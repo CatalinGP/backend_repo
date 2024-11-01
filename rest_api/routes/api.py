@@ -10,7 +10,7 @@ from actions.read_info_action import *  # noqa: E402
 from utils.logger import log_memory  # noqa: E402
 from actions.manual_send_frame import manual_send_frame  # noqa: E402
 from actions.write_info_action import WriteInfo  # noqa: E402
-from src.ota.google_drive_api.GoogleDriveApi import gDrive  # noqa: E402
+from ota.google_drive_api.GoogleDriveApi import gDrive  # noqa: E402
 from actions.secure_auth import Auth  # noqa: E402
 from actions.dtc_info import DiagnosticTroubleCode  # noqa: E402
 from actions.diag_session import SessionManager  # noqa: E402
