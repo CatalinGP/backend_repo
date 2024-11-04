@@ -16,7 +16,26 @@ PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -l
 
 # Compiler flags
 CXX = g++
-CFLAGS = -std=c++17 -g -Wall -Werror -pthread -I./include -I../../utils/include ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
+CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
+         -I./include \
+         -I../../utils/include \
+         -I../../mcu/include \
+         -I../DoorsModule/include \
+         -I../EngineModule/include \
+         -I../HVACModule/include \
+         -I../../uds/access_timing_parameters/include \
+         -I../../uds/authentication/include \
+         -I../../uds/clear_dtc/include \
+         -I../../uds/diagnostic_session_control/include \
+         -I../../uds/ecu_reset/include \
+         -I../../uds/read_data_by_identifier/include \
+         -I../../uds/read_dtc_information/include \
+         -I../../uds/read_memory_by_address/include \
+         -I../../uds/routine_control/include \
+         -I../../uds/tester_present/include \
+         -I../../uds/write_data_by_identifier/include \
+         ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
+         
 LDFLAGS = -lspdlog -lfmt -lzip ${PYTHON_LDFLAGS}
 
 # Test flags
