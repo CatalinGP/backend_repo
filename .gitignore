@@ -1,0 +1,13 @@
+# virtual env folder
+rest_api/venv
+
+# pycache
+__pycache__
+mcu/obj/*
+ota/__pycache__
+ota/google_drive_api/__pycache__
+rest_api/__pycache__
+rest_api/actions/__pycache__
+rest_api/configs/__pycache__
+rest_api/utils/__pycache__
+rest_api/utils/log*
