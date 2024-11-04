@@ -13,7 +13,7 @@ GREEN = '\033[92m'
 YELLOW = '\033[93m'
 RESET = '\033[0m'
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), "..", ".."))
+PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), "..", "..", ".."))
 CREDS_PATH = PROJECT_PATH + '/key.json'
 OAUTH2_SCOPE = 'https://www.googleapis.com/auth/drive'
 DRIVE_BASE_FILE = {
