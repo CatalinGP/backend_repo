@@ -8,7 +8,7 @@ PYTHON_ENABLED = 1
 PROJECT_DEFINES = -DPROJECT_PATH=\"$(PROJECT_PATH)\" -DSOFTWARE_VERSION=${SOFTWARE_VERSION} -DPYTHON_ENABLED=${PYTHON_ENABLED}
 
 #Python flags needed for pybing library
-PYTHON_INCL_DIR=-I/usr/include/python3.8
+PYTHON_INCL_DIR= -I/usr/include/python3.8
 PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -lcrypt -ldl -lutil -lm -lpthread
 
 # Uncomment this lines in production when running on Raspberry Pi
@@ -21,6 +21,17 @@ CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
          -I../include \
          -I./include \
          -I../utils/include \
+         -I../uds/access_timing_parameters/include \
+         -I../uds/authentication/include \
+         -I../uds/clear_dtc/include \
+         -I../uds/diagnostic_session_control/include \
+         -I../uds/ecu_reset/include \
+         -I../uds/read_data_by_identifier/include \
+         -I../uds/read_dtc_information/include \
+         -I../uds/read_memory_by_address/include \
+         -I../uds/routine_control/include \
+         -I../uds/tester_present/include \
+         -I../uds/write_data_by_identifier/include \
          ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
          
 LDFLAGS = -lspdlog -lfmt -lzip ${PYTHON_LDFLAGS}
