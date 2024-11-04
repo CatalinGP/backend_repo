@@ -16,6 +16,9 @@ CXX = g++
 CFLAGS = -std=c++17 -g -Wall -Werror -pthread -I./include -I../../utils/include ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
 LDFLAGS = -lspdlog -lzip -lfmt  ${PYTHON_LDFLAGS}
 
+
+
+
 # Test flags
 CFLAGSTST = -std=c++17 -I/include -fprofile-arcs -ftest-coverage
 CFLAGSTST2 = -lgtest -lgtest_main -lpthread
