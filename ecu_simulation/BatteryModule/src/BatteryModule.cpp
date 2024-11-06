@@ -1,4 +1,4 @@
-#include "../include/BatteryModule.h"
+#include "BatteryModule.h"
 
 
 Logger* batteryModuleLogger = nullptr;

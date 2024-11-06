@@ -1,4 +1,4 @@
-#include "../include/BatteryModule.h"
+#include "BatteryModule.h"
 
 int main() {
     #ifdef UNIT_TESTING_MODE

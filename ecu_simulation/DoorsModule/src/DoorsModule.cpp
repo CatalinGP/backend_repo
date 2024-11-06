@@ -1,4 +1,4 @@
-#include "../include/DoorsModule.h"
+#include "DoorsModule.h"
 
 Logger* doorsModuleLogger = nullptr;
 DoorsModule* doors = nullptr;
