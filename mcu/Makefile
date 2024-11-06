@@ -32,6 +32,10 @@ CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
          -I../uds/routine_control/include \
          -I../uds/tester_present/include \
          -I../uds/write_data_by_identifier/include \
+         -I../ecu_simulation/BatteryModule/include \
+         -I../ecu_simulation/EngineModule/include \
+         -I../ecu_simulation/DoorsModule/include \
+         -I../ecu_simulation/HVACModule/include \
          ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
          
 LDFLAGS = -lspdlog -lfmt -lzip ${PYTHON_LDFLAGS}
