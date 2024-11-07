@@ -1,6 +1,6 @@
-#include "../../../mcu/include/MCUModule.h"
-#include "../include/RequestDownload.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
+#include "MCUModule.h"
+#include "RequestDownload.h"
+#include "BatteryModule.h"
 
 RDSData RequestDownloadService::rds_data = {0, 0, 0, 0};
 
