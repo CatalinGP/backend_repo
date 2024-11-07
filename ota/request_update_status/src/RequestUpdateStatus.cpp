@@ -9,8 +9,8 @@
  * 
  */
 
-#include "../include/RequestUpdateStatus.h"
-#include "../../../uds/access_timing_parameters/include/AccessTimingParameter.h"
+#include "RequestUpdateStatus.h"
+#include "AccessTimingParameter.h"
 
 RequestUpdateStatus::RequestUpdateStatus(int socket, Logger& logger) : socket(socket), _logger(logger)
 {}

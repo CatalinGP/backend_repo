@@ -1,5 +1,5 @@
 
-#include "../include/EngineModule.h"
+#include "EngineModule.h"
 
 int main() {
     #ifdef UNIT_TESTING_MODE

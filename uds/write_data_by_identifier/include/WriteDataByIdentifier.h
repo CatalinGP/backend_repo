@@ -25,11 +25,11 @@
 #include<iomanip>
 #include <algorithm>
 
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/Logger.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../authentication/include/SecurityAccess.h"
-#include "../../../utils/include/FileManager.h"
+#include "GenerateFrames.h"
+#include "Logger.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
+#include "FileManager.h"
 
 class WriteDataByIdentifier
 {

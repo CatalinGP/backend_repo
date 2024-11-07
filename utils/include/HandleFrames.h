@@ -21,21 +21,21 @@
 #include <vector>
 #include <chrono>
 
-#include "../../uds/read_data_by_identifier/include/ReadDataByIdentifier.h"
-#include "../../uds/write_data_by_identifier/include/WriteDataByIdentifier.h"
-#include "../../uds/ecu_reset/include/EcuReset.h"
-#include "../../uds/tester_present/include/TesterPresent.h"
-#include "../../uds/authentication/include/SecurityAccess.h"
-#include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
-#include "../../uds/read_dtc_information/include/ReadDtcInformation.h"
-#include "../../uds/routine_control/include/RoutineControl.h"
-#include "../../uds/access_timing_parameters/include/AccessTimingParameter.h"
-#include "../../uds/read_memory_by_address/include/ReadMemoryByAddress.h"
-#include "../../ota/request_download/include/RequestDownload.h"
-#include "../../ota/request_update_status/include/RequestUpdateStatus.h"
-#include "../../ota/transfer_data/include/TransferData.h"
-#include "../../uds/clear_dtc/include/ClearDtc.h"
-#include "../../utils/include/MemoryManager.h"
+#include "ReadDataByIdentifier.h"
+#include "WriteDataByIdentifier.h"
+#include "EcuReset.h"
+#include "TesterPresent.h"
+#include "SecurityAccess.h"
+#include "DiagnosticSessionControl.h"
+#include "ReadDtcInformation.h"
+#include "RoutineControl.h"
+#include "AccessTimingParameter.h"
+#include "ReadMemoryByAddress.h"
+#include "RequestDownload.h"
+#include "RequestUpdateStatus.h"
+#include "TransferData.h"
+#include "ClearDtc.h"
+#include "MemoryManager.h"
 
 class HandleFrames 
 {

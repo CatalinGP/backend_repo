@@ -9,7 +9,7 @@
  * 
  */
 
-#include "../include/Logger.h"
+#include "Logger.h"
 
 /* first initialisation of the consoleLogger shall be to nullptr. */
 std::shared_ptr<spdlog::logger> Logger::_consoleLogger = nullptr;

@@ -7,11 +7,11 @@
 #ifndef POC_MCU_MODULE_H
 #define POC_MCU_MODULE_H
 
-#include "../../utils/include/HandleFrames.h"
-#include "../../utils/include/CreateInterface.h"
+#include "HandleFrames.h"
+#include "CreateInterface.h"
 #include "ReceiveFrames.h"
-#include "../include/MCULogger.h"
-#include "../../uds/tester_present/include/TesterPresent.h"
+#include "MCULogger.h"
+#include "TesterPresent.h"
 
 #include <thread>
 #include <future>

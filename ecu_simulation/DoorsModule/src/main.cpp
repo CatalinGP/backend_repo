@@ -1,4 +1,4 @@
-#include "../include/DoorsModule.h"
+#include "DoorsModule.h"
 
 int main() {
     #ifdef UNIT_TESTING_MODE

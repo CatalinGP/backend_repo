@@ -1,4 +1,4 @@
-#include "../include/HVACModule.h"
+#include "HVACModule.h"
 
 Logger *hvacModuleLogger = nullptr;
 HVACModule *hvac = nullptr;

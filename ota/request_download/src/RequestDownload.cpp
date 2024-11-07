@@ -1,6 +1,6 @@
-#include "../../../mcu/include/MCUModule.h"
-#include "../include/RequestDownload.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
+#include "MCUModule.h"
+#include "RequestDownload.h"
+#include "BatteryModule.h"
 
 RDSData RequestDownloadService::rds_data = {0, 0, 0, 0};
 
@@ -404,7 +404,7 @@ void RequestDownloadService::downloadSoftwareVersion(uint8_t ecu_id, uint8_t sw_
     py::scoped_interpreter guard{}; // start the interpreter and keep it alive
     /* PROJECT_PATH defined in makefile to be the root folder path (POC)*/
     std::string project_path = PROJECT_PATH;
-    std::string path_to_drive_api = project_path + "/src/ota/google_drive_api";
+    std::string path_to_drive_api = project_path + "/backend/ota/google_drive_api";
     try
     {
 

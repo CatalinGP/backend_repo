@@ -1,4 +1,4 @@
-#include "../include/BatteryModule.h"
+#include "BatteryModule.h"
 
 
 Logger* batteryModuleLogger = nullptr;
@@ -314,8 +314,8 @@ void BatteryModule::writeDataToFile()
 void BatteryModule::checkDTC()
 {
     /* Check if dtcs.txt exists */
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/dtcs.txt";
-    std::string battery_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/battery_data.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/dtcs.txt";
+    std::string battery_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/battery_data.txt";
     std::ifstream infile(dtc_file_path);
 
     if (!infile.is_open())

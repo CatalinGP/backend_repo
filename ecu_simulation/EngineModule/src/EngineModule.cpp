@@ -1,4 +1,4 @@
-#include "../include/EngineModule.h"
+#include "EngineModule.h"
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;
@@ -158,8 +158,8 @@ void EngineModule::writeDataToFile()
 void EngineModule::checkDTC()
 {      
     /* Check if dtcs.txt exists */
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/EngineModule/dtcs.txt";
-    std::string engine_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/EngineModule/engine_data.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/dtcs.txt";
+    std::string engine_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/engine_data.txt";
     std::ifstream infile(dtc_file_path);
 
     if (!infile.is_open())

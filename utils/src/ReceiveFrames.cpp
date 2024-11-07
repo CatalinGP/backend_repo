@@ -1,8 +1,8 @@
-#include "../include/ReceiveFrames.h"
-#include "../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../ecu_simulation/HVACModule/include/HVACModule.h"
+#include "ReceiveFrames.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
 bool ReceiveFrames::ecu_state = false;
 ReceiveFrames::ReceiveFrames(int socket, int current_module_id, Logger& receive_logger) : socket(socket),
                                                                                             current_module_id(current_module_id),

@@ -1,6 +1,6 @@
 /* To successfully run these tests, ensure the following prerequisites:
- * - Create an "output" folder in the src/mcu directory.
- * - Place the "ECU_BATTERY_SW_VERSION_2.3.zip" file in the same directory (src/mcu).
+ * - Create an "output" folder in the backend/mcu directory.
+ * - Place the "ECU_BATTERY_SW_VERSION_2.3.zip" file in the same directory (backend/mcu).
  */
 
 #include <gtest/gtest.h>

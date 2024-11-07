@@ -1,6 +1,6 @@
-#include "../include/ReceiveFrames.h"
-#include "../include/MCUModule.h"
-#include "../../uds/authentication/include/SecurityAccess.h"
+#include "ReceiveFrames.h"
+#include "MCUModule.h"
+#include "SecurityAccess.h"
 
 namespace MCU
 {

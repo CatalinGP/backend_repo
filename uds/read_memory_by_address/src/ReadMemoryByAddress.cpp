@@ -1,4 +1,4 @@
-#include "../include/ReadMemoryByAddress.h"
+#include "ReadMemoryByAddress.h"
 
 ReadMemoryByAddress::ReadMemoryByAddress(MemoryManager* memManager, GenerateFrames& frameGen, int socket, Logger& log)
     : memoryManager(memManager), frameGenerator(frameGen), socket(socket), logger(log) {}
