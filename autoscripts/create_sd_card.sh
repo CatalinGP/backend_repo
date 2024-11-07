@@ -195,7 +195,7 @@ find . -type f ! -name "MCULogs.log" -exec sed -i "s/\/dev\/loop[0-9]*/\/dev\/lo
 cd "$SRC_DIR" || { echo "'src' directory not found. Exiting."; exit 1; }
 
 # Go downwards into mcu folder
-cd mcu || { echo "'mcu' directory not found. Exiting."; exit 1; }
+cd ./backend/mcu || { echo "'mcu' directory not found. Exiting."; exit 1; }
 
 # Run make file and make commands
 echo "Running make commands..."
