@@ -56,7 +56,7 @@
         MemoryManager* install = MemoryManager::getInstance(address, "/dev/loop21",&l);
     
         // data from an executable. Simulate data from transfer data frame
-        std::vector<uint8_t> data = MemoryManager::readBinary("/home/projectx/Desktop/PoC/src/mcu/main");
+        std::vector<uint8_t> data = MemoryManager::readBinary("/home/projectx/Desktop/PoC/backend/mcu/main");
 
         // This lines are called in the transfer data service to save the data 
         MemoryManager* install2 = MemoryManager::getInstance();

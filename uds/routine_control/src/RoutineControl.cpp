@@ -315,7 +315,7 @@ bool RoutineControl::initialiseOta(uint8_t target_ecu, const std::vector<uint8_t
 
     /* PROJECT_PATH defined in makefile to be the root folder path (POC)*/
     std::string project_path = PROJECT_PATH;
-    std::string path_to_drive_api = project_path + "/src/ota/google_drive_api";
+    std::string path_to_drive_api = project_path + "/backend/ota/google_drive_api";
     short version_size = -1;
     try
     {

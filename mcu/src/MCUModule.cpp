@@ -135,7 +135,7 @@ namespace MCU
     }
     void MCUModule::writeDataToFile()
     {
-        std::string file_path = std::string(PROJECT_PATH) + "/src/mcu/mcu_data.txt";
+        std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
         /* Insert the default DID values in the file */
         std::ofstream outfile(file_path);
         if (!outfile.is_open())
@@ -182,7 +182,7 @@ namespace MCU
 
     void MCUModule::setDidValue(const uint16_t did, const std::vector<uint8_t>& value)
     {
-        std::string file_path = std::string(PROJECT_PATH) + "/src/mcu/mcu_data.txt";
+        std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
         auto data_map = FileManager::readMapFromFile(file_path);
         auto did_it = data_map.find(did);
 
@@ -198,7 +198,7 @@ namespace MCU
     std::vector<uint8_t> MCUModule::getDidValue(const uint16_t did) const
     {
         /* Should also contain validation */
-        std::string file_path = std::string(PROJECT_PATH) + "/src/mcu/mcu_data.txt";
+        std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
         auto data_map = FileManager::readMapFromFile(file_path);
         return data_map.at(did);
     }

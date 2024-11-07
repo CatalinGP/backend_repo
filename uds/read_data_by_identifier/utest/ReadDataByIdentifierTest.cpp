@@ -251,7 +251,7 @@ TEST_F(ReadDataByIdentifierTest, ModuleNotSupported)
 
 TEST_F(ReadDataByIdentifierTest, ErrorReadingFromFile)
 {
-    std::string file_name = std::string(PROJECT_PATH) + "/src/mcu/mcu_data.txt";
+    std::string file_name = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
     std::string original_content;
     std::ifstream original_file(file_name);
     if (original_file)

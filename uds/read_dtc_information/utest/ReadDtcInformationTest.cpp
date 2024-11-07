@@ -107,7 +107,7 @@ struct ReadDtcTest : testing::Test
     Logger* logger;
     ReadDtcTest()
     {
-        std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/EngineModule/dtcs.txt";
+        std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/dtcs.txt";
         logger = new Logger("log_test_read_dtc","./log_test_read_dtc.log");
         r = new ReadDTC(*logger, dtc_file_path,socket2_);
         c1 = new CaptureFrame();
@@ -161,7 +161,7 @@ TEST_F(ReadDtcTest, SubfunctionNotSupported)
 
 TEST_F(ReadDtcTest, UnableToOpenFile1)
 {
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/WrongPath/dtcs.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/WrongPath/dtcs.txt";
     r = new ReadDTC(*logger, dtc_file_path,socket2_);
     struct can_frame result_frame = createFrame(0x12fa, {0x03, 0x7F, 0x19, 0x94});
 
@@ -172,7 +172,7 @@ TEST_F(ReadDtcTest, UnableToOpenFile1)
 
 TEST_F(ReadDtcTest, UnableToOpenFile2)
 {
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/WrongPath/dtcs.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/WrongPath/dtcs.txt";
     r = new ReadDTC(*logger, dtc_file_path,socket2_);
     struct can_frame result_frame = createFrame(0x12fa, {0x03, 0x7F, 0x19, 0x94});
 
@@ -183,7 +183,7 @@ TEST_F(ReadDtcTest, UnableToOpenFile2)
 
 TEST_F(ReadDtcTest, NoDtcFound)
 {
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/uds/read_dtc_information/dtcs.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/uds/read_dtc_information/dtcs.txt";
     r = new ReadDTC(*logger, dtc_file_path, socket2_);
     struct can_frame result_frame = createFrame(0x12fa, {0x03, 0x59, 0x02, 0x00});
 

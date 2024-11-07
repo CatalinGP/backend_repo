@@ -155,7 +155,7 @@ TEST_F(BatteryModuleTest, checkDTCLogError)
     std::string output = "";
     const std::string expected_out = 
         "Failed to create dtcs.txt file.";
-    std::string path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/dtcs.txt";
+    std::string path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/dtcs.txt";
     std::ifstream infile(path);
     chmod(path.c_str(), 0);
     testing::internal::CaptureStdout();
@@ -167,7 +167,7 @@ TEST_F(BatteryModuleTest, checkDTCLogError)
 
 TEST_F(BatteryModuleTest, checkDTCCreateFileSuccessfully)
 {
-    std::string path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/dtcs.txt";
+    std::string path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/dtcs.txt";
     remove(path.c_str());
 
     battery->checkDTC();

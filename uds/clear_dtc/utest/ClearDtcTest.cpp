@@ -126,7 +126,7 @@ struct ClearDtcTest : testing::Test
     ClearDtcTest()
     {
         logger = new Logger();
-        std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/EngineModule/dtcs.txt";
+        std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/dtcs.txt";
         c = new ClearDtc(dtc_file_path ,*logger, socket2);
         r = new SecurityAccess(socket2, *logger);
         c1 = new CaptureFrame();
@@ -204,7 +204,7 @@ TEST_F(ClearDtcTest, ClearAllDTCs) {
 TEST_F(ClearDtcTest, WrongPath) {
     std::cerr << "Running WrongPath" << std::endl;
 
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/dtcs.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/dtcs.txt";
     c = new ClearDtc(dtc_file_path ,*logger, socket2);
 
     struct can_frame result_frame = createFrame(0x10FA, {0x03, 0x7F, 0x14, 0x22});

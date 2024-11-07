@@ -146,7 +146,7 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
             }
             else
             {
-                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_mcu_new.zip" : "/src/mcu/");
+                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_mcu_new.zip" : "/backend/mcu/");
             }
             break;
         }
@@ -159,7 +159,7 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
             }
             else
             {
-                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_battery_new.zip" : "/src/ecu_simulation/BatteryModule/");
+                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_battery_new.zip" : "/backend/ecu_simulation/BatteryModule/");
             }        
             break;
         }
@@ -172,7 +172,7 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
             }
             else
             {
-                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_engine_new.zip" : "/src/ecu_simulation/EngineModule/");
+                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_engine_new.zip" : "/backend/ecu_simulation/EngineModule/");
             }        
             break;
         }
@@ -185,7 +185,7 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
             }
             else
             {
-                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_doors_new.zip" : "/src/ecu_simulation/DoorsModule/");
+                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_doors_new.zip" : "/backend/ecu_simulation/DoorsModule/");
             }        
             break;
         }
@@ -198,7 +198,7 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
             }
             else
             {
-                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_hvac_new.zip" : "/src/ecu_simulation/HVACModule/");
+                ecu_path = std::string(PROJECT_PATH) + ((param == 1) ? "/main_hvac_new.zip" : "/backend/ecu_simulation/HVACModule/");
             }        
             break;
         }
