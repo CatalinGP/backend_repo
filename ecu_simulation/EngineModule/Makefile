@@ -31,6 +31,10 @@ CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
          -I../../uds/routine_control/include \
          -I../../uds/tester_present/include \
          -I../../uds/write_data_by_identifier/include \
+         -I../ota/request_download/include \
+         -I../ota/request_transfer_exit/include \
+         -I../ota/request_update_status/include \
+         -I../ota/transfer_data/include \
          ${PYTHON_INCL_DIR} ${PROJECT_DEFINES}
 LDFLAGS = -lspdlog -lzip -lfmt  ${PYTHON_LDFLAGS}
 
