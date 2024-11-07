@@ -1,11 +1,11 @@
-#include "../include/WriteDataByIdentifier.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "WriteDataByIdentifier.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "MCUModule.h"
 
 WriteDataByIdentifier::WriteDataByIdentifier(Logger& wdbi_logger, int socket)
             : generate_frames(socket, wdbi_logger), wdbi_logger(wdbi_logger)

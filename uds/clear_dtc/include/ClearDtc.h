@@ -16,8 +16,8 @@
 #include <fstream>
 #include <map>
 
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/Logger.h"
+#include "GenerateFrames.h"
+#include "Logger.h"
 
 class ClearDtc
 {

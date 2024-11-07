@@ -1,9 +1,9 @@
-#include "../include/RoutineControl.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "RoutineControl.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "MCUModule.h"
 #include <limits.h>
 
 RoutineControl::RoutineControl(int socket, Logger& rc_logger) 

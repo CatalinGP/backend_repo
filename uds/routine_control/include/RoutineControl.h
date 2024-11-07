@@ -11,11 +11,11 @@
 #include <vector>
 #include <bitset>
 
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../utils/include/Logger.h"
-#include "../../utils/include/MemoryManager.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../authentication/include/SecurityAccess.h"
+#include "GenerateFrames.h"
+#include "Logger.h"
+#include "MemoryManager.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
 
 #define ERASE_MEMORY_RC_ID (0x0101)
 #define INSTALL_UPDATES_RC_ID (0x0201)

@@ -1,9 +1,9 @@
-#include "../include/ReadDataByIdentifier.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "ReadDataByIdentifier.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "MCUModule.h"
 
 ReadDataByIdentifier::ReadDataByIdentifier(int socket, Logger& rdbi_logger) 
             : generate_frames(socket, rdbi_logger), rdbi_logger(rdbi_logger)

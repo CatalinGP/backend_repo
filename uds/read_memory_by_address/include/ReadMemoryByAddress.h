@@ -12,11 +12,11 @@
 #define READ_MEMORY_BY_ADDRESS_H
 
 #include <vector>
-#include "../../../utils/include/Logger.h"
-#include "../../../utils/include/MemoryManager.h"
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../authentication/include/SecurityAccess.h"
+#include "Logger.h"
+#include "MemoryManager.h"
+#include "GenerateFrames.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
 
 class ReadMemoryByAddress {
 private:

@@ -1,9 +1,9 @@
-#include "../include/ClearDtc.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "ClearDtc.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "MCUModule.h"
 
 ClearDtc::ClearDtc(std::string path_to_dtc, Logger& logger, int socket)
                 : path_to_dtc(path_to_dtc), logger(logger), socket(socket)
