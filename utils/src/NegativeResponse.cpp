@@ -1,4 +1,4 @@
-#include "../include/NegativeResponse.h"
+#include "NegativeResponse.h"
 
 const std::map<uint8_t, std::string> NegativeResponse::nrcMap =
 {

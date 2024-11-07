@@ -1,4 +1,4 @@
-#include "../include/FileManager.h"
+#include "FileManager.h"
 #include <unistd.h>
 #include <zip.h>
 

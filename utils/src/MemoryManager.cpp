@@ -1,4 +1,4 @@
-#include "../include/MemoryManager.h"
+#include "MemoryManager.h"
 
 MemoryManager* MemoryManager::instance = nullptr;
 
