@@ -57,9 +57,9 @@
 #include <atomic>
 #include <set>
 
-#include "../../utils/include/HandleFrames.h"
-#include "../../utils/include/GenerateFrames.h"
-#include "../include/MCULogger.h"
+#include "HandleFrames.h"
+#include "GenerateFrames.h"
+#include "MCULogger.h"
 
 
 namespace MCU

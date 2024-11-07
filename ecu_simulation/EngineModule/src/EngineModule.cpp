@@ -1,4 +1,4 @@
-#include "../include/EngineModule.h"
+#include "EngineModule.h"
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;

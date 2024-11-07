@@ -1,4 +1,4 @@
-#include "../include/MCUModule.h"
+#include "MCUModule.h"
 
 Logger* MCULogger = nullptr;
 namespace MCU

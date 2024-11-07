@@ -10,11 +10,11 @@
 #include <unistd.h>
 #include <future>
 #include <fstream>
-#include "../../../utils/include/CreateInterface.h"
-#include "../../../utils/include/ReceiveFrames.h"
-#include "../../../utils/include/GenerateFrames.h"
+#include "CreateInterface.h"
+#include "ReceiveFrames.h"
+#include "GenerateFrames.h"
 #include "EngineModuleLogger.h"
-#include "../../../utils/include/ECU.h"
+#include "ECU.h"
 
 class EngineModule
 {
