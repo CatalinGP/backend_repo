@@ -18,9 +18,9 @@
 
 #include <cstdlib>
 #include <iostream>
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/Logger.h"
-#include "../../../utils/include/NegativeResponse.h"
+#include "GenerateFrames.h"
+#include "Logger.h"
+#include "NegativeResponse.h"
 
 /* Diagnostic Control Session codes */
 const uint8_t SID_DIAGNOSTIC_SESSION_CONTROL = 0x10;

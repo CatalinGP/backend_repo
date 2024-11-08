@@ -9,11 +9,11 @@
 #define TRANSFER_DATA_H
 
 #include <linux/can.h>
-#include "../../utils/include/Logger.h"
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../utils/include/MemoryManager.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../request_transfer_exit/include/RequestTransferExit.h"
+#include "Logger.h"
+#include "GenerateFrames.h"
+#include "MemoryManager.h"
+#include "NegativeResponse.h"
+#include "RequestTransferExit.h"
 
 #define TRANSFER_DATA_SID 0x36
 class TransferData 
@@ -47,11 +47,12 @@ public:
      * @brief Method used for processing data before it is added to the transfer data service request.
      *      This will be used only in the MCU process, right before sending the request to the ECU
      * 
-     * @param receiver_id 
-     * @param current_data 
-     * @param logger 
+     * @param can_id
+     * @param current_data
+     * @param socket
+     * @param logger
      */
-    static void processDataForTransfer(uint8_t receiver_id, std::vector<uint8_t>& current_data, Logger& logger);
+    static void processDataForTransfer(canid_t can_id, std::vector<uint8_t>& current_data, int socket, Logger& logger);
     /**
      * @brief method used to compute a simple checksum for a block of data transferred
      * 

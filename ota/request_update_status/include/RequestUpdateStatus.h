@@ -24,16 +24,16 @@
 #include <vector>
 #include <linux/can.h>
 #include <map>
-#include "../../../utils/include/Logger.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../../uds/read_data_by_identifier/include/ReadDataByIdentifier.h"
-#include "../../../utils/include/GenerateFrames.h"
+#include "Logger.h"
+#include "NegativeResponse.h"
+#include "ReadDataByIdentifier.h"
+#include "GenerateFrames.h"
 
 #define REQUEST_UPDATE_STATUS_REQUEST_SIZE      0x02
 #define REQUEST_UPDATE_STATUS_RESPONSE_SUCCESS_SIZE	    0x03
 #define REQUEST_UPDATE_STATUS_RESPONSE_NEGATIVE_SIZE	0x04
 
-#define OTA_UPDATE_STATUS_DID 0x01E0
+#define OTA_UPDATE_STATUS_DID 0xE001
 #define OTA_UPDATE_STATUS_DID_MSB ((OTA_UPDATE_STATUS_DID & 0xFF00) >> 8)
 #define OTA_UPDATE_STATUS_DID_LSB (OTA_UPDATE_STATUS_DID & 0x00FF)
 

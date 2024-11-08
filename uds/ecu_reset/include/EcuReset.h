@@ -9,11 +9,11 @@
 #ifndef ECU_RESET_H
 #define ECU_RESET_H
 
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/CreateInterface.h"
-#include "../../../utils/include/Logger.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../authentication/include/SecurityAccess.h"
+#include "GenerateFrames.h"
+#include "CreateInterface.h"
+#include "Logger.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
 
 #include <linux/can.h>
 #include <iostream>

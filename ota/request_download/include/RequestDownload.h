@@ -24,14 +24,14 @@
 #include <sys/ioctl.h>
 #include <linux/can.h>
 #include <net/if.h>
-#include "../../../utils/include/CreateInterface.h"
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../utils/include/Logger.h"
-#include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
-#include "../../../utils/include/NegativeResponse.h"
-#include "../../uds/authentication/include/SecurityAccess.h"
-#include "../../uds/read_data_by_identifier/include/ReadDataByIdentifier.h"
-#include "../../utils/include/MemoryManager.h"
+#include "CreateInterface.h"
+#include "GenerateFrames.h"
+#include "Logger.h"
+#include "DiagnosticSessionControl.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
+#include "ReadDataByIdentifier.h"
+#include "MemoryManager.h"
 #include <pybind11/embed.h>
 
 /* ECU permitted transfer data bytes in a request. Set to 5 because we use only 8 bytes for requests (1 pci, 1 sid, 1 blc_indx => remaining 5 bytes)*/
@@ -177,13 +177,6 @@ private:
      */
     void downloadInEcu(int id, int memory_address);
 
-    /**
-     * @brief Method for downloading software version from google drive.
-     * 
-     * @param ecu_id The identifier of ECU.
-     * @param sw_version The software version.
-     */
-    void downloadSoftwareVersion(uint8_t ecu_id, uint8_t sw_version);
 };
 
 #endif /* REQUEST_DOWNLOAD_SERVICE_H */

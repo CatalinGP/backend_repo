@@ -1,4 +1,4 @@
-#include "../include/MemoryManager.h"
+#include "MemoryManager.h"
 
 MemoryManager* MemoryManager::instance = nullptr;
 
@@ -94,7 +94,7 @@ bool MemoryManager::availableAddress(off_t address)
     }
 
     char verify_address_command[256];
-    sprintf(verify_address_command, "sudo fdisk -l %s | grep '^/dev/' | grep '*' | awk '{print $3,$4}'", DEV_LOOP);
+    sprintf(verify_address_command, "sudo fdisk -l %s | grep '^/dev/' | grep '*' | awk '{print $3,$4}'", path.c_str());
 
     std::string result = runCommand(verify_address_command);
     if (result.length() < 3)
@@ -119,7 +119,7 @@ bool MemoryManager::availableAddress(off_t address)
 bool MemoryManager::availableMemory(off_t size_of_data)
 {
     char verify_memory_command[256];
-    sprintf(verify_memory_command, "sudo fdisk -l %s | grep '^/dev/' | grep -v '*' | awk '{print $3}'", DEV_LOOP);
+    sprintf(verify_memory_command, "sudo fdisk -l %s | grep '^/dev/' | grep -v '*' | awk '{print $3}'", path.c_str());
     std::string result = runCommand(verify_memory_command);
     if (result.length() < 3)
     {
@@ -261,6 +261,7 @@ std::vector<uint8_t> MemoryManager::readFromAddress(std::string path, off_t addr
     return uint8Buffer;
 }
 
+/*
 void print_bin_data(std::vector<uint8_t> &data)
 {
     int i=0;
@@ -275,3 +276,4 @@ void print_bin_data(std::vector<uint8_t> &data)
     }
     std::cout<<"\n";
 }
+*/

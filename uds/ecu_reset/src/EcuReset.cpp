@@ -1,9 +1,9 @@
-#include "../include/EcuReset.h"
-#include "../../../mcu/include/MCUModule.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
+#include "EcuReset.h"
+#include "MCUModule.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
 
 EcuReset::EcuReset(uint32_t can_id, uint8_t sub_function, int socket, Logger &logger)
     : can_id(can_id), sub_function(sub_function), socket(socket), ECUResetLog(logger)

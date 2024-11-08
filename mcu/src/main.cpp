@@ -1,9 +1,9 @@
-#include "../include/MCUModule.h"
+#include "MCUModule.h"
 
 int main() {
 
     #ifndef UNIT_TESTING_MODE
-    MCULogger = new Logger("MCULogger", std::string(PROJECT_PATH) + "/src/mcu/logs/MCULogs.log");
+    MCULogger = new Logger("MCULogger", std::string(PROJECT_PATH) + "/backend/mcu/logs/MCULogs.log");
     #else
     MCULogger = new Logger;
     #endif /* UNIT_TESTING_MODE */

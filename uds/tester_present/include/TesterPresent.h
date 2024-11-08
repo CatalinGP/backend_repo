@@ -11,10 +11,10 @@
 #ifndef TESTER_PRESENT_H
 #define TESTER_PRESENT_H
 
-#include "../../../utils/include/GenerateFrames.h"
-#include "../../../utils/include/CreateInterface.h"
-#include "../../diagnostic_session_control/include/DiagnosticSessionControl.h"
-#include "../../../utils/include/NegativeResponse.h"
+#include "GenerateFrames.h"
+#include "CreateInterface.h"
+#include "DiagnosticSessionControl.h"
+#include "NegativeResponse.h"
 #include <iostream>
 #include <vector>
 #include <thread>

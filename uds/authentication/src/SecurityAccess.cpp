@@ -1,6 +1,6 @@
-#include "../include/SecurityAccess.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "SecurityAccess.h"
+#include "BatteryModule.h"
+#include "MCUModule.h"
 
 /* Set the default security access to false. */
 bool SecurityAccess::mcu_state = false;

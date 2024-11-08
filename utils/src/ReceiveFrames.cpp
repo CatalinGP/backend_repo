@@ -1,8 +1,8 @@
-#include "../include/ReceiveFrames.h"
-#include "../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../ecu_simulation/HVACModule/include/HVACModule.h"
+#include "ReceiveFrames.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
 bool ReceiveFrames::ecu_state = false;
 ReceiveFrames::ReceiveFrames(int socket, int current_module_id, Logger& receive_logger) : socket(socket),
                                                                                             current_module_id(current_module_id),
@@ -14,7 +14,7 @@ ReceiveFrames::ReceiveFrames(int socket, int current_module_id, Logger& receive_
     {
         /* std::cerr << "Error: Pass a valid Socket\n"; */
         LOG_WARN(receive_logger.GET_LOGGER(), "Error: Pass a valid Socket\n");
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Error: Pass a valid Socket\n");
     }
 
     const int MIN_VALID_ID = 0x00000000;
@@ -24,7 +24,7 @@ ReceiveFrames::ReceiveFrames(int socket, int current_module_id, Logger& receive_
     {
         /* std::cerr << "Error: Pass a valid Module ID\n"; */
         LOG_WARN(receive_logger.GET_LOGGER(), "Error: Pass a valid Module ID\n");
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Error: Pass a valid Module ID\n");
     }
 
     /* Print the frame_id for debugging */ 
@@ -48,16 +48,8 @@ void ReceiveFrames::setEcuState(bool value)
 
 void ReceiveFrames::receive(HandleFrames &handle_frame) 
 {
-    try 
-    {
         bufferFrameInThread = std::thread(&ReceiveFrames::bufferFrameIn, this);
         this->bufferFrameOut(handle_frame);
-    } 
-    catch (const std::exception &e) 
-    {
-        LOG_ERROR(receive_logger.GET_LOGGER(), "Exception in starting threads: {}", e.what());
-        stop();
-    }
 }
 
 /* Set the socket to non-blocking mode. */
@@ -76,51 +68,44 @@ void ReceiveFrames::stop()
 
 void ReceiveFrames::bufferFrameIn() 
 {
-    try{
-        /* Define a pollfd structure to monitor the socket */ 
-        struct pollfd pfd;
-        /* Set the socket file descriptor */ 
-        pfd.fd = this->socket; 
-        /* We are interested in read events -use POLLING */ 
-        pfd.events = POLLIN;    
+    /* Define a pollfd structure to monitor the socket */ 
+    struct pollfd pfd;
+    /* Set the socket file descriptor */ 
+    pfd.fd = this->socket; 
+    /* We are interested in read events -use POLLING */ 
+    pfd.events = POLLIN;    
 
-        while (running) 
-        {
-            /* Use poll to wait for data to be available with a timeout of 1000ms (1 second) */ 
-            int poll_result = poll(&pfd, 1, 1000);
-
-            if (poll_result > 0) 
-            {
-                if (pfd.revents & POLLIN) 
-                {
-                    struct can_frame frame = {};
-                    int nbytes = read(this->socket, &frame, sizeof(struct can_frame));
-                    uint8_t frame_receiver = frame.can_id & 0xFF;
-                    if (nbytes > 0 && frame_receiver == current_module_id) 
-                    {
-                        std::unique_lock<std::mutex> lock(mtx);
-                        frame_buffer.push_back(std::make_tuple(frame, nbytes));
-                        cv.notify_one();
-                    }
-                }
-            } 
-            else if (poll_result == 0) 
-            {
-                /* Timeout occurred, no data available, but we just continue to check */ 
-                continue;
-            } 
-            else 
-            {
-                /* An error occurred */ 
-                LOG_ERROR(receive_logger.GET_LOGGER(), "poll error: {}", strerror(errno));
-                break;
-            }
-        }
-    }
-    catch (const std::exception &e) 
+    while (running) 
     {
-        LOG_ERROR(receive_logger.GET_LOGGER(), "Exception in bufferFrameIn: {}", e.what());
-        stop();
+        /* Use poll to wait for data to be available with a timeout of 1000ms (1 second) */ 
+        int poll_result = poll(&pfd, 1, 1000);
+
+        if (poll_result > 0) 
+        {
+            if (pfd.revents & POLLIN) 
+            {
+                struct can_frame frame = {};
+                int nbytes = read(this->socket, &frame, sizeof(struct can_frame));
+                uint8_t frame_receiver = frame.can_id & 0xFF;
+                if (nbytes > 0 && frame_receiver == current_module_id) 
+                {
+                    std::unique_lock<std::mutex> lock(mtx);
+                    frame_buffer.push_back(std::make_tuple(frame, nbytes));
+                    cv.notify_one();
+                }
+            }
+        } 
+        else if (poll_result == 0) 
+        {
+            /* Timeout occurred, no data available, but we just continue to check */ 
+            continue;
+        } 
+        else 
+        {
+            /* An error occurred */ 
+            LOG_ERROR(receive_logger.GET_LOGGER(), "poll error: {}", strerror(errno));
+            break;
+        }
     }
 }
 

@@ -39,7 +39,29 @@ TEST_F(HandleFramesTest, HandleFrameNegativeResponse)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
+    EXPECT_NE(output.find("Negative response received."), std::string::npos);
+}
+
+/* Test for HandleFrameSessionChangeByTP */
+TEST_F(HandleFramesTest, HandleFrameSessionChangeByTP)
+{
+    TesterPresent::setEndTimeProgrammingSession(true);
+    sleep(11);
+    testing::internal::CaptureStdout();
+    handler.processFrameData(skt, 0xfa10, 0x23, {0x03,0x7F, 0x23, 0x12}, false);
+    std::string output = testing::internal::GetCapturedStdout();
+    /* check if the correct message is printed */
+    EXPECT_NE(output.find("Session changed to DEFAULT_SESSION by TesterPresent"), std::string::npos);
+}
+
+/* Test for HandleFrameNegativeResponse */
+TEST_F(HandleFramesTest, HandleFrameDiagnosticSession)
+{
+    struct can_frame testFrame = createFrame({0x02,0x10, 0x02});
+    testing::internal::CaptureStdout();
+    handler.handleFrame(skt, testFrame);
+    std::string output = testing::internal::GetCapturedStdout();
+    /* check if the correct message is printed */
     EXPECT_NE(output.find("DiagnosticSessionControl called."), std::string::npos);
 }
 
@@ -51,7 +73,6 @@ TEST_F(HandleFramesTest, HandleFrameEcuReset)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Service 0x11 EcuReset called"), std::string::npos);
     EXPECT_NE(output.find("sub_function: 2"), std::string::npos);
     
@@ -78,7 +99,6 @@ TEST_F(HandleFramesTest, WrongSessionSecurity)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Subfunction not supported in active session."), std::string::npos);
     
 }
@@ -92,7 +112,6 @@ TEST_F(HandleFramesTest, SecurityTest)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("SecurityAccess called."), std::string::npos);
     
 }
@@ -105,7 +124,6 @@ TEST_F(HandleFramesTest, TesterPresent)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("TesterPresent called."), std::string::npos);
     
 }
@@ -118,7 +136,6 @@ TEST_F(HandleFramesTest, AccessTimingParameter)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("AccessTimingParameters called."), std::string::npos);
     
 }
@@ -131,7 +148,6 @@ TEST_F(HandleFramesTest, AccessTimingParameter2)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("AccessTimingParameters called."), std::string::npos);
     
 }
@@ -144,7 +160,6 @@ TEST_F(HandleFramesTest, ReadDataByIdentifier)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("ReadDataByIdentifier called."), std::string::npos);
     
 }
@@ -152,12 +167,10 @@ TEST_F(HandleFramesTest, ReadDataByIdentifier)
 /* Test for ReadMemoryByAdressNRC */
 TEST_F(HandleFramesTest, ReadMemoryByAdressNRC)
 {
-    struct can_frame testFrame = createFrame({0x03,0x7F, 0x23, 0x12});
     testing::internal::CaptureStdout();
-    handler.handleFrame(skt, testFrame);
+    handler.processFrameData(skt, 0xfa10, 0x23, {0x03,0x7F, 0x23, 0x12}, false);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Negative Response received."), std::string::npos);
     
 }
@@ -169,9 +182,7 @@ TEST_F(HandleFramesTest, ReadMemoryByAdress)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("ReadMemoryByAddress called."), std::string::npos);
-    
 }
 /* Test for WriteDataByIdentifier */
 TEST_F(HandleFramesTest, WriteDataByIdentifier)
@@ -181,7 +192,6 @@ TEST_F(HandleFramesTest, WriteDataByIdentifier)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("WriteDataByIdentifier service called!"), std::string::npos);
     
 }
@@ -193,7 +203,6 @@ TEST_F(HandleFramesTest, ClearDiagnosticInformation)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("ClearDiagnosticInformation called."), std::string::npos);
     
 }
@@ -205,7 +214,6 @@ TEST_F(HandleFramesTest, ReadDtcInformation)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("ReadDtcInformation called."), std::string::npos);
     
 }
@@ -217,7 +225,6 @@ TEST_F(HandleFramesTest, RoutineControl)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("RoutineControl called."), std::string::npos);
 }
 /* Test for DiagnosticSessionResponse */
@@ -227,8 +234,6 @@ TEST_F(HandleFramesTest, DiagnosticSessionControlResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response for DiagnosticSessionControl received."), std::string::npos);
 }
 
@@ -239,8 +244,6 @@ TEST_F(HandleFramesTest, ECUResetResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response for ECUReset received."), std::string::npos);
 }
 
@@ -251,8 +254,6 @@ TEST_F(HandleFramesTest, SecurityAccessResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from SecurityAccess received."), std::string::npos);
 }
 
@@ -263,8 +264,6 @@ TEST_F(HandleFramesTest, AuthenticationResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from Authentication received."), std::string::npos);
 }
 
@@ -275,8 +274,6 @@ TEST_F(HandleFramesTest, TesterPresentResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from TesterPresent received."), std::string::npos);
 }
 
@@ -287,8 +284,6 @@ TEST_F(HandleFramesTest, AccessTimingParametersResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from AccessTimingParameters received."), std::string::npos);
 }
 
@@ -299,8 +294,6 @@ TEST_F(HandleFramesTest, ReadDataByIdentifierResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from ReadDataByIdentifier received in one frame."), std::string::npos);
 }
 
@@ -322,8 +315,6 @@ TEST_F(HandleFramesTest, ReadMemoryByAdressResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from ReadMemoryByAdress received in one frame."), std::string::npos);
 }
 
@@ -345,8 +336,6 @@ TEST_F(HandleFramesTest, WriteDataByIdentifierResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from WriteDataByIdentifier received."), std::string::npos);
 }
 
@@ -357,8 +346,6 @@ TEST_F(HandleFramesTest, ClearDiagnosticInformationResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from ClearDiagnosticInformation received."), std::string::npos);
 }
 
@@ -369,8 +356,6 @@ TEST_F(HandleFramesTest, ReadDtcInformationResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from ReadDtcInformation received."), std::string::npos);
 }
 
@@ -381,8 +366,6 @@ TEST_F(HandleFramesTest, RoutineControlResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from RoutineControl received."), std::string::npos);
 }
 
@@ -394,7 +377,6 @@ TEST_F(HandleFramesTest, RequestDownload)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("RequestDownload called."), std::string::npos);
 }
 
@@ -406,8 +388,6 @@ TEST_F(HandleFramesTest, WrongSessionRequestDownload)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-    /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Subfunction not supported in active session."), std::string::npos);
 }
 
@@ -420,21 +400,21 @@ TEST_F(HandleFramesTest, WrongSessionTransferData)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Subfunction not supported in active session."), std::string::npos);
 }
 
-// /* Test for TransferData */
-// TEST_F(HandleFramesTest, TransferData)
-// {
-//     struct can_frame testFrame = createFrame({0x02,0x36, 0x02});
-//     testing::internal::CaptureStdout();
-//     handler.handleFrame(skt, testFrame);
-//     std::string output = testing::internal::GetCapturedStdout();
-//     /* check if the correct message is printed */
-//     EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
-//     EXPECT_NE(output.find("TransferData called with one frame."), std::string::npos);
-// }
+/* Test for TransferData */
+TEST_F(HandleFramesTest, TransferData)
+{   
+    dsc.sessionControl(0xFA10, 0x02, true);
+    struct can_frame testFrame = createFrame({0x02,0x36, 0x02});
+    testing::internal::CaptureStdout();
+    handler.handleFrame(skt, testFrame);
+    std::string output = testing::internal::GetCapturedStdout();
+    /* check if the correct message is printed */
+    EXPECT_NE(output.find("TransferData called with one frame."), std::string::npos);
+    dsc.sessionControl(0xFA10, 0x01, true);
+}
 
 /* Test for WrongSessionRequestTransferExit */
 TEST_F(HandleFramesTest, WrongSessionRequestTransferExit)
@@ -445,7 +425,6 @@ TEST_F(HandleFramesTest, WrongSessionRequestTransferExit)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Subfunction not supported in active session."), std::string::npos);
 }
 
@@ -458,7 +437,6 @@ TEST_F(HandleFramesTest, RequestTransferExit)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Request Transfer Exit Service 0x37 called"), std::string::npos);
 }
 
@@ -472,17 +450,16 @@ TEST_F(HandleFramesTest, TransferDataMultipleFrame)
     EXPECT_NE(output.find("TransferData called with multiple frames."), std::string::npos);
 }
 
-// /* Test for RequestUpdateStatus */
-// TEST_F(HandleFramesTest, RequestUpdateStatus)
-// {
-//     struct can_frame testFrame = createFrame({0x02,0x32, 0x02});
-//     testing::internal::CaptureStdout();
-//     handler.handleFrame(skt, testFrame);
-//     std::string output = testing::internal::GetCapturedStdout();
-//     /* check if the correct message is printed */
-//     EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
-//     EXPECT_NE(output.find("RequestUpdateStatus called."), std::string::npos);
-// }
+/* Test for RequestUpdateStatus */
+TEST_F(HandleFramesTest, RequestUpdateStatus)
+{
+    struct can_frame testFrame = createFrame({0x02,0x32, 0x02});
+    testing::internal::CaptureStdout();
+    handler.handleFrame(skt, testFrame);
+    std::string output = testing::internal::GetCapturedStdout();
+    /* check if the correct message is printed */
+    EXPECT_NE(output.find("RequestUpdateStatus called."), std::string::npos);
+}
 
 /* Test for RequestDownload */
 TEST_F(HandleFramesTest, WrongSessionRequestUpdateStatus)
@@ -493,7 +470,6 @@ TEST_F(HandleFramesTest, WrongSessionRequestUpdateStatus)
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
     /* check if the correct message is printed */
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Subfunction not supported in active session."), std::string::npos);
 }
 
@@ -503,8 +479,6 @@ TEST_F(HandleFramesTest, RequestDownloadResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from RequestDownload received."), std::string::npos);
 }
 
@@ -514,8 +488,6 @@ TEST_F(HandleFramesTest, TransferDataResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from TransferData received."), std::string::npos);
 }
 
@@ -525,8 +497,6 @@ TEST_F(HandleFramesTest, RequestTransferExitResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from RequestTransferExit received."), std::string::npos);
 }
 
@@ -536,8 +506,6 @@ TEST_F(HandleFramesTest, RequestUpdateStatusResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Response from RequestUpdateStatus received."), std::string::npos);
 }
 
@@ -547,9 +515,13 @@ TEST_F(HandleFramesTest, UnknownResponse)
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("Single Frame received:"), std::string::npos);
     EXPECT_NE(output.find("Unknown request/response received."), std::string::npos);
+}
+
+TEST_F(HandleFramesTest, IgnoreConsecutiveFrames)
+{
+    struct can_frame testFrame = createFrame({0x22, 0x0F,0x05});
+    handler.handleFrame(skt, testFrame);
 }
 
 TEST_F(HandleFramesTest, FirstFrame)

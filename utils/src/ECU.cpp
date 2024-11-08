@@ -1,4 +1,4 @@
-#include "../include/ECU.h"
+#include "ECU.h"
 
 std::map<uint8_t, double> ECU::timing_parameters;
 std::map<uint8_t, std::future<void>> ECU::active_timers;

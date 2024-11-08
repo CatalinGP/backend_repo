@@ -14,7 +14,7 @@
 int socket_;
 int socket2_;
 std::vector<uint8_t> seed;
-std::string file_path = std::string(PROJECT_PATH) + "/src/mcu/mcu_data.txt";
+std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
 
 /* Class to capture the frame sin the can-bus */
 class CaptureFrame

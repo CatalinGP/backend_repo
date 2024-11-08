@@ -1,11 +1,11 @@
-#include "../include/WriteDataByIdentifier.h"
-#include "../../../ecu_simulation/BatteryModule/include/BatteryModule.h"
-#include "../../../ecu_simulation/EngineModule/include/EngineModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../ecu_simulation/DoorsModule/include/DoorsModule.h"
-#include "../../../ecu_simulation/HVACModule/include/HVACModule.h"
-#include "../../../mcu/include/MCUModule.h"
+#include "WriteDataByIdentifier.h"
+#include "BatteryModule.h"
+#include "EngineModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "DoorsModule.h"
+#include "HVACModule.h"
+#include "MCUModule.h"
 
 WriteDataByIdentifier::WriteDataByIdentifier(Logger& wdbi_logger, int socket)
             : generate_frames(socket, wdbi_logger), wdbi_logger(wdbi_logger)
@@ -113,23 +113,23 @@ void WriteDataByIdentifier::WriteDataByIdentifierService(canid_t frame_id, std::
         std::string file_name = std::string(PROJECT_PATH);
         if (receiver_id == 0x10)
         {
-            file_name += "/src/mcu/mcu_data.txt";
+            file_name += "/backend/mcu/mcu_data.txt";
         }
         else if (receiver_id == 0x11)
         {
-            file_name += "/src/ecu_simulation/BatteryModule/battery_data.txt";
+            file_name += "/backend/ecu_simulation/BatteryModule/battery_data.txt";
         }
         else if (receiver_id == 0x12)
         {
-            file_name += "/src/ecu_simulation/EngineModule/engine_data.txt";
+            file_name += "/backend/ecu_simulation/EngineModule/engine_data.txt";
         }
         else if (receiver_id == 0x13)
         {
-            file_name += "/src/ecu_simulation/DoorsModule/doors_data.txt";
+            file_name += "/backend/ecu_simulation/DoorsModule/doors_data.txt";
         }
         else if (receiver_id == 0x14)
         {
-            file_name += "/src/ecu_simulation/HVACModule/hvac_data.txt";
+            file_name += "/backend/ecu_simulation/HVACModule/hvac_data.txt";
         }
         else
         {

@@ -1,6 +1,6 @@
 /* To successfully run these tests, ensure the following prerequisites:
- * - Create an "output" folder in the src/mcu directory.
- * - Place the "ECU_BATTERY_SW_VERSION_2.3.zip" file in the same directory (src/mcu).
+ * - Create an "output" folder in the backend/mcu directory.
+ * - Place the "ECU_BATTERY_SW_VERSION_2.3.zip" file in the same directory (backend/mcu).
  */
 
 #include <gtest/gtest.h>
@@ -273,7 +273,7 @@ TEST_F(FileManagerTest, ValidateData_DefaultCaseInvalidFileType)
 
 TEST_F(FileManagerTest, ExtractZipFileWrongZipPath)
 {
-    std::string zipFilePath = "invalid/path/test.zip";
+    std::string zipFilePath = "/invalid/path/test.zip";
     std::string outputDir = "./output";
 
     EXPECT_FALSE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
@@ -281,7 +281,7 @@ TEST_F(FileManagerTest, ExtractZipFileWrongZipPath)
 
 TEST_F(FileManagerTest, ExtractZipFileWrongFolderPath)
 {
-    std::string zipFilePath = "ECU_BATTERY_SW_VERSION_2.3.zip";
+    std::string zipFilePath = "/ECU_BATTERY_SW_VERSION_2.3.zip";
     std::string outputDir = "./wrongFolder";
 
     EXPECT_FALSE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
@@ -289,8 +289,8 @@ TEST_F(FileManagerTest, ExtractZipFileWrongFolderPath)
 
 TEST_F(FileManagerTest, ExtractZipFile)
 {
-    std::string zipFilePath = "ECU_BATTERY_SW_VERSION_2.3.zip";
-    std::string outputDir = "./output";
+    std::string zipFilePath = std::string(PROJECT_PATH) + "/backend/mcu/ECU_BATTERY_SW_VERSION_2.3.zip";
+    std::string outputDir = std::string(PROJECT_PATH) + "/backend/mcu/output";
 
     EXPECT_TRUE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
 }

@@ -1,4 +1,4 @@
-#include "../include/BatteryModule.h"
+#include "BatteryModule.h"
 
 
 Logger* batteryModuleLogger = nullptr;
@@ -11,6 +11,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
         {0x01D0, {0}},   /* State of Charge */
         {0x01E0, {0}},   /* Temperature (C) */
         {0x01F0, {0}},   /* Life cycle */
+        {0xE001, {0}},   /* OTA Status */
 #ifdef SOFTWARE_VERSION
         {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
@@ -314,8 +315,8 @@ void BatteryModule::writeDataToFile()
 void BatteryModule::checkDTC()
 {
     /* Check if dtcs.txt exists */
-    std::string dtc_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/dtcs.txt";
-    std::string battery_file_path = std::string(PROJECT_PATH) + "/src/ecu_simulation/BatteryModule/battery_data.txt";
+    std::string dtc_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/dtcs.txt";
+    std::string battery_file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/battery_data.txt";
     std::ifstream infile(dtc_file_path);
 
     if (!infile.is_open())
