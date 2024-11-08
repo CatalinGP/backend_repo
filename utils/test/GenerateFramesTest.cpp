@@ -171,6 +171,31 @@ TEST_F(GenerateFramesTest, CorrectSocket)
     receive_thread.join();
 }
 
+/* Test for Invalid Socket */
+TEST_F(GenerateFramesTest, InvalidSocket) 
+{
+    int invalid_socket = -1;
+    EXPECT_THROW({
+        g1->sendFrame(0x101, {0x12}, invalid_socket, DATA_FRAME);
+    }, std::runtime_error);
+}
+
+TEST_F(GenerateFramesTest, WriteOperationFailed) 
+{
+    int socket_fd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    /* Close the socket */
+    close(socket_fd);
+
+    EXPECT_EQ(g1->sendFrame(0x101, {0x12}, socket_fd, DATA_FRAME), -1);
+}
+
+TEST_F(GenerateFramesTest, InvalidSocket2) 
+{
+    EXPECT_THROW({
+        g1->addSocket(-1);
+    }, std::runtime_error);    
+}
+
 /* Test for Service SessionConroll */
 TEST_F(GenerateFramesTest, SessionControlTest) 
 {
