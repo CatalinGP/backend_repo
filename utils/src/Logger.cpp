@@ -24,6 +24,7 @@ Logger::Logger(std::string loggerName, std::string filePath)
     spdlog::flush_on(spdlog::level::trace);
 
     _fileLogger = spdlog::basic_logger_mt(loggerName, filePath);
+    _fileLogger->set_level(spdlog::level::trace);
 
     /**
      *  For future use, not needed now
@@ -42,6 +43,7 @@ std::shared_ptr<spdlog::logger> Logger::getConsoleLogger()
         auto _consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         _consoleLogger = std::make_shared<spdlog::logger>("console", _consoleSink);
         spdlog::register_logger(_consoleLogger);
+        _consoleLogger->set_level(spdlog::level::trace);
     }
     
     return _consoleLogger;

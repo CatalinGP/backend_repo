@@ -87,7 +87,7 @@ void GenerateFrames::addSocket(int socket)
     }
     /* std::cout<<"Error: Pass a valid Socket\n"; */
     LOG_WARN(logger.GET_LOGGER(), "Error: Pass a valid Socket\n");
-    exit(EXIT_FAILURE);
+    throw std::runtime_error("Error: Pass a valid Socket\n");
 }
 
 void GenerateFrames::sessionControl(int id, uint8_t sub_function, bool response)

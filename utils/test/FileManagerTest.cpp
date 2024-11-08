@@ -273,7 +273,7 @@ TEST_F(FileManagerTest, ValidateData_DefaultCaseInvalidFileType)
 
 TEST_F(FileManagerTest, ExtractZipFileWrongZipPath)
 {
-    std::string zipFilePath = "invalid/path/test.zip";
+    std::string zipFilePath = "/invalid/path/test.zip";
     std::string outputDir = "./output";
 
     EXPECT_FALSE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
@@ -281,7 +281,7 @@ TEST_F(FileManagerTest, ExtractZipFileWrongZipPath)
 
 TEST_F(FileManagerTest, ExtractZipFileWrongFolderPath)
 {
-    std::string zipFilePath = "ECU_BATTERY_SW_VERSION_2.3.zip";
+    std::string zipFilePath = "/ECU_BATTERY_SW_VERSION_2.3.zip";
     std::string outputDir = "./wrongFolder";
 
     EXPECT_FALSE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
@@ -289,8 +289,8 @@ TEST_F(FileManagerTest, ExtractZipFileWrongFolderPath)
 
 TEST_F(FileManagerTest, ExtractZipFile)
 {
-    std::string zipFilePath = "ECU_BATTERY_SW_VERSION_2.3.zip";
-    std::string outputDir = "./output";
+    std::string zipFilePath = std::string(PROJECT_PATH) + "/backend/mcu/ECU_BATTERY_SW_VERSION_2.3.zip";
+    std::string outputDir = std::string(PROJECT_PATH) + "/backend/mcu/output";
 
     EXPECT_TRUE(fileManager.extractZipFile(0x10, zipFilePath, outputDir, logger));
 }

@@ -135,6 +135,66 @@ uint8_t computeKey(uint8_t& seed)
     return ~seed + 1;
 }
 
+TEST_F(ReceiveFramesTest, TestProcessQueue_SecurityLocked)
+{
+    std::cerr << "Running TestProcessQueue_SecurityLocked" << std::endl;
+    struct can_frame frame;
+    frame.can_id = 0x2210;
+    frame.can_dlc = 4;
+    for (uint8_t itr = 0; itr < 4; ++itr)
+    {
+        frame.data[itr] = itr;
+    }
+    frame.data[1] = 0x34;
+    receive_frames->startListenCANBus(); 
+    {
+        std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
+        /* Push frame to queue */
+        receive_frames->frame_queue.push(frame);
+    }
+    receive_frames->queue_cond_var.notify_one();
+    testing::internal::CaptureStdout();
+    std::thread processor_thread([this] {
+        receive_frames->processQueue();
+    });
+    receive_frames->stopListenCANBus();
+    processor_thread.join();
+
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("Server is locked."), std::string::npos);
+    std::cerr << "Finished TestProcessQueue_SecurityLocked" << std::endl;
+}
+
+TEST_F(ReceiveFramesTest, TestProcessQueue_TransferData)
+{
+    std::cerr << "Running TestProcessQueue_TransferData" << std::endl;
+    struct can_frame frame;
+    frame.can_id = 0xfa11;
+    frame.can_dlc = 3;
+    for (uint8_t itr = 0; itr < 3; ++itr)
+    {
+        frame.data[itr] = itr;
+    }
+    frame.data[1] = 0x36;
+    receive_frames->startListenCANBus(); 
+    {
+        std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
+        /* Push frame to queue */
+        receive_frames->frame_queue.push(frame);
+    }
+    receive_frames->queue_cond_var.notify_one();
+    testing::internal::CaptureStdout();
+    std::thread processor_thread([this] {
+        receive_frames->processQueue();
+    });
+    receive_frames->stopListenCANBus();
+    processor_thread.join();
+
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("Received frame for ECU to execute service with SID: 0x36"), std::string::npos);
+    std::cerr << "Finished TestProcessQueue_TransferData" << std::endl;
+}
+
 TEST_F(ReceiveFramesTest, UnlockedSecurity)
 {
     std::cerr << "Running UnlockedSecurity" << std::endl;
@@ -876,6 +936,58 @@ TEST_F(ReceiveFramesTest, StopProccesingQueue)
     EXPECT_NE(output.find("Frame processing method invoked!"), std::string::npos);
     std::cerr << "Finished StopProccesingQueue" << std::endl;
 }
+
+TEST_F(ReceiveFramesTest, StopTimer) 
+{
+    std::cerr << "Running StopTimer" << std::endl;
+    testing::internal::CaptureStdout();
+    std::thread processor_thread([this] {
+        receive_frames->startTimer(0x10);
+    });
+    processor_thread.join();
+    std::this_thread::sleep_for(std::chrono::milliseconds(2100));
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("stopTimer function called for frame with SID 10."), std::string::npos);
+    std::cerr << "Finished StopTimer" << std::endl;
+}
+
+// TEST_F(ReceiveFramesTest, CANBusConnectionClose)
+// {
+//     std::cerr << "Running CANBusConnectionClose" << std::endl;
+//     receive_frames_2->startListenCANBus(); 
+
+//     testing::internal::CaptureStdout();
+//     std::thread processor_thread([this] {
+//         receive_frames_2->receiveFramesFromCANBus();
+//     });
+//     close(socket2);
+//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//     receive_frames_2->stopListenCANBus();
+//     processor_thread.join();
+
+//     std::string output = testing::internal::GetCapturedStdout();
+//     EXPECT_NE(output.find("CANBus connection closed."), std::string::npos);
+//     std::cerr << "Finished CANBusConnectionClose" << std::endl;
+// }
+
+// TEST_F(ReceiveFramesTest, APIConnectionClose)
+// {
+//     std::cerr << "Running APIConnectionClose" << std::endl;
+//     receive_frames_2->startListenAPI(); 
+
+//     testing::internal::CaptureStdout();
+//     std::thread processor_thread([this] {
+//         receive_frames_2->receiveFramesFromAPI();
+//     });
+//     close(socket1);
+//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//     receive_frames_2->stopListenAPI();
+//     processor_thread.join();
+
+//     std::string output = testing::internal::GetCapturedStdout();
+//     EXPECT_NE(output.find("API connection closed."), std::string::npos);
+//     std::cerr << "Finished APIConnectionClose" << std::endl;
+// }
   
 /* Main function to run all tests */
 int main(int argc, char **argv)

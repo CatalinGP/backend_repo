@@ -352,13 +352,13 @@ class GenerateFrames
          * @brief NOT IMPLEMENTED!!
          */
         bool requestUpdateStatusResponse(int id, std::vector<uint8_t> response);
-    private:
         /**
          * @brief Set the socket parameter
          * 
          * @param socket The socket descriptor used for communication over the CAN bus.
          */
         void addSocket(int socket);
+    private:
         /**
          * @brief Create a Frame object
          * 

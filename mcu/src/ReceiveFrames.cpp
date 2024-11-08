@@ -312,7 +312,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
             if(mcu->stop_flags[sid])
             {
                 int id = ((sid & 0xFF) << 8) | ((sid >> 8) & 0xFF);
-                LOG_INFO(MCULogger->GET_LOGGER(), "Service with SID {:x} sent the response pending frame.", 0x2E);
+                LOG_INFO(MCULogger->GET_LOGGER(), "Service with SID {:x} sent the response pending frame.", sid);
                 NegativeResponse negative_response(socket_api, *MCULogger);
                 negative_response.sendNRC(id, sid, 0x78);
                 mcu->stop_flags[sid] = false;
@@ -403,27 +403,21 @@ bool ReceiveFrames::receiveFramesFromAPI()
 
     void ReceiveFrames::timerCheck()
     {
-        try {
-            while (running) {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                auto now = std::chrono::steady_clock::now();
-                std::lock_guard<std::mutex> lock(queue_mutex);
-                for (auto it = ecu_timers.begin(); it != ecu_timers.end();) {
-                    if (std::chrono::duration_cast<std::chrono::seconds>(now - it->second) >= timeout_duration) {
-                         ecus_up[(it->first-0x11)] = 0;
-                        std::vector<uint8_t> data = {0x01, 0x99};
-                        uint16_t id = (0x10 << 8) | it->first;
-                        ReceiveFrames::generate_frames.sendFrame(id, data);
-                        it = ecu_timers.erase(it);
-                    } else {
-                        ++it;
-                    }
+        while (running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            auto now = std::chrono::steady_clock::now();
+            std::lock_guard<std::mutex> lock(queue_mutex);
+            for (auto it = ecu_timers.begin(); it != ecu_timers.end();) {
+                if (std::chrono::duration_cast<std::chrono::seconds>(now - it->second) >= timeout_duration) {
+                        ecus_up[(it->first-0x11)] = 0;
+                    std::vector<uint8_t> data = {0x01, 0x99};
+                    uint16_t id = (0x10 << 8) | it->first;
+                    ReceiveFrames::generate_frames.sendFrame(id, data);
+                    it = ecu_timers.erase(it);
+                } else {
+                    ++it;
                 }
             }
-        } catch (const std::exception& e) {
-            std::cerr << "Exception in timerCheck: " << e.what() << std::endl;
-        } catch (...) {
-            std::cerr << "Unknown exception in timerCheck" << std::endl;
         }
     }
     void ReceiveFrames::securityNotifyECU(std::vector<uint8_t> response)

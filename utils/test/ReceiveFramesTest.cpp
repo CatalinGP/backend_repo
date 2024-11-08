@@ -75,29 +75,25 @@ struct ReceiveFramesTest : testing::Test
     }
 };
 
-// TEST_F(ReceiveFramesTest, WrongSocket)
-// {
-//     std::cerr << "Running WrongSocket" << std::endl;
-//     testing::internal::CaptureStdout();
-//     ReceiveFrames* local_receive_frames = new ReceiveFrames(-1, 0x11, *logger);
+TEST_F(ReceiveFramesTest, WrongSocket)
+{
+    std::cerr << "Running WrongSocket" << std::endl;
+    EXPECT_THROW({
+        ReceiveFrames* local_receive_frames = new ReceiveFrames(-1, 0x11, *logger);
+        delete local_receive_frames;
+    }, std::runtime_error);    
+    std::cerr << "Finished WrongSocket" << std::endl;
+}
 
-//     std::string output = testing::internal::GetCapturedStdout();
-//     EXPECT_NE(output.find("Error: Pass a valid Socket\n"), std::string::npos);
-//     delete local_receive_frames;
-//     std::cerr << "Finished WrongSocket" << std::endl;
-// }
-
-// TEST_F(ReceiveFramesTest, WrongModuleId)
-// {
-//     std::cerr << "Running WrongModuleId" << std::endl;
-//     testing::internal::CaptureStdout();
-//     ReceiveFrames* local_receive_frames = new ReceiveFrames(socket2, 0x8FFFFFFF, *logger);
-
-//     std::string output = testing::internal::GetCapturedStdout();
-//     EXPECT_NE(output.find("Error: Pass a valid Module ID\n"), std::string::npos);
-//     delete local_receive_frames;
-//     std::cerr << "Finished WrongModuleId" << std::endl;
-// }
+TEST_F(ReceiveFramesTest, WrongModuleId)
+{
+    std::cerr << "Running WrongModuleId" << std::endl;
+    EXPECT_THROW({
+        ReceiveFrames* local_receive_frames = new ReceiveFrames(socket2, 0x8FFFFFFF, *logger);
+        delete local_receive_frames;
+    }, std::runtime_error);    
+    std::cerr << "Finished WrongModuleId" << std::endl;
+}
 
 TEST_F(ReceiveFramesTest, EcuState)
 {
