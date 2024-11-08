@@ -807,11 +807,11 @@ TEST_F(ReceiveFramesTest, TestGetHexValueId)
 TEST_F(ReceiveFramesTest, TestStartTimerThread)
 {
     std::cerr << "Running TestStartTimerThread" << std::endl;
-    receive_frames->stopTimerThread(); // Stop the timer thread if it's already running
-    receive_frames->startTimerThread(); // Start the timer thread
+    receive_frames->stopTimerThread();
+    receive_frames->startTimerThread();
     EXPECT_TRUE(receive_frames->running);
-    std::this_thread::sleep_for(std::chrono::seconds(2)); // Wait for 2 seconds
-    receive_frames->stopTimerThread(); // Stop the timer thread
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    receive_frames->stopTimerThread();
     EXPECT_FALSE(receive_frames->running);
     std::cerr << "Finished TestStartTimerThread" << std::endl;
 }
@@ -899,7 +899,6 @@ TEST_F(ReceiveFramesTest, ListenOnCANSocket)
     processor_thread.join();
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Captured a frame on the CANBus socket"), std::string::npos);
-    // EXPECT_NE(output.find("Passed a valid Module ID: 0x1110 and frame added to the processing queue."), std::string::npos);
     std::cerr << "Finished ListenOnCANSocket" << std::endl;
 }
 
@@ -918,7 +917,6 @@ TEST_F(ReceiveFramesTest, ListenOnAPISocket)
 
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Captured a frame on the API socket"), std::string::npos);
-    // EXPECT_NE(output.find("Passed a valid Module ID: fa10 and frame added to the processing queue."), std::string::npos);
     std::cerr << "Finished ListenOnAPISocket" << std::endl;
 }
 
