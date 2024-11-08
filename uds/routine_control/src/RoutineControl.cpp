@@ -6,7 +6,7 @@
 #include "MCUModule.h"
 #include <limits.h>
 
-RoutineControl::RoutineControl(int socket, Logger& rc_logger) 
+RoutineControl::RoutineControl(int socket, Logger& rc_logger)
             : generate_frames(socket, rc_logger), rc_logger(rc_logger)
 {
     this->socket = socket;
@@ -20,7 +20,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
     NegativeResponse nrc(socket, rc_logger);
     uint8_t receiver_id = can_id & 0xFF;
     uint8_t sender_id = can_id >> 8 & 0xFF;
-    uint8_t target_id = can_id >> 16 & 0xFF; 
+    uint8_t target_id = can_id >> 16 & 0xFF;
     uint8_t sub_function = request[2];
     std::vector<uint8_t> routine_result = {0x00};
     /* reverse ids */
@@ -66,7 +66,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
         AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
         return;
     }
-  
+
     std::vector<uint8_t> binary_data;
     std::vector<uint8_t> adress_data;
     switch(routine_identifier)
@@ -165,7 +165,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
             {
                 auto rds_data = RequestDownloadService::getRdsData();
                 auto memory_manager = MemoryManager::getInstance(rc_logger);
-                /* Address and path should have been initialized from Request Download. If they are not, initialisation is done here.*/            
+                /* Address and path should have been initialized from Request Download. If they are not, initialisation is done here.*/
                 if(memory_manager->getAddress() != rds_data.address || memory_manager->getPath() != DEV_LOOP)
                 {
                     LOG_WARN(rc_logger.GET_LOGGER(), "Write to file routine called with uninitialized memory manager instance. Initilization done in write to file routine.");
@@ -173,16 +173,16 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                     memory_manager->setPath(DEV_LOOP);
                 }
                 uint8_t file_size_format = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
-                auto file_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, file_size_format, rc_logger);   
+                auto file_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, file_size_format, rc_logger);
                 uint8_t binary_offset = sizeof(file_size_format) + file_size_format;
-        
+
                 size_t file_size = 0;
                 for(uint8_t i = 0; i < file_size_format; i++)
                 {
                     file_size |= (file_size_bytes[i] << ((file_size_format - i - 1) * 8));
-                }   
+                }
 
-                /* Read the binary data from memory */            
+                /* Read the binary data from memory */
                 auto binary_data = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, file_size, rc_logger);
 
                 std::string ecu_path;
@@ -203,7 +203,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                     return;
                 }
             }
-            
+
             bool status = handleDataCompressionEncryption(receiver_id);
             if(status == 0)
             {
@@ -273,7 +273,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                 return;
             }
             LOG_INFO(rc_logger.GET_LOGGER(), "Current software saved. Activating the new software..");
-            
+
             if(activateSoftware() == false)
             {
                 MCU::mcu->setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_FAILED});
@@ -300,7 +300,7 @@ void RoutineControl::routineControlResponse(canid_t can_id, const uint8_t sub_fu
 
     generate_frames.routineControl(can_id, sub_function, routine_identifier, routine_result, true);
     LOG_INFO(rc_logger.GET_LOGGER(), "Service with SID {:x} successfully sent the response frame for routine: {:2x}", 0x31, routine_identifier);
-                
+
     AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
 }
 
@@ -375,13 +375,13 @@ bool RoutineControl::activateSoftware()
     {
         return 0;
     }
-    std::string cmd = std::string(PROJECT_PATH) + "/config/installUpdates.sh " + std::to_string(pid) + " " + pname + " " + "activate";
+    std::string cmd = std::string(PROJECT_PATH) + "/backend/config/installUpdates.sh " + std::to_string(pid) + " " + pname + " " + "activate";
     int install_update_status = system(cmd.c_str());
     if(install_update_status != 0)
     {
         return 0;
     }
-    
+
     return 1;
 }
 bool RoutineControl::verifySoftware(uint8_t receiver_id)
@@ -398,15 +398,15 @@ bool RoutineControl::verifySoftware(uint8_t receiver_id)
             memory_manager->setPath(DEV_LOOP);
         }
         uint8_t binary_size_format = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
-        auto binary_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, binary_size_format, rc_logger);    
+        auto binary_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, binary_size_format, rc_logger);
         uint8_t binary_offset = sizeof(binary_size_format) + binary_size_format;
-            
+
         size_t binary_size = 0;
         for(uint8_t i = 0; i < binary_size_format; i++)
         {
             binary_size |= (binary_size_bytes[i] << ((binary_size_format - i - 1) * 8));
         }
-        /* Read the binary data from memory */    
+        /* Read the binary data from memory */
         binary_data = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, binary_size, rc_logger);
 
         uint8_t checksum = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1 + binary_size_format + binary_size, 1, rc_logger)[0];
@@ -463,18 +463,18 @@ bool RoutineControl::verifySoftware(uint8_t receiver_id)
     return true;
 }
 
-bool RoutineControl::getCurrentProcessInfo(pid_t& pid, std::string& pname, std::string& ppath) 
+bool RoutineControl::getCurrentProcessInfo(pid_t& pid, std::string& pname, std::string& ppath)
 {
     /* Get the current process ID */
     pid = getpid();
-    /* Open the process file */ 
+    /* Open the process file */
     std::ifstream file("/proc/" + std::to_string(pid) + "/comm");
 
-    if (file.is_open()) 
+    if (file.is_open())
     {
         std::getline(file, pname);
         file.close();
-    } 
+    }
     else
     {
         LOG_ERROR(rc_logger.GET_LOGGER(), "Error: Unable to open /proc/{}/comm", pid);
@@ -484,11 +484,11 @@ bool RoutineControl::getCurrentProcessInfo(pid_t& pid, std::string& pname, std::
     /* Get the path of the executable using /proc/self/exe */
     char result[PATH_MAX];
     ssize_t count = readlink(("/proc/" + std::to_string(pid) + "/exe").c_str(), result, PATH_MAX);
-    if (count != -1) 
+    if (count != -1)
     {
         ppath = std::string(result, count);
-    } 
-    else 
+    }
+    else
     {
         LOG_ERROR(rc_logger.GET_LOGGER(), "Error: Unable to resolve path for /proc/{}/exe", pid);
         return false;
@@ -499,8 +499,8 @@ bool RoutineControl::getCurrentProcessInfo(pid_t& pid, std::string& pname, std::
 bool RoutineControl::rollbackSoftware()
 {
     LOG_INFO(rc_logger.GET_LOGGER(), "Rollback routine called.");
-    /* Get the size of the stored binary. 
-        First byte represents the size in bytes of the binary size. 03 means the following 3 bytes are used for representing the size 
+    /* Get the size of the stored binary.
+        First byte represents the size in bytes of the binary size. 03 means the following 3 bytes are used for representing the size
         Following n bytes are used to represent the size.
         The following bytes after this are the binary data.
     */
@@ -518,12 +518,12 @@ bool RoutineControl::rollbackSoftware()
     auto binary_data = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START + binary_offset, binary_size, rc_logger);
 
     /* Check is software is saved in the memory by checking the .elf extension */
-    if( (binary_data[1] != 'E') || 
-        (binary_data[2] != 'L') || 
+    if( (binary_data[1] != 'E') ||
+        (binary_data[2] != 'L') ||
         (binary_data[3] != 'F'))
     {
         LOG_WARN(rc_logger.GET_LOGGER(), "Current software is not saved in the memory before doing the rollback. Aborting rollback..");
-        return 0;        
+        return 0;
     }
     pid_t pid;
     std::string pname, ppath;
@@ -539,7 +539,7 @@ bool RoutineControl::rollbackSoftware()
         return 0;
     }
 
-    std::string cmd = std::string(PROJECT_PATH) + "/config/installUpdates.sh " + std::to_string(pid) + " " + pname + " " + "restore";
+    std::string cmd = std::string(PROJECT_PATH) + "/backend/config/installUpdates.sh " + std::to_string(pid) + " " + pname + " " + "restore";
     int install_update_status = system(cmd.c_str());
     if(install_update_status != 0)
     {
@@ -558,7 +558,7 @@ bool RoutineControl::saveCurrentSoftware()
     }
     /* Read the current software binary data */
 
-    MemoryManager* memory_manager = MemoryManager::getInstance(rc_logger);   
+    MemoryManager* memory_manager = MemoryManager::getInstance(rc_logger);
     memory_manager->setPath(DEV_LOOP);
     auto binary_data = MemoryManager::readBinary(ppath, rc_logger);
     size_t binary_data_size = binary_data.size();
@@ -622,7 +622,7 @@ bool RoutineControl::handleDataCompressionEncryption(uint8_t receiver_id)
                 // nrc.sendNRC(id, RDS_SID, NegativeResponse::UDNA);
                 // AccessTimingParameter::stopTimingFlag(receiver_id, 0x34);
                 return 0;
-            }            
+            }
         }
         else
         {
@@ -645,7 +645,7 @@ bool RoutineControl::handleDataCompressionEncryption(uint8_t receiver_id)
         if (FileManager::extractZipFile(receiver_id, zipFilePath, extractedZipOutputPath, rc_logger))
         {
             LOG_INFO(rc_logger.GET_LOGGER(), "Files extracted successfully");
-        } 
+        }
         else
         {
             LOG_ERROR(rc_logger.GET_LOGGER(), "Failed to extract files from ZIP archive.");
