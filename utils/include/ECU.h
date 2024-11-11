@@ -64,6 +64,11 @@ public:
      */
     void stopFrames();
 
+    /**
+     * @brief Method that checks if there has been a change to the software version. It checks the current software version with the previous one.
+     *  The previous sw version is saved in memory
+     * 
+     */
     void checkSwVersion();
     /**
      * @brief Destroy the ECU object

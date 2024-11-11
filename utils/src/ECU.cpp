@@ -61,7 +61,7 @@ void ECU::checkSwVersion()
     if(current_sw_version[0] != previous_sw_version)
     {
         /* Software has been upgraded/downgraded => success */
-        FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger);
+        FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger, _ecu_socket);
     }
     else
     {
