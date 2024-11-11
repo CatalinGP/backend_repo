@@ -23,11 +23,11 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         /* Intake Air Temperature */
         {0x0130, {0}},
         /* OTA Status */
-        {0xE001, {0}},
+        {OTA_UPDATE_STATUS_DID, {0}},
 #ifdef SOFTWARE_VERSION
-        {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {0xF1A2, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
     };
 
@@ -35,10 +35,10 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
  * sets up the CAN interface, and prepares the frame receiver. */
 EngineModule::EngineModule()
 {
-    /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
-    _ecu = new ECU(ENGINE_ID, *engineModuleLogger);
     writeDataToFile();
     checkDTC();
+    /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
+    _ecu = new ECU(ENGINE_ID, *engineModuleLogger);
     LOG_INFO(engineModuleLogger->GET_LOGGER(), "Engine object created successfully");
 }
 
@@ -64,7 +64,10 @@ void EngineModule::fetchEngineData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            byte = dist(gen);  
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            {
+                byte = dist(gen);  
+            }
             /* Generate a random value between 0 and 255 */
             data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
         }

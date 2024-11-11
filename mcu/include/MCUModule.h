@@ -19,6 +19,8 @@
 #include <stdexcept>
 #include <filesystem>
 
+#define SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID 0xF1A2
+
 namespace MCU
 {
     class MCUModule {
@@ -33,11 +35,11 @@ namespace MCU
         /* Variable to store mcu data */
         std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_MCU = 
         {
-            {0xE001, {IDLE}},
+            {OTA_UPDATE_STATUS_DID, {IDLE}},
 #ifdef SOFTWARE_VERSION
-            {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-            {0xF1A2, {0x00}}
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
         };
         static const std::vector<uint16_t> VALID_DID_MCU;
@@ -110,7 +112,13 @@ namespace MCU
          * 
          */
         void writeDataToFile();
- 
+
+        /**
+         * @brief Method to check if a software update has been made.
+         * 
+         */
+        void checkSwVersion();
+
     private:
         bool is_running;
         CreateInterface* create_interface;

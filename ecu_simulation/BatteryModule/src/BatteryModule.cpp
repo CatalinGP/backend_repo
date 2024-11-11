@@ -11,11 +11,11 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
         {0x01D0, {0}},   /* State of Charge */
         {0x01E0, {0}},   /* Temperature (C) */
         {0x01F0, {0}},   /* Life cycle */
-        {0xE001, {0}},   /* OTA Status */
+        {OTA_UPDATE_STATUS_DID, {0}},   /* OTA Status */
 #ifdef SOFTWARE_VERSION
-        {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {0xF1A2, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
 };
 
@@ -27,9 +27,9 @@ BatteryModule::BatteryModule() : energy(0.0),
 {
 
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
-    _ecu = new ECU(BATTERY_ID, *batteryModuleLogger);
     writeDataToFile();
     checkDTC();
+    _ecu = new ECU(BATTERY_ID, *batteryModuleLogger);
     LOG_INFO(batteryModuleLogger->GET_LOGGER(), "Battery object created successfully");
 }
 
