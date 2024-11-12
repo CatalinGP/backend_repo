@@ -16,6 +16,13 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
         {0xF1A2, {0x00}}
 #endif
     };
+const std::vector<uint16_t> DoorsModule::writable_Doors_DID =
+{
+    /* represents Door Driver Locked Status (0:unlocked; 1:locked) */
+     0x03C0,
+     /* represents Door Passenger Locked Status (0:unlocked; 1:locked) */
+    0x03D0
+};
 
 /** Constructor - initializes the DoorsModule with default values,
  * sets up the CAN interface, and prepares the frame receiver. */
@@ -44,13 +51,27 @@ void DoorsModule::fetchDoorsData()
 
     for (auto& [did, data] : default_DID_doors)
     {
-        std::stringstream data_ss;
-        for (auto& byte : data)
+        if(did != 0xe001 && did != 0xf1a2)
         {
-            byte = dist(gen);  // Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning
-            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                byte = dist(gen);  
+                /* Generate a random value between 0 and 255 */
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
         }
-        updated_values[did] = data_ss.str();
+        /* For OTA status DIDs don t generate random values */
+        else
+        {
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
+        }
     }
 
     /* Path to engine data file */

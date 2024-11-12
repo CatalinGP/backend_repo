@@ -2,7 +2,6 @@
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;
-
 std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_engine = {
         /* Engine RPM */
         {0x0100, {0}},
@@ -22,6 +21,8 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         {0x012C, {0}},
         /* Intake Air Temperature */
         {0x0130, {0}},
+        /* Mass air flow sensor */
+        {0x0134, {0}},
         /* OTA Status */
         {0xE001, {0}},
 #ifdef SOFTWARE_VERSION
@@ -30,6 +31,11 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         {0xF1A2, {0x00}}
 #endif
     };
+const std::vector<uint16_t> EngineModule::writable_Engine_DID =
+{
+    /* Throttle Position */
+     0x0110,
+};
 
 /** Constructor - initializes the EngineModule with default values,
  * sets up the CAN interface, and prepares the frame receiver. */
@@ -61,14 +67,27 @@ void EngineModule::fetchEngineData()
 
     for (auto& [did, data] : default_DID_engine)
     {
-        std::stringstream data_ss;
-        for (auto& byte : data)
+        if(did != 0xe001 && did != 0xf1a2)
         {
-            byte = dist(gen);  
-            /* Generate a random value between 0 and 255 */
-            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                byte = dist(gen);  
+                /* Generate a random value between 0 and 255 */
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
         }
-        updated_values[did] = data_ss.str();
+        /* For OTA status DIDs don t generate random values */
+        else
+        {
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
+        }
     }
 
     /* Read the current file contents into memory */

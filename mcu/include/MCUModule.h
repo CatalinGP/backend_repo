@@ -31,16 +31,8 @@ namespace MCU
         static std::map<uint8_t, std::atomic<bool>> stop_flags;
 
         /* Variable to store mcu data */
-        std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_MCU = 
-        {
-            {0xE001, {IDLE}},
-#ifdef SOFTWARE_VERSION
-            {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
-#else
-            {0xF1A2, {0x00}}
-#endif
-        };
-        static const std::vector<uint16_t> VALID_DID_MCU;
+        static std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_MCU;
+        static const std::vector<uint16_t> writable_MCU_DID;
 
         /** 
          * @brief Constructor that takes the interface number as an argument.
@@ -110,6 +102,12 @@ namespace MCU
          * 
          */
         void writeDataToFile();
+
+        /**
+         * @brief This function generates random values for all DID entries defined in the default_DID_MCU map
+         * 
+         */
+        void fetchMCUData();
  
     private:
         bool is_running;

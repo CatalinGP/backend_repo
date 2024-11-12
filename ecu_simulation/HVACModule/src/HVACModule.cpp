@@ -4,7 +4,6 @@ Logger *hvacModuleLogger = nullptr;
 HVACModule *hvac = nullptr;
 std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac =
     {
-        {MASS_AIR_FLOW_SENSOR, {DEFAULT_DID_VALUE}}, /* Mass air flow sensor */
         {AMBIENT_TEMPERATURE_DID, {DEFAULT_DID_VALUE}}, /* Ambient temperature */
         {CABIN_TEMPERATURE_DID, {DEFAULT_DID_VALUE}}, /* Cabin temperature */
         {HVAC_SET_TEMPERATURE_DID, {DEFAULT_DID_VALUE}}, /* HVAC set temperature */
@@ -17,6 +16,15 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac 
         {0xF1A2, {0x00}}
 #endif
     };
+const std::vector<uint16_t> HVACModule::writable_HVAC_DID =
+{
+    /* represents Cabin Temperature set by driver */
+     0x04B0,
+    /* represents Fan Speed */
+     0x04C0,
+    /* represents HVAC operating modes */
+     0x04D0 
+};
 
 HVACModule::HVACModule() : _logger(*hvacModuleLogger)
 {
@@ -93,8 +101,6 @@ void HVACModule::generateData()
     default_DID_hvac[FAN_SPEED_DID].front() = static_cast<uint8_t>((std::rand() % HVAC_FAN_SPEED_MOD) + HVAC_MIN_FAN_SPEED);
     /* Each bit represents a mode, no specific logic */
     default_DID_hvac[HVAC_MODES_DID].front() = static_cast<uint8_t>(std::rand() % HVAC_MODES_MOD);
-    /* Mass Air Flow Sensor: Max Value is 255 (example value in grams/second) */
-    default_DID_hvac[MASS_AIR_FLOW_SENSOR].front() = static_cast<uint8_t>(std::rand() % 256);
 }
 
 void HVACModule::writeDataToFile()

@@ -149,15 +149,28 @@ std::vector<uint8_t> ReadDataByIdentifier::readDataByIdentifier(canid_t frame_id
         oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
     }
 
-    // Log the data
+    /* Log the data */
     LOG_INFO(rdbi_logger.GET_LOGGER(), "Data for DID 0x{:04X} from {}: {}", data_identifier, file_name, oss.str());
+
 
     if (use_send_frame)
     {
+        int length_response = response.size();
+        if (length_response <= 4)
+        {
         /* Send response frame */
         generate_frames.readDataByIdentifier(can_id, data_identifier, response);
         LOG_INFO(rdbi_logger.GET_LOGGER(), "Service with SID {:x} successfully sent the response frame.", 0x22);
         AccessTimingParameter::stopTimingFlag(lowerbits, 0x22);
+        }
+        else
+        {
+            /* Send response frame */
+            generate_frames.readDataByIdentifierLongResponse(can_id, data_identifier, response, true);
+            generate_frames.readDataByIdentifierLongResponse(can_id, data_identifier, response, false);
+            LOG_INFO(rdbi_logger.GET_LOGGER(), "Service with SID {:x} successfully sent the response frame.", 0x22);
+            AccessTimingParameter::stopTimingFlag(lowerbits, 0x22);
+        }
     }
     return response;
 }

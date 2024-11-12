@@ -40,7 +40,7 @@ private:
 public:
     /* Variable to store hvac data*/
     static std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_hvac;
-
+    static const std::vector<uint16_t> writable_HVAC_DID;
     /* ECU object used for sockets, frame handling and ecu specific parameters (timing, flags etc)*/
     ECU *_ecu;
     /**
