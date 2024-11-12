@@ -42,6 +42,8 @@ public:
     ECU *_ecu;
     /* Variable to store ecu data: 0:closed; 1:open; 0:unlocked; 1:locked; 0:no warning; 1: warning */
     static std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_doors;
+    static const std::vector<uint16_t> writable_Doors_DID;
+    
     /**
      * @brief Default constructor for Doors Module object.
      */

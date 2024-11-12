@@ -16,6 +16,13 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
     };
+const std::vector<uint16_t> DoorsModule::writable_Doors_DID =
+{
+    /* represents Door Driver Locked Status (0:unlocked; 1:locked) */
+     0x03C0,
+     /* represents Door Passenger Locked Status (0:unlocked; 1:locked) */
+    0x03D0
+};
 
 /** Constructor - initializes the DoorsModule with default values,
  * sets up the CAN interface, and prepares the frame receiver. */
