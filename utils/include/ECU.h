@@ -19,6 +19,7 @@
 #include "ReceiveFrames.h"
 
 #define ECU_INTERFACE_NUMBER 0x00
+#define SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID 0xF1A2
 
 class ECU
 {
@@ -63,6 +64,12 @@ public:
      */
     void stopFrames();
 
+    /**
+     * @brief Method that checks if there has been a change to the software version. It checks the current software version with the previous one.
+     *  The previous sw version is saved in memory
+     * 
+     */
+    void checkSwVersion();
     /**
      * @brief Destroy the ECU object
      * 

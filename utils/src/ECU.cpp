@@ -11,6 +11,7 @@ ECU::ECU(uint8_t module_id, Logger& logger) : _module_id(module_id),
     _ecu_socket = _can_interface->createSocket(ECU_INTERFACE_NUMBER);
     _frame_receiver = new ReceiveFrames(_ecu_socket, _module_id, _logger);
     sendNotificationToMCU();
+    checkSwVersion();
 }
 
 void ECU::sendNotificationToMCU()
@@ -46,6 +47,30 @@ void ECU::stopFrames()
 {
     _frame_receiver->stop();
     LOG_INFO(_logger.GET_LOGGER(), "{:#x} stopped the frame receiver", _module_id);
+}
+
+void ECU::checkSwVersion()
+{
+    auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(_module_id), _logger);
+
+    auto memory_manager_instance = MemoryManager::getInstance(_logger);
+    memory_manager_instance->setPath(DEV_LOOP);
+    memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (_module_id % 0x10));
+    uint8_t previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (_module_id % 0x10), 1, _logger)[0];
+
+    if(current_sw_version[0] != previous_sw_version)
+    {
+        /* Software has been upgraded/downgraded => success */
+        FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger, _ecu_socket);
+    }
+    else
+    {
+        /* Software unchanged */
+        return;
+    }
+    LOG_INFO(_logger.GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, current_sw_version[0]);
+
+    memory_manager_instance->writeToAddress(current_sw_version);
 }
 
 ECU::~ECU()

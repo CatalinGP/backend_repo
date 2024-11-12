@@ -9,11 +9,11 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
         {0x03C0, {0}},  /* Door Driver Locked Status*/
         {0x03D0, {0}},  /* Door Passenger Locked Status*/
         {0x03E0, {0}},   /* Ajar Warning Status */
-        {0xE001, {0}},   /* OTA Status */
+        {OTA_UPDATE_STATUS_DID, {0}},   /* OTA Status */
 #ifdef SOFTWARE_VERSION
-        {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {0xF1A2, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
     };
 
@@ -21,16 +21,16 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
  * sets up the CAN interface, and prepares the frame receiver. */
 DoorsModule::DoorsModule()
 {
+    writeDataToFile();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(DOORS_ID, *doorsModuleLogger);
-    writeDataToFile();
     LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Doors object created successfully");
 }
 
 /* Destructor */
 DoorsModule::~DoorsModule()
 {
-    LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Doors object out of scope");
+    LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Dooors object out of scope");
 }
 
 /* Function to fetch data with simulated door data */
@@ -47,7 +47,11 @@ void DoorsModule::fetchDoorsData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            byte = dist(gen);  // Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            {
+                /* Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning */
+                byte = dist(gen);
+            }
             data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
         }
         updated_values[did] = data_ss.str();

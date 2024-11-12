@@ -52,6 +52,7 @@ namespace MCU
                     {
         writeDataToFile();
         receive_frames = new ReceiveFrames(mcu_ecu_socket, mcu_api_socket);
+        checkSwVersion();
     }
 
     /* Default constructor */
@@ -179,4 +180,29 @@ namespace MCU
         }
         outfile.close();
     }
+
+    void MCUModule::checkSwVersion()
+    {
+        auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(MCU_ID), *MCULogger);
+
+        auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
+        memory_manager_instance->setPath(DEV_LOOP);
+        memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10));
+        uint8_t previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10), 1, *MCULogger)[0];
+
+        if(current_sw_version[0] != previous_sw_version)
+        {
+            /* Software has been upgraded/downgraded => success */
+            FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(MCU_ID), *MCULogger);
+        }
+        else
+        {
+            /* Software unchanged */
+            return;
+        }
+        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, current_sw_version[0]);
+
+        memory_manager_instance->writeToAddress(current_sw_version);
+    }
+
 }

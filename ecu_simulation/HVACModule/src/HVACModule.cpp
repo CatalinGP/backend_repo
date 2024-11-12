@@ -10,11 +10,11 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac 
         {HVAC_SET_TEMPERATURE_DID, {DEFAULT_DID_VALUE}}, /* HVAC set temperature */
         {FAN_SPEED_DID, {DEFAULT_DID_VALUE}}, /* Fan speed (Duty cycle) */
         {HVAC_MODES_DID, {DEFAULT_DID_VALUE}},  /* HVAC modes */
-        {0xE001, {0}}, /* OTA Status */
+        {OTA_UPDATE_STATUS_DID, {0}}, /* OTA Status */
 #ifdef SOFTWARE_VERSION
-        {0xF1A2, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {0xF1A2, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
     };
 
@@ -25,9 +25,9 @@ HVACModule::HVACModule() : _logger(*hvacModuleLogger)
 
 void HVACModule::initHVAC()
 {
+    writeDataToFile();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(HVAC_ECU_ID, _logger);
-    writeDataToFile();
 }
 
 void HVACModule::fetchHvacData()
