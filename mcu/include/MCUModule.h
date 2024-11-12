@@ -33,16 +33,8 @@ namespace MCU
         static std::map<uint8_t, std::atomic<bool>> stop_flags;
 
         /* Variable to store mcu data */
-        std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_MCU = 
-        {
-            {OTA_UPDATE_STATUS_DID, {IDLE}},
-#ifdef SOFTWARE_VERSION
-            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
-#else
-            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
-#endif
-        };
-        static const std::vector<uint16_t> VALID_DID_MCU;
+        static std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_MCU;
+        static const std::vector<uint16_t> writable_MCU_DID;
 
         /** 
          * @brief Constructor that takes the interface number as an argument.
@@ -118,7 +110,12 @@ namespace MCU
          * 
          */
         void checkSwVersion();
-
+        /**
+         * @brief This function generates random values for all DID entries defined in the default_DID_MCU map
+         * 
+         */
+        void fetchMCUData();
+ 
     private:
         bool is_running;
         CreateInterface* create_interface;

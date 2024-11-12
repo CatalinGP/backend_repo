@@ -47,6 +47,7 @@ public:
     ECU *_ecu;
     /* Variable to store ecu data */
     static std::unordered_map<uint16_t, std::vector<uint8_t>> default_DID_battery;
+    static const std::vector<uint16_t> writable_Battery_DID;
     /**
      * @brief Default constructor for Battery Module object.
      */
