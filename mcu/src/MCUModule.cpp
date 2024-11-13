@@ -188,8 +188,15 @@ namespace MCU
         auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
         memory_manager_instance->setPath(DEV_LOOP);
         memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10));
-        uint8_t previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10), 1, *MCULogger)[0];
-
+        uint8_t previous_sw_version = 0;
+        try
+        {
+            previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10), 1, *MCULogger)[0];
+        }
+        catch(const std::runtime_error& e)
+        {
+            return;
+        }
         if(current_sw_version[0] != previous_sw_version)
         {
             /* Software has been upgraded/downgraded => success */

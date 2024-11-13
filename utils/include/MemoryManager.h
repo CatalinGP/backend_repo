@@ -29,21 +29,21 @@
  *  ->now type q-> enter to quit fdisk
  *  
  *  ->after finishing commands above run the two mkfs commands below to format those partitions
- * sudo mkfs.fat -F 32 /dev/loop21p1
- * sudo mkfs.fat -F 16 /dev/loop21p2
+ * sudo mkfs.fat -F 32 /dev/loop0p1
+ * sudo mkfs.fat -F 16 /dev/loop0p2
  * 
  * -> run mkdir to create /mnt folder
  * sudo mkdir /mnt/sdcard
  * 
  * -> run mount for both partitions created
- * sudo mount -o rw,uid=1000,gid=1000 /dev/loop21p1 /mnt/sdcard
- * sudo mount -o rw,uid=1000,gid=1000 /dev/loop21p2 /mnt/sdcard
+ * sudo mount -o rw,uid=1000,gid=1000 /dev/loop0p1 /mnt/sdcard
+ * sudo mount -o rw,uid=1000,gid=1000 /dev/loop0p2 /mnt/sdcard
  * 
  * -> this commands prints the data found at starting with adress 118006272
- * sudo xxd -l 17168 -s 118006272 /dev/loop21
+ * sudo xxd -l 17168 -s 118006272 /dev/loop0
  * 
  * -> this command replaces all data with zeros(erase)
- * sudo dd if=/dev/zero of=/dev/loop21 bs=1 seek=118006272 count=17168 conv=notrunc
+ * sudo dd if=/dev/zero of=/dev/loop0 bs=1 seek=118006272 count=17168 conv=notrunc
  * 
  * -> last two commands are not mandatory, only for testing
  * MAIN:
@@ -82,7 +82,7 @@
 
 #include "Logger.h"
 
-#define DEV_LOOP "/dev/loop20"
+#define DEV_LOOP "/dev/loop0"
 
 #define SECTOR_SIZE 512 
 
@@ -104,6 +104,7 @@ class MemoryManager
         off_t address_continue_to_write = -1;
         static MemoryManager* instance;
         Logger& logger;
+        static bool dev_loop_path_configured;
 
         /**
          * @brief Method to transform a string number to type integer

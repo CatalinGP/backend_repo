@@ -73,7 +73,7 @@ void TransferData::processDataForTransfer(canid_t can_id, std::vector<uint8_t>& 
         uint8_t byte;
         bool first_byte_found = false;
 
-        for(int i = sizeof(total_size) - 1; i >=0; --i)
+        for(signed char i = sizeof(total_size) - 1; i >=0; --i)
         {
             byte = (total_size >> (i * 8)) & 0xFF;
             if(byte != 0 || first_byte_found == true)
