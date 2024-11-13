@@ -366,7 +366,7 @@ void FileManager::setDidValue(const uint16_t did, const std::vector<uint8_t>& va
     canid_t sender_id = (receiver_id << 8) | target_id; 
     /* Create the can frame : PCI, SID, DIS MSB, DID LSB, Data */
     std::vector<uint8_t> wdbi_frame;
-    wdbi_frame.push_back(0x03); /* PCI */
+    wdbi_frame.push_back(0x04); /* PCI */
     wdbi_frame.push_back(0x2e); /* Service ID */
     wdbi_frame.push_back((did >> 8) & 0xFF); /* did 0XE0*/
     wdbi_frame.push_back(did & 0xFF); /* did 0X01*/

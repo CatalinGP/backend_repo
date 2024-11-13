@@ -46,7 +46,7 @@ void TransferData::processDataForTransfer(canid_t can_id, std::vector<uint8_t>& 
     /* Extract the receiver */
     uint8_t receiver_id = can_id  & 0xFF;
 
-    OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, can_id, logger)[0]);
+    OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>MCU_ID, logger)[0]);
 
     if(ota_state == WAIT_DOWNLOAD_COMPLETED)
     {
@@ -96,7 +96,7 @@ void TransferData::processDataForTransfer(canid_t can_id, std::vector<uint8_t>& 
     }
     
     size_t current_chunk_size = std::min(static_cast<size_t>(chunk_size), total_size - bytes_sent);
-    if (bytes_sent >= total_size)
+    if (bytes_sent >= total_size && bytes_sent != 0)
     {   
         current_data.emplace_back(TransferData::computeChecksum(TransferData::checksums.data(), TransferData::checksums.size()));
         canid_t aux_can_id = ((can_id & 0xFF) << 16) | ((can_id & 0xFF00)) | 0X10;
