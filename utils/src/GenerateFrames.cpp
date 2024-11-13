@@ -545,7 +545,7 @@ void GenerateFrames::requestDownloadResponse(int id, int max_number_block)
     /* Response frame */
     std::vector<uint8_t> max_number_block_bytes;
     bool first_byte_found = false;
-    for(char i = 3, byte; i >=0; --i)
+    for(signed char i = sizeof(max_number_block), byte; i >=0; --i)
     {
         byte = (max_number_block >> (i * 8)) & 0xFF;
         if(byte != 0 || first_byte_found == true)

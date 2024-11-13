@@ -345,7 +345,7 @@ bool RoutineControl::initialiseOta(uint8_t target_ecu, const std::vector<uint8_t
         routine_result[0] = version_size;
     }
 #elif PYTHON_ENABLED == 0
-    routine_result[0] = 0;
+    routine_result[0] = 1;
 #endif
     /* Map 0-15 to 1-16 */
     uint8_t highNibble = ((sw_version >> 4) & 0x0F) + 1;
