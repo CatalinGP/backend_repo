@@ -61,7 +61,7 @@ void MemoryManager::setPath(std::string path)
     //     LOG_WARN(logger.GET_LOGGER(), "777 permisions could not be granted for {}", path);
     //     return;
     // }
-    // MemoryManager::dev_loop_path_configured = true;
+    MemoryManager::dev_loop_path_configured = true;
 }
 
 off_t MemoryManager::getAddress()
