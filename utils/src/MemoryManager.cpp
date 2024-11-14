@@ -9,7 +9,7 @@ MemoryManager* MemoryManager::getInstance(Logger& logger)
 {
     if ( instance == nullptr)
     {
-        instance = new MemoryManager(-1, "", logger);
+        instance = new MemoryManager(-1, DEV_LOOP, logger);
         LOG_INFO(logger.GET_LOGGER(), "logger initialized 1 ");
     }
     if (instance->address == -1)
@@ -47,20 +47,34 @@ void MemoryManager::setAddress(off_t address)
 
 void MemoryManager::setPath(std::string path)
 {
-    // std::string command = "lsblk -o NAME,MOUNTPOINT | grep '" + std::string(path) + "' | grep -q 'sdcard.img' >/dev/null 2>&1";
-    // if(system(command.c_str()) != 0)
-    // {
-    //     LOG_WARN(logger.GET_LOGGER(), "{} does not exist", path);
-    //     return;
-    // }
+    path = "/dev/loop2";
+    if(path == this->path)
+    {
+        LOG_INFO(logger.GET_LOGGER(), "Path {} already set.", path);
+        return;
+    }
+    if(path == "" || path == "-a")
+    {
+        LOG_INFO(logger.GET_LOGGER(), "Path {} invalid", path);
+        return;  
+    }
+    std::string command = "losetup " + std::string(path) + " | grep -q 'sdcard.img'";
+    if(system(command.c_str()) != 0)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "Path {} not linked to sdcard.", path);
+        return;
+    }
+
     this->path = path;
-    // LOG_INFO(logger.GET_LOGGER(), "Path {} exists and is assigned. Granting 777 permisions..", path);
-    // command = "sudo chmod 777 " + std::string(path) + " >/dev/null 2>&1";
-    // if(system(command.c_str()) != 0)
-    // {
-    //     LOG_WARN(logger.GET_LOGGER(), "777 permisions could not be granted for {}", path);
-    //     return;
-    // }
+    LOG_INFO(logger.GET_LOGGER(), "Path {} exists and is assigned. Granting 777 permisions..", path);
+    command = "sudo chmod 777 " + std::string(path) + " >/dev/null 2>&1";
+    if(system(command.c_str()) != 0)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "777 permisions could not be granted for {}", path);
+        return;
+    }
+
+    LOG_INFO(logger.GET_LOGGER(), "777 permisions granted for {}", path);
     MemoryManager::dev_loop_path_configured = true;
 }
 
