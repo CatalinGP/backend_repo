@@ -21,9 +21,9 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
  * sets up the CAN interface, and prepares the frame receiver. */
 DoorsModule::DoorsModule()
 {
-    writeDataToFile();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(DOORS_ID, *doorsModuleLogger);
+    writeDataToFile();
     LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Doors object created successfully");
 }
 

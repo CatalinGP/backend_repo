@@ -50,9 +50,9 @@ namespace MCU
                     mcu_api_socket(create_interface->createSocket(interfaces_number)),
                     mcu_ecu_socket(create_interface->createSocket(interfaces_number >> 4))
                     {
+        checkSwVersion();
         writeDataToFile();
         receive_frames = new ReceiveFrames(mcu_ecu_socket, mcu_api_socket);
-        checkSwVersion();
     }
 
     /* Default constructor */
@@ -189,7 +189,6 @@ namespace MCU
         {
             return;
         }
-        auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(MCU_ID), *MCULogger);
 
         auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
         memory_manager_instance->setPath(DEV_LOOP);
@@ -204,7 +203,7 @@ namespace MCU
             LOG_ERROR(MCULogger->GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop19, permissions. Current dev/loop:{}", DEV_LOOP);
             return;
         }
-        if(current_sw_version[0] != previous_sw_version)
+        if(static_cast<uint8_t>(SOFTWARE_VERSION) != previous_sw_version)
         {
             /* Software has been upgraded/downgraded => success */
             FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(MCU_ID), *MCULogger);
@@ -214,9 +213,9 @@ namespace MCU
             /* Software unchanged */
             return;
         }
-        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, current_sw_version[0]);
-
-        memory_manager_instance->writeToAddress(current_sw_version);
+        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
+        std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
+        memory_manager_instance->writeToAddress(temp_vector);
     }
 
 }

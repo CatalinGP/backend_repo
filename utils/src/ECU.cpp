@@ -57,7 +57,6 @@ void ECU::checkSwVersion()
     {
         return;
     }
-    auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(_module_id), _logger);
 
     auto memory_manager_instance = MemoryManager::getInstance(_logger);
     memory_manager_instance->setPath(DEV_LOOP);
@@ -73,7 +72,7 @@ void ECU::checkSwVersion()
         return;
     }
 
-    if(current_sw_version[0] < previous_sw_version)
+    if(static_cast<uint8_t>(SOFTWARE_VERSION) < previous_sw_version)
     {
         /* Software has been upgraded/downgraded => success */
         FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger, _ecu_socket);
@@ -83,9 +82,10 @@ void ECU::checkSwVersion()
         /* Software unchanged */
         return;
     }
-    LOG_INFO(_logger.GET_LOGGER(), "Software has been changed from version {} to version {}.", previous_sw_version, current_sw_version[0]);
+    LOG_INFO(_logger.GET_LOGGER(), "Software has been changed from version {} to version {}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
 
-    memory_manager_instance->writeToAddress(current_sw_version);
+    std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
+    memory_manager_instance->writeToAddress(temp_vector);
 }
 
 ECU::~ECU()
