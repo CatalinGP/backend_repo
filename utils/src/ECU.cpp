@@ -68,7 +68,7 @@ void ECU::checkSwVersion()
     }
     catch(const std::runtime_error& e)
     {
-        LOG_ERROR(_logger.GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop19, permissions. Current dev/loop:{}", DEV_LOOP);
+        LOG_ERROR(_logger.GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop, permissions. Current dev/loop:{}", DEV_LOOP);
         return;
     }
 
