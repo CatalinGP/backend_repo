@@ -199,6 +199,11 @@ class Updates(Action):
         frame_response = self._passive_response(ROUTINE_CONTROL, "Error at install routine.")
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at install step.")
+        self.get_ota_update_state(api_target_id)
+        frame_response =self.passive_response(REQUEST_UPDATE_STATUS , "Error at verify data routine.")
+        if frame_response.data[1] != 0x72:
+            log_info_message(logger, "Failed request update ota status.")
+            return
 
     def _verify_version(self):
         """

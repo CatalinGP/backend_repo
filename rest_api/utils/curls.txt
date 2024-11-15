@@ -119,3 +119,10 @@ curl -X POST http://localhost:5000/api/write_timing \
     "p2_max": 500,
     "p2_star_max": 1000
 }'
+
+23. /ota_status - POST Request
+
+curl -X POST http://localhost:5000/api/ota_status      
+ -H "Content-Type: application/json"      
+ -d '{"hex_value": "0x50", 
+ "is_manual_flow": false}'
