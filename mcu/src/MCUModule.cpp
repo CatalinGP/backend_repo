@@ -213,7 +213,7 @@ namespace MCU
             /* Software unchanged */
             return;
         }
-        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {:x} to version {:x}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
+        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been changed from version {:x} to version {:x}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
         std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
         memory_manager_instance->writeToAddress(temp_vector);
     }
