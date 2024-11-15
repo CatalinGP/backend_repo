@@ -192,15 +192,15 @@ namespace MCU
 
         auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
         memory_manager_instance->setPath(DEV_LOOP);
-        memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10));
+        memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1);
         uint8_t previous_sw_version = 0;
         try
         {
-            previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (MCU_ID % 0x10), 1, *MCULogger)[0];
+            previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
         }
         catch(const std::runtime_error& e)
         {
-            LOG_ERROR(MCULogger->GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop19, permissions. Current dev/loop:{}", DEV_LOOP);
+            LOG_ERROR(MCULogger->GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop, permissions. Current dev/loop:{}", DEV_LOOP);
             return;
         }
         if(static_cast<uint8_t>(SOFTWARE_VERSION) != previous_sw_version)
@@ -213,7 +213,7 @@ namespace MCU
             /* Software unchanged */
             return;
         }
-        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
+        LOG_INFO(MCULogger->GET_LOGGER(), "Software has been updated from version {:x} to version {:x}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
         std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
         memory_manager_instance->writeToAddress(temp_vector);
     }
