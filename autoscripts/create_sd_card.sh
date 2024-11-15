@@ -1,10 +1,33 @@
 #!/bin/bash
 
 # The script will be run as: 1. sudo ./create_sd_card.sh (when there is need to set the virtual environment setup)
-# or 2. sudo ./create_sd_card.sh --only-sdcard (when there is no need of virtual environment setup, but only sd card creation)
+# or 2. sudo ./create_sd_card.sh --only-sdcard (when there is no need of virtual environment setup, but only sd card creation). 
+# This script can also be run from any directory.
+
+# Determine the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Save initial directory
-INITIAL_DIR="$PWD"
+#INITIAL_DIR="$PWD"
+
+# Function to find a target directory by searching up the tree
+find_directory_upwards()
+{
+  local TARGET_DIR="$1"
+  local CURRENT_DIR="$SCRIPT_DIR"
+  
+  while [[ "$CURRENT_DIR" != "/" ]]; do
+    if [[ -d "$CURRENT_DIR/$TARGET_DIR" ]]; then
+    echo "$CURRENT_DIR/$TARGET_DIR"
+    return 0
+    fi
+  # Go up one level
+  CURRENT_DIR="$(dirname "$CURRENT_DIR")"
+  done
+  
+  #Return 1 if not found
+  return 1
+}
 
 # Ensure the script is run with sudo
 if [ "$EUID" -ne 0 ]; then
@@ -30,8 +53,17 @@ echo "Python version is $PYTHON_VERSION. Proceeding..."
 
 # Skip venv setup if --only-sdcard is provided
 if [ "$ONLY_SDCARD" = false ]; then
-  # Step 1: Change directory to ../rest_api
-  cd ../rest_api || { echo "rest_api directory not found. Exiting."; exit 1; }
+  # Step 1: Change directory to ../rest_api, but first find the rest_api directory by searching upwards from the script location
+  REST_API_DIR=$(find_directory_upwards "rest_api")
+ 
+  if [[ -z "$REST_API_DIR" ]]; then
+    echo "rest_api directory not found. Exiting."
+    exit 1
+  else
+    echo "Found rest_api directory at $REST_API_DIR"
+  fi
+
+  cd "$REST_API_DIR" || exit 1
 
   # Step 2
   # Check if the virtual environment exists
@@ -54,10 +86,19 @@ if [ "$ONLY_SDCARD" = false ]; then
   fi
 
 # Step 4: Change directory back to ../mcu
-cd ../mcu || { echo "mcu directory not found. Exiting."; exit 1; }
+MCU_DIR=$(find_directory_upwards "mcu")
+ 
+  if [[ -z "$MCU_DIR" ]]; then
+    echo "mcu directory not found. Exiting."
+    exit 1
+  else
+    echo "Found mcu directory at $MCU_DIR"
+  fi
+
+  cd "$MCU_DIR" || exit 1
 
 # Ensure we are back in the initial directory
-cd "$INITIAL_DIR"
+#cd "$INITIAL_DIR"
 fi
 
 #Set IMG_PATH in order to create the sd card image in the user's home directory
@@ -158,7 +199,7 @@ else
 fi
 
 # Step 17: Navigate back to initial location
-cd "$INITIAL_DIR"
+cd "$SCRIPT_DIR"
 
 # Step 18: Navigate backwards to find the 'src' directory
 while [[ "$PWD" != "/" && "${PWD##*/}" != "src" ]]; do
@@ -174,6 +215,7 @@ fi
 echo "Found 'src' directory at $PWD"
 SRC_DIR="$PWD"
 
+
 # Step 19: Replace loop numbers in files, excluding MCULogs.log
 echo "Replacing loop numbers in files, excluding MCULogs.log..."
 find . -type f ! -name "MCULogs.log" -exec sed -i "s/\/dev\/loop[0-9]*/\/dev\/loop${LOOP_NUMBER}/g" {} +
@@ -186,8 +228,8 @@ cd ./backend/mcu || { echo "'mcu' directory not found. Exiting."; exit 1; }
 
 # Run make file and make commands
 echo "Running make commands..."
-#make clean
-make
-echo "Build completed successfully."
+make clean
+make && echo "Build completed successfully." || { echo "Build failed. Exiting."; exit 1; }
+
 
 echo "Script completed successfully."
