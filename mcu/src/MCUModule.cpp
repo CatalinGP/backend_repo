@@ -183,6 +183,12 @@ namespace MCU
 
     void MCUModule::checkSwVersion()
     {
+        OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(MCU_ID), *MCULogger)[0]);
+        /* Check if a software update has been started, if not, don't check for updates */
+        if(ota_state != ACTIVATE)
+        {
+            return;
+        }
         auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(MCU_ID), *MCULogger);
 
         auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
@@ -195,6 +201,7 @@ namespace MCU
         }
         catch(const std::runtime_error& e)
         {
+            LOG_ERROR(MCULogger->GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop19, permissions. Current dev/loop:{}", DEV_LOOP);
             return;
         }
         if(current_sw_version[0] != previous_sw_version)

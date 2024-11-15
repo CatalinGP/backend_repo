@@ -51,6 +51,12 @@ void ECU::stopFrames()
 
 void ECU::checkSwVersion()
 {
+    OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(_module_id), _logger)[0]);
+    /* Check if a software update has been started, if not, don't check for updates */
+    if(ota_state != ACTIVATE)
+    {
+        return;
+    }
     auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(_module_id), _logger);
 
     auto memory_manager_instance = MemoryManager::getInstance(_logger);
@@ -63,11 +69,11 @@ void ECU::checkSwVersion()
     }
     catch(const std::runtime_error& e)
     {
-        LOG_ERROR(_logger.GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop, permissions. Current dev/loop:{}", DEV_LOOP);
+        LOG_ERROR(_logger.GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop19, permissions. Current dev/loop:{}", DEV_LOOP);
         return;
     }
 
-    if(current_sw_version[0] != previous_sw_version)
+    if(current_sw_version[0] < previous_sw_version)
     {
         /* Software has been upgraded/downgraded => success */
         FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger, _ecu_socket);
@@ -77,7 +83,7 @@ void ECU::checkSwVersion()
         /* Software unchanged */
         return;
     }
-    LOG_INFO(_logger.GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, current_sw_version[0]);
+    LOG_INFO(_logger.GET_LOGGER(), "Software has been changed from version {} to version {}.", previous_sw_version, current_sw_version[0]);
 
     memory_manager_instance->writeToAddress(current_sw_version);
 }

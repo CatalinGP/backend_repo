@@ -269,6 +269,8 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
         case 0x0601:
         {
             LOG_INFO(rc_logger.GET_LOGGER(), "Activate software routine called. Saving the current software..");
+            FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE}, aux_can_id, rc_logger, socket);
+
             if(saveCurrentSoftware() == false)
             {
                 LOG_ERROR(rc_logger.GET_LOGGER(), "Current software saving failed.");
