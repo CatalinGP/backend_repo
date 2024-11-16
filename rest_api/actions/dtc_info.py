@@ -46,6 +46,27 @@ class DiagnosticTroubleCode(Action):
                 return make_response(jsonify(f"Invalid DTC status bit name: {bit_name}"), 400)
         return mask
 
+    def convert_bytes_to_dtc(self, byte1, byte2, byte3):
+        # Map for the DTC letter
+        letter_map = {0b00: 'P', 0b01: 'C', 0b10: 'B', 0b11: 'U'}
+        first_digit_map = {0b00: '0', 0b01: '1', 0b10: '2', 0b11: '3'}
+
+        # Extract the DTC letter from the first 2 bits of byte1
+        letter_bits = (byte1 >> 6) & 0b11
+        letter = letter_map.get(letter_bits, '?')
+
+        # Extract the first digit from the next 2 bits of byte1
+        first_digit_bits = (byte1 >> 4) & 0b11
+        first_digit = first_digit_map.get(first_digit_bits, '?')
+
+        # Extract the remaining 5 digits of the DTC
+        remaining_digits = f"{(byte1 & 0x0F):X}{(byte2 >> 4):X}{(byte2 & 0x0F):X}{(byte3 >> 4):X}{(byte3 & 0x0F):X}"
+
+        # Construct the DTC code
+        dtc = f"{letter}{first_digit}{remaining_digits}"
+        return dtc
+
+
     def read_dtc_info(self, subfunc, dtc_mask_bits, ecu_id):
         """ Byte 2 (Sub-function): Defines what kind of DTC report is requested.
                 0x01 for the number of DTCs by status mask.
@@ -85,32 +106,46 @@ class DiagnosticTroubleCode(Action):
         except CustomError as e:
             return make_response(jsonify({"error": e.message}), 500)  # Return 500 Internal Server Error
 
-    def clear_dtc_info(self, ecu_id):
+    def clear_dtc_info(self, dtc_group, ecu_id):
         """ curl -X GET http://127.0.0.1:5000/api/clear_dtc_info """
-        # id_mcu = self.id_ecu[MCU]
-        id = self.my_id * 0x100 + ecu_id
 
         try:
-            log_info_message(logger, "Clearing all DTCs information with positive response")
-            self.clear_diagnostic_information(id, 0xFFFFFF, False)
+            id = self.my_id * 0x100 + ecu_id
+            log_info_message(logger, "Clearing DTCs information with positive response")
+            if dtc_group == "p":
+                dtc_group_code = 0x000aaa
+            elif dtc_group == "c":
+                dtc_group_code = 0x010aaa
+            elif dtc_group == "b":
+                dtc_group_code = 0x020aaa
+            elif dtc_group == "u":
+                dtc_group_code = 0x030aaa
+            elif dtc_group == "a":
+                dtc_group_code = 0xffffff
+            else:
+                dtc_group_code = 0x000000 # invalid dtc_group
+
+            self.clear_diagnostic_information(id, dtc_group_code, False)
             frame_response = self._passive_response(CLEAR_DTC, "Error clearing DTCs")
 
             if frame_response.data[1] == 0x54:
-                return {
-                    "message": "Clearing all DTCs information with positive response succeded"
+                json_response = {
+                    "message": f"Clearing DTCs information with positive response succeded"
                 }
+                return jsonify(json_response), 200
 
             if frame_response.data[1] == 0x7F:
                 nrc_msg = frame_response.data[3]
                 sid_msg = frame_response.data[2]
                 negative_response = self.handle_negative_response(nrc_msg, sid_msg)
-                return {
+                json_response = {
                     "message": "Negative response received while Requesting read DTC information",
                     "negative_response": negative_response
                 }
+                return jsonify(json_response), 400 # Return 400 Bad Request
 
         except CustomError as e:
-            return e.message
+            return make_response(jsonify({"error": e.message}), 500)  # Return 500 Internal Server Error
 
     def construct_json_response(self, data, can_id):
         if len(data) < 1:
@@ -120,6 +155,50 @@ class DiagnosticTroubleCode(Action):
         sid = int(data[1], 16) if len(data) > 1 else None  # Service Identifier (SID)
         sub_function = int(data[2], 16) if len(data) > 2 else None  # Sub-function
         status_availability_mask = int(data[3], 16) if len(data) > 3 else None  # Status availability mask
+        
+        if(sub_function == 2):
+            dtc_list = []
+            for i in range(4, len(data) - 2, 3):
+                byte1 = int(data[i], 16)
+                byte2 = int(data[i + 1], 16)
+                byte3 = int(data[i + 2], 16)
+                dtc = self.convert_bytes_to_dtc(byte1, byte2, byte3)
+
+                 # Interpret DTC status bits
+                status_bits_active = []
+                for bit_name, bit_position in DTC_STATUS_BITS.items():
+                    if byte3 & (1 << bit_position):
+                        status_bits_active.append(bit_name)
+
+                # Add DTC code and its status to list
+                dtc_list.append({
+                    "DTC_Code": dtc,
+                    "Status_Bits": status_bits_active,
+                })
+
+            json_response = {
+                "CAN_ID": hex(can_id),
+                "Data_Bytes": {
+                    "SID": {
+                        "value": hex(sid),
+                        "description": "Positive Response SID" if sid is not None else "Not provided"
+                    },
+                    "SubFunction": {
+                        "value": f"0x0{sub_function}",
+                        "description": "Report DTCs by the status mask" if sub_function == 2 else "Unknown"
+                    },
+                    "StatusAvailabilityMask": {
+                        "value": hex(status_availability_mask),
+                        "description": "Status availability mask." if status_availability_mask is not None else "Not provided"
+                    },
+                    "DTC_List": {
+                        "value": dtc_list,
+                        "description": "DTCs are listed according to SAE J2012 and ISO standards. Status bits specify active conditions."
+                    }
+                }
+            }
+            return json_response
+
         dtc_format_identifier = int(data[4], 16) if len(data) > 4 else None  # DTC format identifier
         dtc_count_high = int(data[5], 16) if len(data) > 5 else 0  # High byte of DTC count
         dtc_count_low = int(data[6], 16) if len(data) > 6 else 0  # Low byte of DTC count
@@ -127,8 +206,6 @@ class DiagnosticTroubleCode(Action):
 
         if sub_function == 1:
             sub_function_description = "reporNumberOfDTCByStatusMask"
-        elif sub_function == 2:
-            sub_function_description = "reportDTCsByStatusMask"
         else:
             sub_function_description = "Unknown sub-function"
 

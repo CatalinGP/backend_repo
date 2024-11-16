@@ -210,14 +210,32 @@ def read_dtc_info():
         return jsonify({"error": "An unexpected error occurred", "details": str(err)}), 500
 
 
-@api_bp.route('/clear_dtc_info', methods=['GET'])
+@api_bp.route('/clear_dtc_info', methods=['POST'])
 def clear_dtc_info():
     try:
+        errors = []
+        log_info_message(logger, f"Clear DTC Request received: {request.args}")
+
         ecu_id_str = request.args.get('ecu_id', default='0x11')
-        ecu_id = int(ecu_id_str, 16)
+        try:
+            ecu_id = int(ecu_id_str, 16)
+        except ValueError:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+        
+        requester = RequestIdAction()
+        response_req_json = requester.read_ids()
+        ecu_values = response_req_json.get("ecus", [])
+        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
+
+        if ecu_id not in valid_values:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+
+        dtc_group = request.args.get('dtc_group')
+        if errors:
+            return jsonify({"errors": errors}), 400
+
         clearer = DiagnosticTroubleCode()
-        response_json = clearer.clear_dtc_info(ecu_id)
-        return jsonify(response_json), 200
+        return clearer.clear_dtc_info(dtc_group, ecu_id)
 
     except CustomError as e:
         return jsonify(e.message), 400
