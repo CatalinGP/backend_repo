@@ -393,8 +393,8 @@ def write_timing():
             result = writer._write_timing_info(sub_funct, ecu_id, timing_values)
         return jsonify(result)
 
-    # except CustomError as e:
-    #     return jsonify(e.message), 400
+    except CustomError as e:
+        return jsonify(e.message), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
