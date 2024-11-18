@@ -42,34 +42,46 @@ class Auth(Action):
                 key = self._algorithm(seed)
                 log_info_message(logger, f"Key: {key}")
 
-                # Send the key for authentication
-                self.authentication_key(id,
-                                        key=key,
-                                        sid_send=AUTHENTICATION_RECV,
-                                        sid_recv=AUTHENTICATION_SEND,
-                                        subf=AUTHENTICATION_SUBF_SEND_KEY)
-                frame_response = self._passive_response(AUTHENTICATION_SEND,
-                                                        "Error sending key")
+                all_zeros = all(x == 0 for x in key)
+                if not all_zeros or not key:
+                   # Send the key for authentication
+                   self.authentication_key(
+                       id,
+                       key=key,
+                       sid_send=AUTHENTICATION_RECV,
+                       sid_recv=AUTHENTICATION_SEND,
+                       subf=AUTHENTICATION_SUBF_SEND_KEY
+                   )
+                   frame_response = self._passive_response(
+                       AUTHENTICATION_SEND,
+                       "Error sending key"
+                   )
 
-                if frame_response.data[1] == 0x7F:
-                    nrc_msg = frame_response.data[3]
-                    sid_msg = frame_response.data[2]
-                    negative_response = self.handle_negative_response(nrc_msg, sid_msg)
-                    return {
-                        "message": "Negative response received while sending key",
-                        "negative_response": negative_response
-                    }
+                   if frame_response.data[1] == 0x7F:
+                       nrc_msg = frame_response.data[3]
+                       sid_msg = frame_response.data[2]
+                       negative_response = self.handle_negative_response(nrc_msg, sid_msg)
+                       return {
+                           "message": "Negative response received while sending key",
+                           "negative_response": negative_response
+                       }
 
-                if frame_response.data[1] == 0x67 and frame_response.data[2] == 0x02:
-                    log_info_message(logger, "Authentication successful")
-                    return {
-                        "message": "Authentication successful",
-                    }
+                   if frame_response.data[1] == 0x67 and frame_response.data[2] == 0x02:
+                       log_info_message(logger, "Authentication successful")
+                       return {
+                           "message": "Authentication successful",
+                       }
+                   else:
+                       log_warning_message(logger, "Authentication failed")
+                       return {
+                           "message": "Authentication failed",
+                       }
                 else:
-                    log_warning_message(logger, "Authentication failed")
+                    log_info_message(logger, "Already logged in")
                     return {
-                        "message": "Authentication failed",
-                    }
+                           "message": "Already logged in",
+                       }
+
 
         except CustomError:
             nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
