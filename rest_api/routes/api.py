@@ -378,8 +378,36 @@ def write_timing():
             result = writer._write_timing_info(sub_funct, ecu_id, timing_values)
         return jsonify(result)
 
-    except CustomError as e:
-        return jsonify(e.message), 400
+    # except CustomError as e:
+    #     return jsonify(e.message), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/rollback_software', methods=['POST'])
+def rollback_software():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    try:
+        updater = Updates()
+        response = updater.rollback_software(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
+@api_bp.route('/activate_software', methods=['POST'])
+def activate_software():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "ECU ID is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.activate_software(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500

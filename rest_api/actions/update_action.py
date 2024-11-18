@@ -257,3 +257,60 @@ class Updates(Action):
                 return "INVALID_STATE_TIMEOUT"
 
             time.sleep(1)
+
+    def rollback_software(self, ecu_id):
+        """
+        Handles the CAN frame sending for rolling back software.
+
+        Args:
+        - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
+            can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
+
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x05, 0x01, 0x00]
+            log_info_message(logger, f"Sending rollback CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(ROUTINE_CONTROL, "Error during rollback.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Rollback failed for ECU ID: {ecu_id}")
+                raise CustomError(f"Rollback failed for ECU ID: {ecu_id}")
+
+            log_info_message(logger, f"Rollback successful for ECU ID: {ecu_id}")
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {ecu_id}")
+
+
+    def activate_software(self, ecu_id):
+        """
+        Handles the CAN frame sending for activating software.
+    
+        Args:
+        - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
+            can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
+        
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x06, 0x01, 0x00]
+            log_info_message(logger, f"Sending CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+        
+            # Wait for response and handle it
+            frame_response = self._passive_response(ROUTINE_CONTROL, "Error during activation.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Activation failed for ECU ID: {ecu_id}")
+                raise CustomError(f"Activation failed for ECU ID: {ecu_id}")
+            
+            log_info_message(logger, f"Activation successful for ECU ID: {ecu_id}")
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {ecu_id}")
