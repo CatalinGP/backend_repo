@@ -7,9 +7,6 @@
 # Determine the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Save initial directory
-#INITIAL_DIR="$PWD"
-
 # Function to find a target directory by searching up the tree
 find_directory_upwards()
 {
@@ -73,16 +70,25 @@ if [ "$ONLY_SDCARD" = false ]; then
       # Activate the virtual environment
       source venv/bin/activate
       echo "Virtual environment activated."
+      pip install -r requirements.txt
 
       # Optional: Check if the activation was successful
       if [ "$VIRTUAL_ENV" != "" ]; then
-          echo "Currently in virtual environment: $VIRTUAL_ENV"
+          echo "Virtual environment activated: $VIRTUAL_ENV"
           pip install -r requirements.txt
+          echo "Requirements installed."
       else
           echo "Failed to activate the virtual environment."
       fi
   else
       echo "Virtual environment found."
+      # Activate the virtual environment
+      source venv/bin/activate
+      if [ "$VIRTUAL_ENV" != "" ]; then
+          echo "Virtual environment activated: $VIRTUAL_ENV"
+      else
+          echo "Failed to activate the virtual environment."
+      fi
   fi
 
 # Step 4: Change directory back to ../mcu
@@ -97,8 +103,6 @@ MCU_DIR=$(find_directory_upwards "mcu")
 
   cd "$MCU_DIR" || exit 1
 
-# Ensure we are back in the initial directory
-#cd "$INITIAL_DIR"
 fi
 
 #Set IMG_PATH in order to create the sd card image in the user's home directory
@@ -215,21 +219,48 @@ fi
 echo "Found 'src' directory at $PWD"
 SRC_DIR="$PWD"
 
-
-# Step 19: Replace loop numbers in files, excluding MCULogs.log
-echo "Replacing loop numbers in files, excluding MCULogs.log..."
-find . -type f ! -name "MCULogs.log" -exec sed -i "s/\/dev\/loop[0-9]*/\/dev\/loop${LOOP_NUMBER}/g" {} +
+# Step 19: Replace loop numbers in file MemoryManager.h
+echo "Replacing loop numbers in file MemoryManager.h"
+find ./backend/utils/include -type f -name "MemoryManager.h" -exec sed -i "s/\/dev\/loop[0-9]*/\/dev\/loop${LOOP_NUMBER}/g" {} +
 
 # Navigate to SRC_DIR, go downwards into mcu folder, and run make commands
 cd "$SRC_DIR" || { echo "'src' directory not found. Exiting."; exit 1; }
 
 # Go downwards into mcu folder
 cd ./backend/mcu || { echo "'mcu' directory not found. Exiting."; exit 1; }
-
-# Run make file and make commands
-echo "Running make commands..."
+# Run make clean command for mcu
+echo "Running make command for mcu..."
 make clean
-make && echo "Build completed successfully." || { echo "Build failed. Exiting."; exit 1; }
 
+# Go downwards into battery folder
+cd ./../ecu_simulation/BatteryModule || { echo "'BaterryModule' directory not found. Exiting."; exit 1; }
+# Run make clean command for battery
+echo "Running make command for battery..."
+make clean
+
+# Go downwards into doors folder
+cd ./../DoorsModule || { echo "'DoorsModule' directory not found. Exiting."; exit 1; }
+# Run make clean command for doors
+echo "Running make command for doors..."
+make clean
+
+# Go downwards into engine folder
+cd ./../EngineModule || { echo "'EngineModule' directory not found. Exiting."; exit 1; }
+# Run make clean command for engine
+echo "Running make command for engine..."
+make clean
+
+# Go downwards into HVAC folder
+cd ./../HVACModule || { echo "'HVACodule' directory not found. Exiting."; exit 1; }
+# Run make clean command for HVAC
+echo "Running make command for HVAC..."
+make clean
+
+echo "Make clean done for mcu and ECUs"
+
+# Info message:
+YELLOW='\033[0;33m'
+NC='\033[0m'
+echo -e "${YELLOW}MCU and ECUs need to be compiled. Run the command 'make'.${NC}"
 
 echo "Script completed successfully."
