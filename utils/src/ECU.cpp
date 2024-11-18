@@ -51,7 +51,16 @@ void ECU::stopFrames()
 
 void ECU::checkSwVersion()
 {
-    OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(_module_id), _logger)[0]);
+    OtaUpdateStatesEnum ota_state;
+    try
+    {
+        ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(_module_id), _logger)[0]);
+    }
+    catch(const std::runtime_error& e)
+    {
+        LOG_ERROR(_logger.GET_LOGGER(), "{}", e.what());
+        return;
+    }
     /* Check if a software update has been started, if not, don't check for updates */
     if(ota_state != ACTIVATE)
     {

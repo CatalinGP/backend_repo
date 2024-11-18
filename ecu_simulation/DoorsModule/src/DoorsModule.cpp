@@ -47,7 +47,7 @@ void DoorsModule::fetchDoorsData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
             {
                 /* Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning */
                 byte = dist(gen);

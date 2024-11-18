@@ -64,7 +64,7 @@ void EngineModule::fetchEngineData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
             {
                 byte = dist(gen);  
             }

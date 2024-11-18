@@ -183,7 +183,16 @@ namespace MCU
 
     void MCUModule::checkSwVersion()
     {
-        OtaUpdateStatesEnum ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(MCU_ID), *MCULogger)[0]);
+        OtaUpdateStatesEnum ota_state;
+    try
+    {
+        ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(MCU_ID), *MCULogger)[0]);
+    }
+    catch(const std::runtime_error& e)
+    {
+        LOG_ERROR(MCULogger->GET_LOGGER(), "{}", e.what());
+        return;
+    }
         /* Check if a software update has been started, if not, don't check for updates */
         if(ota_state != ACTIVATE)
         {
