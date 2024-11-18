@@ -66,22 +66,26 @@ class Updates(Action):
         try:
             # CAN ID used for OTA Initialisation Routine
             self.id = (int(id, 16) << 16) + (self.my_id << 8) + self.id_ecu[0]
-            log_info_message(logger, "Changing MCU to session to extended diagonstic mode")
+            log_info_message(
+                logger, "Changing MCU to session to extended diagonstic mode")
             self.session_control(self.id, sub_funct=0x03)
             self._passive_response(SESSION_CONTROL, "Error changing session control")
 
-            log_info_message(logger, f"Changing ECU {int} to session to extended diagonstic mode")
+            log_info_message(
+                logger, f"Changing ECU {int} to session to extended diagonstic mode")
             ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
             self.session_control(ses_id, sub_funct=0x03)
             self._passive_response(SESSION_CONTROL, "Error changing session control")
 
             log_info_message(logger, "Authenticating...")
-            self._authentication(self.my_id * 0x100 + self.id_ecu[0])  # -> security only to MCU
+            # -> security only to MCU
+            self._authentication(self.my_id * 0x100 + self.id_ecu[0])
 
             log_info_message(logger, "Reading data from battery")
             current_version = self._verify_version()
             if current_version == version:
-                response_json = ToJSON()._to_json(f"Version {version} already installed", 0)
+                response_json = ToJSON()._to_json(
+                    f"Version {version} already installed", 0)
                 return response_json
 
             # Check if another OTA update is in progress ( OTA_STATE is not IDLE)
@@ -154,7 +158,8 @@ class Updates(Action):
         """
         # self.id is: target(1b)-api(1b)-mcu(1b)
         self.init_ota_routine(self.id, version=version)
-        frame_response = self._passive_response(ROUTINE_CONTROL, "Error initialzing OTA")
+        frame_response = self._passive_response(
+            ROUTINE_CONTROL, "Error initialzing OTA")
 
         mem_size = frame_response.data[5]
 
@@ -164,21 +169,24 @@ class Updates(Action):
                               memory_address=0x0800,
                               memory_size=mem_size,
                               version=version)
-        frame_response = self._passive_response(REQUEST_DOWNLOAD, "Error requesting download")
+        frame_response = self._passive_response(
+            REQUEST_DOWNLOAD, "Error requesting download")
         time.sleep(1)
         if (api_target_id & 0xFF) != 0x10:
 
             transfer_data_counter = 0x01
             while True:
                 self.transfer_data(api_target_id, transfer_data_counter)
-                frame_response = self._passive_response(TRANSFER_DATA, "Error transfering data")
+                frame_response = self._passive_response(
+                    TRANSFER_DATA, "Error transfering data")
                 if frame_response.data[1] != 0x76:
                     log_info_message(logger, "Transfer data failed")
                     break
                 else:
                     ota_state = frame_response.data[3]
                     if ota_state == 0x31:
-                        log_info_message(logger, "Data has been transferred succesfully")
+                        log_info_message(
+                            logger, "Data has been transferred succesfully")
                         break
                 if transfer_data_counter == 255:
                     transfer_data_counter = 0
@@ -186,17 +194,20 @@ class Updates(Action):
 
             # self.request_transfer_exit(api_target_id)
         self.control_frame_verify_data(api_target_id)
-        frame_response = self._passive_response(ROUTINE_CONTROL, "Error at verify data routine.")
+        frame_response = self._passive_response(
+            ROUTINE_CONTROL, "Error at verify data routine.")
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at verification step.")
             return
         self.control_frame_write_file(api_target_id)
-        frame_response = self._passive_response(ROUTINE_CONTROL, "Error at writting file routine.")
+        frame_response = self._passive_response(
+            ROUTINE_CONTROL, "Error at writting file routine.")
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at writting file step.")
             return
         self.control_frame_install_updates(api_target_id)
-        frame_response = self._passive_response(ROUTINE_CONTROL, "Error at install routine.")
+        frame_response = self._passive_response(
+            ROUTINE_CONTROL, "Error at install routine.")
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at install step.")
 
@@ -213,7 +224,8 @@ class Updates(Action):
         """
         log_info_message(logger, "Reading current version")
 
-        current_version = self._read_by_identifier(self.id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
+        current_version = self._read_by_identifier(
+            self.id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
         return current_version
 
     def _check_errors(self):
@@ -231,7 +243,8 @@ class Updates(Action):
 
         if response is not None:
             number_of_dtc = response.data[5]
-            log_info_message(logger, f"There are {number_of_dtc} errors found after download")
+            log_info_message(
+                logger, f"There are {number_of_dtc} errors found after download")
             return number_of_dtc
 
     def get_ota_update_state(self, value):
@@ -253,7 +266,8 @@ class Updates(Action):
 
             elapsed_time = time.time() - start_time
             if elapsed_time >= 5:
-                log_info_message(logger, f"Timeout reached. State {hex(value)} is still invalid.")
+                log_info_message(
+                    logger, f"Timeout reached. State {hex(value)} is still invalid.")
                 return "INVALID_STATE_TIMEOUT"
 
             time.sleep(1)
@@ -272,11 +286,13 @@ class Updates(Action):
 
             # Construct and send the CAN frame
             frame_data = [0x05, 0x31, 0x01, 0x05, 0x01, 0x00]
-            log_info_message(logger, f"Sending rollback CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            log_info_message(
+                logger, f"Sending rollback CAN frame with ID: {hex(can_id)} and data: {frame_data}")
             self.send_frame(can_id, frame_data)
 
             # Wait for response and handle it
-            frame_response = self._passive_response(ROUTINE_CONTROL, "Error during rollback.")
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during rollback.")
             if frame_response.data[1] != 0x71:
                 log_info_message(logger, f"Rollback failed for ECU ID: {ecu_id}")
                 raise CustomError(f"Rollback failed for ECU ID: {ecu_id}")
@@ -286,11 +302,10 @@ class Updates(Action):
         except ValueError:
             raise CustomError(f"Invalid ECU ID: {ecu_id}")
 
-
     def activate_software(self, ecu_id):
         """
         Handles the CAN frame sending for activating software.
-    
+
         Args:
         - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
         """
@@ -298,18 +313,20 @@ class Updates(Action):
             # Compute CAN ID from ECU ID
             ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
             can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
-        
+
             # Construct and send the CAN frame
             frame_data = [0x05, 0x31, 0x01, 0x06, 0x01, 0x00]
-            log_info_message(logger, f"Sending CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            log_info_message(
+                logger, f"Sending CAN frame with ID: {hex(can_id)} and data: {frame_data}")
             self.send_frame(can_id, frame_data)
-        
+
             # Wait for response and handle it
-            frame_response = self._passive_response(ROUTINE_CONTROL, "Error during activation.")
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during activation.")
             if frame_response.data[1] != 0x71:
                 log_info_message(logger, f"Activation failed for ECU ID: {ecu_id}")
                 raise CustomError(f"Activation failed for ECU ID: {ecu_id}")
-            
+
             log_info_message(logger, f"Activation successful for ECU ID: {ecu_id}")
 
         except ValueError:
