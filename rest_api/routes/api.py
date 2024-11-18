@@ -213,10 +213,11 @@ def read_dtc_info():
 @api_bp.route('/clear_dtc_info', methods=['POST'])
 def clear_dtc_info():
     try:
+        data = request.get_json()
         errors = []
-        log_info_message(logger, f"Clear DTC Request received: {request.args}")
-
-        ecu_id_str = request.args.get('ecu_id', default='0x11')
+        log_info_message(logger, f"Clear DTC Request received: {data}")
+        
+        ecu_id_str = data.get('ecu_id')
         try:
             ecu_id = int(ecu_id_str, 16)
         except ValueError:
@@ -230,7 +231,7 @@ def clear_dtc_info():
         if ecu_id not in valid_values:
             errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
-        dtc_group = request.args.get('dtc_group')
+        dtc_group = data.get('dtc_group')
         if errors:
             return jsonify({"errors": errors}), 400
 
