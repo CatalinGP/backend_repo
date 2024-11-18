@@ -9,20 +9,18 @@ class ReadAccessTiming(Action):
         "sub_funct": "timing"
     }'
     """
-    def _read_timing_info(self, id, sub_funct=1):
+    def _read_timing_info(self, ecu_id, sub_funct=1):
         """
-        Reads timing parameters of the ECU.
+        Reads timing parameters of the ECUs.
         Args:
         - id: The identifier of the target ECU or device.
         - sub_funct: The sub-function code to specify which timing parameters to read.
         Returns:
         - A dictionary with the status, message, and timing parameters (if successful).
         """
-        id_mcu = self.id_ecu[MCU]
-        id = self.my_id * 0x100 + id_mcu
 
         try:
-            id = (self.id_ecu[ECU_BATTERY] << 16) + (self.my_id << 8) + self.id_ecu[MCU]
+            id = self.my_id * 0x100 + ecu_id
 
             log_info_message(logger, "Changing session to programming")
             self.access_timing_parameters(id, sub_funct)
@@ -55,12 +53,12 @@ class ReadAccessTiming(Action):
 
                     if sub_funct == 1:
                         timing_values_dict = {
-                            "P2_MAX_TIME_DEFAULT": f"{value1_decimal} seconds",
+                            "P2_MAX_TIME_DEFAULT": f"{value1_decimal} milliseconds",
                             "P2_STAR_MAX_TIME_DEFAULT": f"{value2_decimal} milliseconds"
                         }
                     elif sub_funct == 3:
                         timing_values_dict = {
-                            "p2_max_time": f"{value1_decimal} seconds",
+                            "p2_max_time": f"{value1_decimal} milliseconds",
                             "p2_star_max_time": f"{value2_decimal} milliseconds"
                         }
                     else:
@@ -93,7 +91,7 @@ class WriteAccessTiming(Action):
         "p2_star_max": "100"
     }'
     """
-    def _write_timing_info(self, id, timing_values):
+    def _write_timing_info(self, sub_function, ecu_id, timing_values={}):
         """
         Writes timing parameters to the ECU.
 
@@ -105,29 +103,31 @@ class WriteAccessTiming(Action):
         - A dictionary with the status and message.
         """
         try:
-            id_mcu = self.id_ecu[MCU]
-            id = (self.id_ecu[ECU_BATTERY] << 16) + (self.my_id << 8) + id_mcu
+            id = (self.my_id << 8) + ecu_id
+            if sub_function == 2:
+                self.write_timming_parameters(id, sub_function)
+            else:
+                p2_max = timing_values.get("p2_max", 0)
+                p2_star_max = timing_values.get("p2_star_max", 0)
+                self.write_timming_parameters(id, sub_function, p2_max, p2_star_max)
 
-            log_info_message(logger, "Changing session to programming")
-            self.session_control(id, 0x02)
-            self._passive_response(SESSION_CONTROL, "Error changing session control")
-
-            p2_max = timing_values.get("p2_max", 0)
-            p2_star_max = timing_values.get("p2_star_max", 0)
-
-            self.write_timming_parameters(id, 0x04, p2_max, p2_star_max)
             frame_response = self._passive_response(ACCESS_TIMING_PARAMETERS, "Error writing timing parameters")
 
             if frame_response.data[1] == 0xC3:
                 log_info_message(logger, "Timing parameters written successfully")
 
-                return {
-                    "message": "Timing parameters written successfully",
-                    "written_values": {
-                        "New P2 Max Time": p2_max,
-                        "New P2 Star Max": p2_star_max
+                if sub_function == 2:
+                    return {
+                        "message": "Timing parameters reset successfully",
                     }
-                }
+                else:
+                    return {
+                        "message": "Timing parameters written successfully",
+                        "written_values": {
+                            "New P2 Max Time": p2_max,
+                            "New P2 Star Max": p2_star_max
+                        }
+                    }
             else:
                 return {
                     "message": "Unexpected response while writing timing parameters"

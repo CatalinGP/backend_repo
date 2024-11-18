@@ -7,8 +7,8 @@
 
 
 // Define static constants
-const uint16_t AccessTimingParameter::DEFAULT_P2_MAX_TIME = 40;
-const uint16_t AccessTimingParameter::DEFAULT_P2_STAR_MAX_TIME = 400;
+const uint16_t AccessTimingParameter::DEFAULT_P2_MAX_TIME = 2000;
+const uint16_t AccessTimingParameter::DEFAULT_P2_STAR_MAX_TIME = 20000;
 
 // Define static variables
 uint16_t AccessTimingParameter::p2_max_time = AccessTimingParameter::DEFAULT_P2_MAX_TIME;
