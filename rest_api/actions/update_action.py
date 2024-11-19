@@ -257,3 +257,17 @@ class Updates(Action):
                 return "INVALID_STATE_TIMEOUT"
 
             time.sleep(1)
+
+    def change_ota_state(self, ecu_id, ota_status_value):
+    
+        id = (0x00 << 16) + (0xFA << 8) + 0x10
+        self.write_data_by_identifier(id, 0XE001, [int(ota_status_value, 16)])
+        self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {ota_status_value}")
+
+        id = (0x00 << 16) + (0xFA << 8) + int(ecu_id, 16)
+        if ecu_id != self.id_ecu[0]:
+            self.write_data_by_identifier(id, 0XE001, [int(ota_status_value, 16)])
+            self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {ota_status_value}")
+        
+        return
+        

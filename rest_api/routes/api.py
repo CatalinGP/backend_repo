@@ -383,3 +383,12 @@ def write_timing():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/sync_ota_status', methods=['POST'])
+def sync_ota_status():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    ota_state = data.get('ota_state')
+    updater = Updates()
+    response = updater.change_ota_state(ecu_id=ecu_id, ota_status_value=ota_state)
+    return jsonify(response)
