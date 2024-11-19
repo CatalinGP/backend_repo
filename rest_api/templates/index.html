@@ -43,6 +43,14 @@
         h1, h2, h3 {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        .routine-group {
+        display: flex;
+        align-items: center;
+        }
+        .input-group-custom .form-control {
+        margin-left: 10px;
+        flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -95,6 +103,31 @@
             <button type="button" class="btn btn-success mb-3" onclick="writeTimingInfo()">Write Timing</button>
         </div>
 
+        <div class="btn-group-box mb-4">
+            <h3 class="text-color">Routine Control</h3>
+              <select id="routine-dropdown" class="form-select" style="max-width: 200px;" onchange="selectRoutineControl()">
+                <option value="none" selected>Select a routine</option>
+                <option value="EraseDataRoutine">Erase Data Routine</option>
+                <option value="InitialiseOTARoutine">Initialise OTA Routine</option>
+                <option value="VerifyDataRoutine">Verify Data Routine</option>
+                <option value="WriteToFileRoutine">Write Data to file Routine</option>
+                <option value="RollbackRoutine">Rollback Routine</option>
+                <option value="ActivateRoutine">Activate Routine</option>
+              </select>
+
+              <div id="dynamic-routine-inputs" class="d-flex" style="flex: 1; justify-content: flex-start; margin-top: 1vh"></div>
+        </div>
+
+        <div class="btn-group-box mb-4">
+            <h3 class="text-color">OTA Features</h3>
+                <select id="ota-actions-dropdown" class="form-select" style="max-width: 200px;" onchange="selectOtaAction()">
+                  <option value="none" selected>Select OTA action</option>
+                  <option value="UpdateSoftwareAction">Update Software Action</option>
+                  <option value="TransferDataAction">Transfer Data Action</option>
+                </select>
+                <div id="dynamic-ota-inputs" class="d-flex" style="flex: 1; justify-content: flex-start; margin-top: 1vh;"></div>
+        </div>
+
         <div class="mb-4">
             <h2 class="text-color">Response</h2>
             <pre id="response-output" class="bg-light p-3 border rounded"></pre>
@@ -119,6 +152,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
 </body>
 </html>
