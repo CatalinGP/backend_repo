@@ -84,6 +84,10 @@ void BatteryModule::parseBatteryInfo(const std::string &data, float &energy, flo
             for (size_t i = 0; i < energy_str.size(); i += 2) {
                 energy_grouped += energy_str.substr(i, 2) + " ";
             }
+            int decimal_value = std::stoi(energy_grouped);
+            std::stringstream data_ss;
+            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << decimal_value;
+            energy_grouped = data_ss.str();
             updated_values[0x01A0] = energy_grouped;
         }
         else if (line.find("voltage:") != std::string::npos)
@@ -98,6 +102,10 @@ void BatteryModule::parseBatteryInfo(const std::string &data, float &energy, flo
             for (size_t i = 0; i < voltage_str.size(); i += 2) {
                 voltage_grouped += voltage_str.substr(i, 2) + " ";
             }
+            int decimal_value = std::stoi(voltage_grouped);
+            std::stringstream data_ss;
+            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << decimal_value;
+            voltage_grouped = data_ss.str();
             updated_values[0x01B0] = voltage_grouped;
         }
         else if (line.find("percentage:") != std::string::npos)
@@ -112,6 +120,10 @@ void BatteryModule::parseBatteryInfo(const std::string &data, float &energy, flo
             for (size_t i = 0; i < percentage_str.size(); i += 2) {
                 percentage_grouped += percentage_str.substr(i, 2) + " ";
             }
+            int decimal_value = std::stoi(percentage_grouped);
+            std::stringstream data_ss;
+            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << decimal_value;
+            percentage_grouped = data_ss.str();
             updated_values[0x01C0] = percentage_grouped;
         }
         else if (line.find("state:") != std::string::npos)
