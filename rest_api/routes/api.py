@@ -351,7 +351,7 @@ def write_timing():
 
         sub_funct = int(data.get('sub_funct'))
         if sub_funct is None:
-            error.append(
+            errors.append(
                 {"status": "error", "message": "Missing 'sub_funct' parameter"})
 
         ecu_id_str = data.get('ecu_id')
@@ -404,6 +404,10 @@ def write_timing():
 def rollback_software():
     data = request.get_json()
     ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "ECU ID is required"}), 400
+
     try:
         updater = Updates()
         response = updater.rollback_software(ecu_id)

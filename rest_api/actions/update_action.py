@@ -154,7 +154,7 @@ class Updates(Action):
 
         Important note: This action requires to have the mcu module running in python virtual env and
         create locally a virtual partition used for download.
-        -> search/change "/dev/loopXX" in RequestDownload.cpp, MemoryManager.cpp; (Depends which partition is attributed)
+        -> search/change "/dev/loop13XX" in RequestDownload.cpp, MemoryManager.cpp; (Depends which partition is attributed)
         """
         # self.id is: target(1b)-api(1b)-mcu(1b)
         self.init_ota_routine(self.id, version=version)
@@ -299,6 +299,12 @@ class Updates(Action):
 
             log_info_message(logger, f"Rollback successful for ECU ID: {ecu_id}")
 
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Rollback completed successfully for ECU ID: {ecu_id}"
+            }
+
         except ValueError:
             raise CustomError(f"Invalid ECU ID: {ecu_id}")
 
@@ -328,6 +334,12 @@ class Updates(Action):
                 raise CustomError(f"Activation failed for ECU ID: {ecu_id}")
 
             log_info_message(logger, f"Activation successful for ECU ID: {ecu_id}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Activation completed successfully for ECU ID: {ecu_id}"
+            }
 
         except ValueError:
             raise CustomError(f"Invalid ECU ID: {ecu_id}")
