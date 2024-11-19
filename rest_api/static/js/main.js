@@ -325,7 +325,7 @@ function selectRoutineControl()
         InitialiseOTARoutine: [
             { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
-            { placeholder: 'Sw Version', id: 'software-number', value: '0x01'},
+            { placeholder: 'Sw Version', id: 'software-number', value: '1.0'},
         ],
         VerifyDataRoutine: [
             { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'}
@@ -398,7 +398,7 @@ function selectRoutineControl()
             { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Address', id: 'address-update', value: '0x0800'},
-            { placeholder: 'Sw Version', id: 'software-version', value: '0x01'},
+            { placeholder: 'Sw Version', id: 'software-version', value: '1.0'},
             { placeholder: 'File type', id: 'file-type', value: 'zip'}
         ],
         TransferDataAction: [
@@ -406,6 +406,10 @@ function selectRoutineControl()
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Address', id: 'address-transfer', value: '0x0800'},
             { placeholder: 'Data bytes', id: 'data', value: '0xae25f9'}
+        ],
+        SyncOtaStatus: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x11'},
+            { placeholder: 'Ota State', id: 'ota-state', value: '0x00'}
         ],
     };
   
@@ -468,132 +472,151 @@ function selectRoutineControl()
         else{
             return;
         }
-    
+        formInputs = Array.from(formInputs);
+        
+        dataForApiRequest = {};
         let inputsValid = true;
         const hexPattern = /^0x[0-9A-Fa-f]+$/;
         const validEcuIds = [0x10, 0x11, 0x12, 0x13, 0x14];
     
-        for (const input of formInputs){
-                const hexValue = parseInt(input.value, 16);
-                if(input.id != 'file-type' && hexPattern.test(input.value) == false){
-                    inputsValid = false;
+        formInputs.forEach((input) => {
+            const hexValue = parseInt(input.value, 16);
+            if(input.id != 'file-type' && input.id != 'software-version' && hexPattern.test(input.value) == false){
+                inputsValid = false;
+            }
+            else{
+                switch(input.id)
+                {
+                    case 'receiver-ecu':
+                        {
+                            /* Same as below */
+                        }
+                    case 'target-ecu':
+                        {
+                            if(validEcuIds.includes(hexValue) == false){
+                                inputsValid = false;
+                            }
+                            dataForApiRequest
+                            break;
+                        }
+                    case 'software-version':
+                        {
+                            const versionRegex = /^(?:[1-9]|1[0-6])\.(?:[0-9]|1[0-5])$/;
+                            if(versionRegex.test(input.value) == false){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'address-erase':
+                        {
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'address-update':
+                        {
+                            break;
+                        }
+                    case 'address-transfer':
+                        {
+                            break;
+                        }
+                    case 'data':
+                        {
+                            break;
+                        }
+                    case 'file-type':
+                        {
+                            break;
+                        }
+                    case 'size':
+                        {
+                            if(size <= 0){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'ota-state':
+                        {
+                            break;
+                        }
+                    default: break;
                 }
-                else{
-                    switch(input.id)
-                    {
-                        case 'receiver-ecu':
-                            {
-                                /* Same as below */
-                            }
-                        case 'target-ecu':
-                            {
-                                if(validEcuIds.includes(hexValue) == false){
-                                    inputsValid = false;
-                                }
-                                break;
-                            }
-                        case 'software-version':
-                            {
-                                if(hexValue < 0 || hexValue > 0xFF){
-                                    inputsValid = false;
-                                }
-                                break;
-                            }
-                        case 'address-erase':
-                            {
-                                if(hexValue < 0x0800){
-                                    inputsValid = false;
-                                }
-                                break;
-                            }
-                        case 'address-update':
-                            {
-                                break;
-                            }
-                        case 'address-transfer':
-                            {
-                                break;
-                            }
-                        case 'data':
-                            {
-                                break;
-                            }
-                        case 'file-type':
-                            {
-                                break;
-                            }
-                        case 'size':
-                            {
-                                if(size <= 0){
-                                    inputsValid = false;
-                                }
-                                break;
-                            }
-                        default: break;
-                    }
             }
-        }
-        if(inputsValid == true){
-            /* Call routine */
-            switch(request){
-                /* Extra validations for specific endpoints here */
-                case 'UpdateSoftwareAction':
-                    {
-                        performApiRequest('/api/update_to_version', 'POST', { 
-                            update_file_type: formInputs['file-type'], 
-                            update_file_version: formInputs['software-version'], 
-                            ecu_id: formInputs['target-ecu'] 
-                        });
-                        break;
-                    }
-                case 'TransferDataAction':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                case 'InitialiseOTARoutine':
-                    {
-                        if(hexValue == 0x10){
-                            // performApiRequest();
-                        }
-                        else{
-                            console.log("OTA can be initialised only for mcu as receiver.")
-                        }
-                        break;
-                    }
-                case 'EraseDataRoutine':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                case 'VerifyDataRoutine':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                case 'WriteToFileRoutine':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                case 'RollbackRoutine':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                case 'ActivateRoutine':
-                    {
-                        // performApiRequest();
-                        break;
-                    }
-                default: break;
+
+            if(inputsValid){
+                dataForApiRequest[input.id] = input.value;
             }
-            console.log("Endpoint called");
+            else{
+                console.log("Invalid input");
+                return;
+            }
+        })
+
+        /* Call request */
+        switch(request){
+            /* Extra validations for specific endpoints here */
+            case 'UpdateSoftwareAction':
+                {
+                    performApiRequest('/api/update_to_version', 'POST', { 
+                        update_file_type: dataForApiRequest['file-type'], 
+                        update_file_version: dataForApiRequest['software-version'], 
+                        ecu_id: dataForApiRequest['target-ecu'] 
+                    });
+                    break;
+                }
+            case 'TransferDataAction':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            case 'SyncOtaStatus':
+                {
+                    performApiRequest('/api/sync_ota_status', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                        ota_state: dataForApiRequest['ota-state']
+                    });
+                    break;
+                }
+            case 'InitialiseOTARoutine':
+                {
+                    if(hexValue == 0x10){
+                        // performApiRequest();
+                    }
+                    else{
+                        console.log("OTA can be initialised only for mcu as receiver.")
+                    }
+                    break;
+                }
+            case 'EraseDataRoutine':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            case 'VerifyDataRoutine':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            case 'WriteToFileRoutine':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            case 'RollbackRoutine':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            case 'ActivateRoutine':
+                {
+                    // performApiRequest();
+                    break;
+                }
+            default: break;
         }
-        else{
-            /* Don't call routine */
-            console.log("Inputs invalid");
-        }
+        console.log("Endpoint called");
     }
 
   document.addEventListener('DOMContentLoaded', () => {
