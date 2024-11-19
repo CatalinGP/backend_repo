@@ -392,3 +392,13 @@ def sync_ota_status():
     updater = Updates()
     response = updater.change_ota_state(ecu_id=ecu_id, ota_status_value=ota_state)
     return jsonify(response)
+
+@api_bp.route('/transfer_data_to_ecu', methods=['POST'])
+def transfer_data_to_ecu():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    address = data.get('address')
+    data_bytes = data.get('data_bytes')
+    updater = Updates()
+    response = updater.transfer_data_to_ecu(ecu_id=ecu_id, address=address, data=data_bytes)
+    return jsonify(response)

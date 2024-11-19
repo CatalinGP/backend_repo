@@ -395,20 +395,18 @@ function selectRoutineControl()
   
     const otaActionsInputs = {
         UpdateSoftwareAction: [
-            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Address', id: 'address-update', value: '0x0800'},
             { placeholder: 'Sw Version', id: 'software-version', value: '1.0'},
             { placeholder: 'File type', id: 'file-type', value: 'zip'}
         ],
         TransferDataAction: [
-            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Address', id: 'address-transfer', value: '0x0800'},
             { placeholder: 'Data bytes', id: 'data', value: '0xae25f9'}
         ],
         SyncOtaStatus: [
-            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x11'},
+            { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Ota State', id: 'ota-state', value: '0x00'}
         ],
     };
@@ -496,7 +494,6 @@ function selectRoutineControl()
                             if(validEcuIds.includes(hexValue) == false){
                                 inputsValid = false;
                             }
-                            dataForApiRequest
                             break;
                         }
                     case 'software-version':
@@ -568,13 +565,17 @@ function selectRoutineControl()
                 }
             case 'TransferDataAction':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/transfer_data_to_ecu', 'POST',{
+                        ecu_id: dataForApiRequest['target-ecu'],
+                        address: dataForApiRequest['address-transfer'],
+                        data_bytes: dataForApiRequest['data']
+                    });
                     break;
                 }
             case 'SyncOtaStatus':
                 {
                     performApiRequest('/api/sync_ota_status', 'POST', {
-                        ecu_id: dataForApiRequest['receiver-ecu'],
+                        ecu_id: dataForApiRequest['target-ecu'],
                         ota_state: dataForApiRequest['ota-state']
                     });
                     break;

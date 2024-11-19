@@ -269,5 +269,41 @@ class Updates(Action):
             self.write_data_by_identifier(id, 0XE001, [int(ota_status_value, 16)])
             self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {ota_status_value}")
         
-        return
+        return True
         
+    def transfer_data_to_ecu(self, ecu_id, address, data):
+        id = (0x00 << 16) + (0xFA << 8) + int(ecu_id, 16)
+        hex_address = ''.join(address)
+
+        self.request_download(id,
+                              data_format_identifier=0x00,
+                              memory_address=int(hex_address, 16),
+                              memory_size=0x01,
+                              version=0x00)
+        self._passive_response(REQUEST_DOWNLOAD, "Error requesting download")
+
+        data = data[2:]
+        
+        transfer_data_counter = 0x01
+        while data:
+            max_bytes = min(5, len(data) // 2)
+            current_chunk = int(data[:max_bytes * 2], 16)
+            
+            print(type(current_chunk))
+
+            if max_bytes < 5 or len(data) == 5:
+                if self.change_ota_state(ecu_id, '0x31') == False:
+                    log_info_message(logger, f"Transfer Data to Ecu failed at changing ota status to transfer complete")
+                    return
+                time.sleep(1)
+
+            self.transfer_data(id, transfer_data_counter, current_chunk)
+            self._passive_response(TRANSFER_DATA, "Error transfering data")
+
+            if transfer_data_counter == 255:
+                transfer_data_counter = 0
+            transfer_data_counter += 0x01
+
+            data = data[max_bytes * 2:]
+
+
