@@ -272,7 +272,7 @@ class GenerateFrames
          * @param response variable for request or response frame
          Response&Request
          */
-        void clearDiagnosticInformation(int id, std::vector<uint8_t> group_of_dtc = {0xFF, 0xFF, 0xFF}, bool response=false);
+        void clearDiagnosticInformation(int id, std::vector<uint8_t> group_of_dtc = {0xFF, 0xFF, 0xFF}, uint8_t dtc_count_deleted = 0x00, bool response=false);
         /**
          * @brief Frame for Access timing parameters
          * 

@@ -51,6 +51,8 @@ void ClearDtc::clearDtc(int id, std::vector<uint8_t> data)
 
     std::string line;
     std::vector<std::string> remaining_dtcs;
+    uint8_t dtc_count_match = 0;
+    uint8_t total_dtc_count = 0;
 
     while (std::getline(input_file, line))
     {
@@ -59,6 +61,11 @@ void ClearDtc::clearDtc(int id, std::vector<uint8_t> data)
         {
             remaining_dtcs.push_back(line);
         }
+        else
+        {
+            dtc_count_match++;
+        }
+        total_dtc_count++;
     }
 
     input_file.close();
@@ -81,10 +88,11 @@ void ClearDtc::clearDtc(int id, std::vector<uint8_t> data)
         /* Open the file for writing, clearing its contents */
         file_dtc.open(this->path_to_dtc, std::ios::out | std::ios::trunc);  
         file_dtc.close();
+        dtc_count_match = total_dtc_count;
     }
 
     LOG_INFO(logger.GET_LOGGER(), "DTCs cleared successfully");
-    this->generate->clearDiagnosticInformation(new_id, {}, true);
+    this->generate->clearDiagnosticInformation(new_id, {}, dtc_count_match, true);
     AccessTimingParameter::stopTimingFlag(lowerbits, 0x14);
 }
 
