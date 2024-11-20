@@ -205,9 +205,6 @@ class Updates(Action):
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at install step.")
             return
-        if frame_response.data[1] != 0x72:
-            log_info_message(logger, "Failed request update ota status.")
-            return
 
     def _verify_version(self):
         """
