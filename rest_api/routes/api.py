@@ -6,6 +6,7 @@ sys.path.append(PROJECT_ROOT)
 from flask import request, jsonify, Blueprint  # noqa: E402
 from actions.request_id_action import RequestIdAction  # noqa: E402
 from actions.update_action import Updates  # noqa: E402
+from actions.routine_action import Routine  # noqa: E402
 from actions.read_info_action import *  # noqa: E402
 from utils.logger import log_memory  # noqa: E402
 from actions.manual_send_frame import manual_send_frame  # noqa: E402
@@ -55,6 +56,25 @@ def update_to_version():
     response = updater.update_to(type=sw_file_type,
                                  version=sw_file_version,
                                  id=ecu_id)
+    return jsonify(response)
+
+
+@api_bp.route('/verify_software', methods=['POST'])
+def verify_software():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    routine = Routine()
+    response = routine.verify_software(id=ecu_id)
+    return jsonify(response)
+
+@api_bp.route('/erase_memory', methods=['POST'])
+def erase_memory():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    address = data.get('address')
+    nrBytes = data.get('nrBytes')
+    routine = Routine()
+    response = routine.erase_memory_from_address(id=ecu_id,address=address, nrBytes=nrBytes)
     return jsonify(response)
 
 
