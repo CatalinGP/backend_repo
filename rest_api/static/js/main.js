@@ -1,5 +1,6 @@
 let otaStatusRequestRunning = false;
 let otaStatusRequestIntervalId;
+let otaIndex = 0;
 // Utility function to display JSON response in the output container
 function displayResponse(data) {
     const responseContainer = document.getElementById('response-output');
@@ -633,19 +634,23 @@ function selectRoutineControl()
     }
 
     function getOtaStatus(event){
+        const values = ["IDLE", "INIT", "DOWNLOAD", "VERIFY", "ACTIVATE"];
         const response = {
-            ota_state:"IDLE",
+            ota_state: values[otaIndex++],
+        };
+        if(otaIndex == 5){
+            otaIndex = 0;
         }
         if(event == 'click'){
             // const response = performApiRequest('/api/ota_status', 'POST');
-            document.getElementById('ota-status-btn').innerHTML = `Ota State<br>${response.ota_state}`;
+            document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.ota_state}`;
         }
         else if(event == 'dblclick'){
             otaStatusRequestRunning ^= 1;
             if(otaStatusRequestRunning){
                 otaStatusRequestIntervalId = setInterval(() => {
                     // const response = performApiRequest('/api/ota_status', 'POST');
-                    document.getElementById('ota-status-btn').innerHTML = `Ota State<br>${response.ota_state}`;
+                    document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.ota_state}`;
                 }, 1000);
             }
             else{
