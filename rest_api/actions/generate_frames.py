@@ -284,9 +284,9 @@ class GenerateFrame(CanBridge):
         data = [0x05, 0x31, 0x01, 0x02, 0x01, version_byte]
         self.send_frame(id, data)
 
-    def request_update_status(self, func):
-        data = [0x01, func]
-        _id = (0x00 << 16) + (0xFA << 8) + 0x10
+    def request_update_status(self, ecu_id):
+        data = [0x01, 0x32]
+        _id = (0x00 << 16) + (0xFA << 8) + ecu_id
         self.send_frame(_id, data)
 
     def __generate_long_response(self, id, sid, identifier, response , first_frame):
