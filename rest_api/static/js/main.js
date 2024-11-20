@@ -1,6 +1,6 @@
 let otaStatusRequestRunning = false;
 let otaStatusRequestIntervalId;
-let otaIndex = 0;
+
 // Utility function to display JSON response in the output container
 function displayResponse(data) {
     const responseContainer = document.getElementById('response-output');
@@ -46,6 +46,7 @@ function performApiRequest(url, method, body = null) {
       .then(data => {
           displayResponse(data);
           fetchLogs();
+          return data;
       })
       .catch(error => {
           console.error('Error:', error);
@@ -326,7 +327,6 @@ function selectRoutineControl()
             { placeholder: 'Nr of bytes', id: 'size', value: '0x05'}
         ],
         InitialiseOTARoutine: [
-            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Sw Version', id: 'software-number', value: '1.0'},
         ],
@@ -633,24 +633,21 @@ function selectRoutineControl()
         console.log("Endpoint called");
     }
 
-    function getOtaStatus(event){
-        const values = ["IDLE", "INIT", "DOWNLOAD", "VERIFY", "ACTIVATE"];
-        const response = {
-            ota_state: values[otaIndex++],
-        };
-        if(otaIndex == 5){
-            otaIndex = 0;
-        }
+    async function getOtaStatus(event){
         if(event == 'click'){
-            // const response = performApiRequest('/api/ota_status', 'POST');
-            document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.ota_state}`;
+            const response = await performApiRequest('/api/ota_status', 'POST', {
+                ecu_id: "0x10",
+            });
+            document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
         }
         else if(event == 'dblclick'){
             otaStatusRequestRunning ^= 1;
             if(otaStatusRequestRunning){
-                otaStatusRequestIntervalId = setInterval(() => {
-                    // const response = performApiRequest('/api/ota_status', 'POST');
-                    document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.ota_state}`;
+                otaStatusRequestIntervalId = setInterval(async() => {
+                    const response = await performApiRequest('/api/ota_status', 'POST', {
+                        ecu_id: "0x10"
+                    });
+                    document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
                 }, 1000);
             }
             else{
