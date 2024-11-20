@@ -1,18 +1,18 @@
 #include "MemoryManager.h"
+#include <unistd.h>
+#include <sys/stat.h>
 
 MemoryManager* MemoryManager::instance = nullptr;
+bool MemoryManager::dev_loop_path_configured = false;
 
 MemoryManager* MemoryManager::getInstance(Logger& logger)
 {
-    if ( instance == nullptr)
+    if (instance == nullptr)
     {
-        instance = new MemoryManager(-1, "", logger);
-        LOG_INFO(logger.GET_LOGGER(), "logger initialized 1 ");
+        instance = new MemoryManager(DEV_LOOP_PARTITION_1_ADDRESS_START, DEV_LOOP, logger);
+        LOG_INFO(logger.GET_LOGGER(), "Memory manager instance created with default values: addres {} path {}", DEV_LOOP_PARTITION_1_ADDRESS_START, DEV_LOOP);
     }
-    if (instance->address == -1)
-    {
-        LOG_WARN(logger.GET_LOGGER(), "Warning: The addres/path/logger is not initialized");
-    }
+
     return instance;
 }
 
@@ -27,9 +27,8 @@ MemoryManager* MemoryManager::getInstance(off_t address, std::string path, Logge
 
 MemoryManager::MemoryManager(off_t address, std::string path, Logger& logger) : logger(logger)
 {
-    this->address = address;
-    this->address_continue_to_write = address;
-    this->path = path;
+    setPath(path);
+    setAddress(address);
 } 
 
 int MemoryManager::to_int(std::string number)
@@ -39,13 +38,46 @@ int MemoryManager::to_int(std::string number)
 
 void MemoryManager::setAddress(off_t address)
 {
+    if(availableAddress(address) == 0)
+    {
+        return;
+    }
+
+    LOG_INFO(logger.GET_LOGGER(), "Address {} valid and set.", address);
     this->address = address;
     this->address_continue_to_write = address;
 }
 
 void MemoryManager::setPath(std::string path)
 {
+    if(path == this->path)
+    {
+        LOG_INFO(logger.GET_LOGGER(), "Path {} already set.", path);
+        return;
+    }
+    if(path == "" || path == "-a")
+    {
+        LOG_INFO(logger.GET_LOGGER(), "Path {} invalid", path);
+        return;  
+    }
+    std::string command = "losetup " + std::string(path) + " | grep -q 'sdcard.img'";
+    if(system(command.c_str()) != 0)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "Path {} not linked to sdcard.", path);
+        return;
+    }
+
     this->path = path;
+    LOG_INFO(logger.GET_LOGGER(), "Path {} exists and is assigned. Granting 777 permisions..", path);
+    command = "sudo chmod 777 " + std::string(path) + " >/dev/null 2>&1";
+    if(system(command.c_str()) != 0)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "777 permisions could not be granted for {}", path);
+        return;
+    }
+
+    LOG_INFO(logger.GET_LOGGER(), "777 permisions granted for {}", path);
+    MemoryManager::dev_loop_path_configured = true;
 }
 
 off_t MemoryManager::getAddress()
@@ -87,6 +119,11 @@ std::string MemoryManager::runCommand(char command[])
 
 bool MemoryManager::availableAddress(off_t address)
 {
+    if(dev_loop_path_configured == false)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "Error: DEV_LOOP not configured.");
+        return false;
+    }
     if (address == -1)
     {
         LOG_ERROR(logger.GET_LOGGER(), "Error: the address was not initialized correctly.");
@@ -94,23 +131,21 @@ bool MemoryManager::availableAddress(off_t address)
     }
 
     char verify_address_command[256];
-    sprintf(verify_address_command, "sudo fdisk -l %s | grep '^/dev/' | grep '*' | awk '{print $3,$4}'", path.c_str());
+    sprintf(verify_address_command, "sudo fdisk -l %s | grep '^/dev/' | awk '{print $2,$3}'", path.c_str());
 
     std::string result = runCommand(verify_address_command);
-    if (result.length() < 3)
+    if (result.length() == 0)
     {
-        /* LOG_WARN(logger.GET_LOGGER(), "No boot partition found"); */
-        return true;
+        LOG_WARN(logger.GET_LOGGER(), "Error at reading addresses of the path {}", path);
+        return false;
     }
-    std::string::size_type pos = result.find(' ');
-    /* off_t start_position = to_int(result.substr(0,pos)); */
-    off_t end_position = to_int(result.substr(pos+ 1));
-
-    /* off_t boot_start_byte = start_position * SECTOR_SIZE; */
-    off_t boot_end_byte = (end_position + 1) * SECTOR_SIZE - 1;
-    if ( address <= boot_end_byte)
+    uint32_t start_p1, end_p1, start_p2, end_p2;
+    std::istringstream stream_result(result);
+    stream_result >> start_p1 >> end_p1 >> start_p2 >> end_p2;
+    
+    if(address < start_p1 || address > end_p2)
     {
-        LOG_ERROR(logger.GET_LOGGER(), "Error:Address in boot partition.");
+        LOG_WARN(logger.GET_LOGGER(), "Address {} is not in valid range.", address);
         return false;
     }
     return true;
@@ -118,6 +153,11 @@ bool MemoryManager::availableAddress(off_t address)
 
 bool MemoryManager::availableMemory(off_t size_of_data)
 {
+    if(dev_loop_path_configured == false)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "Error: DEV_LOOP not configured.");
+        return false;
+    }
     char verify_memory_command[256];
     sprintf(verify_memory_command, "sudo fdisk -l %s | grep '^/dev/' | grep -v '*' | awk '{print $3}'", path.c_str());
     std::string result = runCommand(verify_memory_command);
@@ -137,6 +177,12 @@ bool MemoryManager::availableMemory(off_t size_of_data)
 
 bool MemoryManager::writeToAddress(std::vector<uint8_t>& data) 
 {
+    if(dev_loop_path_configured == false)
+    {
+        LOG_WARN(logger.GET_LOGGER(), "Error: DEV_LOOP not configured. Could not writeToAddress");
+        return false;
+    }
+
     if(!availableAddress(this->address_continue_to_write) || !availableMemory(data.size()))
     {
         LOG_ERROR(logger.GET_LOGGER(), "Error: Aborting.");
@@ -222,12 +268,16 @@ std::vector<uint8_t> MemoryManager::readBinary(std::string path_to_binary, Logge
     }
     sd_card.close();
     std::vector<uint8_t> uint8Buffer(buffer.begin(), buffer.end());
-    LOG_INFO(logger.GET_LOGGER(), "Successfully readed from file: " + path_to_binary);
+    LOG_INFO(logger.GET_LOGGER(), "Successfully read from file: " + path_to_binary);
     return uint8Buffer;
 }
 
 std::vector<uint8_t> MemoryManager::readFromAddress(std::string path, off_t address_start, off_t size, Logger& logger)
 {
+    if(dev_loop_path_configured == false)
+    {
+        throw std::runtime_error("Error: DEV_LOOP not configured. Could not readFromAddress");
+    }
     if (! instance->availableAddress(address_start))
     {
         LOG_ERROR(logger.GET_LOGGER(), "Error trying to read from address: " + std::to_string(address_start));

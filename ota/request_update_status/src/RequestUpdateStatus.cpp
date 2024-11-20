@@ -23,7 +23,7 @@ std::vector<uint8_t> RequestUpdateStatus::requestUpdateStatus(canid_t request_id
     canid_t response_id = request_id;
     uint8_t receiver_byte = (response_id & 0xff); /* Get the first byte - receiver */
     uint8_t sender_byte = ((response_id & 0xff00) >> 8);     /* Get second byte - sender */
-    NegativeResponse nrc(socket, rus_logger);
+    NegativeResponse nrc(socket, _logger);
     if(receiver_byte != MCU_ID || sender_byte != API_ID)
     {
         LOG_WARN(_logger.GET_LOGGER(), "Request update status must be made from API to MCU. Request redirected from API to MCU.");
@@ -57,7 +57,7 @@ std::vector<uint8_t> RequestUpdateStatus::requestUpdateStatus(canid_t request_id
         uint8_t status = RIDB_response[0];
         if (isValidStatus(RIDB_response[0]) == 0)
         {
-            LOG_WARN(rus_logger.GET_LOGGER(), "Status value {} read from readDataByIdentifier is invalid.", status);
+            LOG_WARN(_logger.GET_LOGGER(), "Status value {} read from readDataByIdentifier is invalid.", status);
             nrc.sendNRC(response_id, REQUEST_UPDATE_STATUS_SID, NegativeResponse::ROOR);
             AccessTimingParameter::stopTimingFlag(receiver_byte, REQUEST_UPDATE_STATUS_SID);
             return response;

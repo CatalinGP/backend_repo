@@ -59,7 +59,7 @@ class Updates(Action):
 
         curl -X POST http://127.0.0.1:5000/api/update_to_version -H "Content-Type: application/json" -d '{
             "update_file_type": "zip",
-            "update_file_version": "2.3",
+            "update_file_version": "1.3",
             "ecu_id": "0x11"
         }'
         """
@@ -184,7 +184,12 @@ class Updates(Action):
                     transfer_data_counter = 0
                 transfer_data_counter += 0x01
 
-            # self.request_transfer_exit(api_target_id)
+            self.request_transfer_exit(api_target_id, True)
+            frame_response = self._passive_response(REQUEST_TRANSFER_EXIT, "Error at transfer exit.")
+            if frame_response.data[1] != 0x77:
+                log_info_message(logger, "Update failed at transfer exit step.")
+                return
+            
         self.control_frame_verify_data(api_target_id)
         frame_response = self._passive_response(ROUTINE_CONTROL, "Error at verify data routine.")
         if frame_response.data[1] != 0x71:

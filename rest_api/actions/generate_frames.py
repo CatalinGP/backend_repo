@@ -108,7 +108,7 @@ class GenerateFrame(CanBridge):
         self.send(id, data)
 
     def request_transfer_exit(self, id, response=False):
-        data = [1, 0x77] if response is False else [1, 0x37]
+        data = [1, 0x77] if response is False else [0x02, 0x37, 0x00]
         self.send(id, data)
 
     def clear_diagnostic_information(self, id, group_of_dtc=0xFFFFFF, response=False):

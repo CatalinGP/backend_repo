@@ -21,9 +21,9 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
  * sets up the CAN interface, and prepares the frame receiver. */
 DoorsModule::DoorsModule()
 {
-    writeDataToFile();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(DOORS_ID, *doorsModuleLogger);
+    writeDataToFile();
     LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Doors object created successfully");
 }
 
@@ -47,7 +47,7 @@ void DoorsModule::fetchDoorsData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
             {
                 /* Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning */
                 byte = dist(gen);
