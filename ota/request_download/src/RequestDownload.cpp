@@ -73,6 +73,7 @@ void RequestDownloadService::requestDownloadRequest(canid_t id, std::vector<uint
         AccessTimingParameter::stopTimingFlag(receiver_id, 0x34);
         return;
     }
+    auto previousOtaStatus = ota_status;
     FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {WAIT}, aux_can_id, RDSlogger, socket);
 
     /** data format identifier is 0x00 when no compression or encryption method is used 
@@ -132,7 +133,7 @@ void RequestDownloadService::requestDownloadRequest(canid_t id, std::vector<uint
     RequestDownloadService::rds_data.max_number_block = calculate_max_number_block(memory_size);
     requestDownloadResponse(id, memory_address, RequestDownloadService::rds_data.max_number_block);
     FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {WAIT_DOWNLOAD_COMPLETED}, aux_can_id, RDSlogger, socket);
-    if(receiver_id == MCU_ID)
+    if(receiver_id == MCU_ID && previousOtaStatus == INIT)
     {
         FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {READY}, aux_can_id, RDSlogger, socket);
     }
