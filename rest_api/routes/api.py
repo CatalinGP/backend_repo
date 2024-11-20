@@ -302,23 +302,17 @@ def write_timing():
     return jsonify(result)
 
 @api_bp.route('ota_status', methods=['POST'])
-@requires_auth
 def ota_status():
    
     data = request.get_json()
   
     # Parse the hex value from the JSON input
-    hex_value_str = data.get('hex_value')
+    ecu_id = data.get('ecu_id')
     
-    if hex_value_str is None:
+    if ecu_id is None:
         return jsonify({"error": "Missing hex_value"}), 400
 
-    # Convert the hex string (e.g., "0x10") to an integer
-    try:
-        hex_value = int(hex_value_str, 16)
-    except ValueError:
-        return jsonify({"error": "Invalid hex value format"}), 400
-
     updater = Updates()
-    response = updater.get_ota_update_state(hex_value)
+    response = updater.get_ota_status(ecu_id)
+
     return jsonify({"state": response})
