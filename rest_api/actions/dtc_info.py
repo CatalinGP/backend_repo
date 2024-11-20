@@ -114,14 +114,19 @@ class DiagnosticTroubleCode(Action):
             log_info_message(logger, "Clearing DTCs information with positive response")
             if dtc_group == "p":
                 dtc_group_code = 0x000aaa
+                dtc_group_str = "Powertrain"
             elif dtc_group == "c":
                 dtc_group_code = 0x010aaa
+                dtc_group_str = "Chassis"
             elif dtc_group == "b":
                 dtc_group_code = 0x020aaa
+                dtc_group_str = "Body"
             elif dtc_group == "u":
                 dtc_group_code = 0x030aaa
+                dtc_group_str = "Network"
             elif dtc_group == "a":
                 dtc_group_code = 0xffffff
+                dtc_group_str = "All"
             else:
                 dtc_group_code = 0x000000 # invalid dtc_group
 
@@ -129,8 +134,12 @@ class DiagnosticTroubleCode(Action):
             frame_response = self._passive_response(CLEAR_DTC, "Error clearing DTCs")
 
             if frame_response.data[1] == 0x54:
+                dtc_count_deleted = frame_response.data[2]
+      
                 json_response = {
-                    "message": f"Clearing DTCs information with positive response succeded"
+                    "message": "Clearing DTCs information with positive response succeeded",
+                    "category": dtc_group_str,
+                    "cleared_dtc_count": dtc_count_deleted
                 }
                 return jsonify(json_response), 200
 

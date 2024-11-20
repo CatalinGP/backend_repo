@@ -448,7 +448,7 @@ void GenerateFrames::GenerateConsecutiveFrames(int id, std::vector<uint8_t> data
     }
 }
 
-void GenerateFrames::clearDiagnosticInformation(int id, std::vector<uint8_t> group_of_dtc, bool response)
+void GenerateFrames::clearDiagnosticInformation(int id, std::vector<uint8_t> group_of_dtc, uint8_t dtc_count_deleted, bool response)
 {
     std::vector<uint8_t> data;
     /* Request */
@@ -473,7 +473,7 @@ void GenerateFrames::clearDiagnosticInformation(int id, std::vector<uint8_t> gro
         
     }
     /* Response */
-    data = {0x01, 0x54};
+    data = {0x02, 0x54, dtc_count_deleted};
     this->sendFrame(id, data);
     return;
 }

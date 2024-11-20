@@ -208,6 +208,55 @@ class Action(GF):
             response_json = self._to_json_error("Response was interrupted", 1)
             raise CustomError(response_json)
         return response
+    
+    def _collect_response_raw(self, id, sid: int):
+        """
+        Collects the response message from the CAN bus.
+
+        Args:
+        - sid: Service identifier.
+
+        Returns:
+        - The collected CAN message if we have response, otherwise None.
+        """
+        msg = self.get_message_with_id_from_can(id)
+        self.last_msg = msg
+
+        if msg is None:
+            log_error_message(logger, f"[Collect Response RAW] No message collected for SID {hex(sid)}")
+            return None
+        else:
+            log_info_message(logger, f"[Collect Response RAW] Initial message received: {msg}")
+            if (msg.data[1] == (sid + 0x40)):
+                log_info_message(logger, f"[Collect Response RAW] Valid message collected for SID {sid:02X}: {msg}")
+
+            hex_data = [byte for byte in msg.data]
+            return hex_data
+
+
+    def get_message_with_id_from_can(self, target_id, timeout=Config.BUS_RECEIVE_TIMEOUT):
+        """
+        Receives a message from the CAN with a specific arbitrary ID.
+
+        Args:
+            target_id (int): The arbitrary ID of the message we want to select.
+            timeout (float): The maximum time to wait for a message (in seconds).
+
+        Returns:
+            Message: The CAN message received with the specified ID, or None if not found.
+        """
+
+        byte_1 = (target_id >> 8) & 0xFF 
+        byte_2 = target_id & 0xFF 
+        can_id_invert = (byte_2 << 8) | byte_1
+
+        while True:
+            msg = self.bus.recv(timeout)
+            if msg is None:
+                return None
+            if msg.arbitration_id == can_id_invert:
+                return msg 
+            
 
     def _data_from_frame(self, msg: can.Message):
         """
