@@ -129,12 +129,8 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
         return 0;
     }
 
-    if(param == 3)
+    if(param == 3 && access((zip_ecu_path).c_str(), F_OK) != -1)
     {
-        if(access((zip_ecu_path).c_str(), F_OK) == -1)
-        {
-            return 0;
-        }
         ecu_path = zip_ecu_path;
         return 1;
     }

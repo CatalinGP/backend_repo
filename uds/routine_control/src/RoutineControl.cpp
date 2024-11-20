@@ -220,13 +220,10 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
         }
         case 0x0401:
         {
-            if(ota_state != READY)
-            {
-                LOG_WARN(rc_logger.GET_LOGGER(), "Software data verification can be done only from the READY state, current state is {:x}", ota_state);
-                nrc.sendNRC(can_id, ROUTINE_CONTROL_SID, NegativeResponse::CNC);
-                AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
-                return;
-            }
+            // if(ota_state != READY)
+            // {
+            //     return 0;
+            // }
 
             LOG_INFO(rc_logger.GET_LOGGER(), "Verify installation routine called.");
             if(verifySoftware(receiver_id) == false)
@@ -578,7 +575,6 @@ bool RoutineControl::saveCurrentSoftware()
     /* Vector containing the binary_data_size format and the size in bytes */
     std::vector<uint8_t> binary_data_info;
     binary_data_info.push_back(binary_data_size_bytes.size());
-    /* Here there is an out of bound warning */
     binary_data_info.insert(binary_data_info.end(), binary_data_size_bytes.begin(), binary_data_size_bytes.end());
     /* Write at the start of partition 2 the informations about the binary */
     memory_manager->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_START);
