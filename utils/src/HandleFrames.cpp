@@ -40,7 +40,6 @@ void HandleFrames::handleFrame(int can_socket, const struct can_frame &frame)
         {
             frame_data.push_back(frame.data[data_pos]);
         }
-        std::cout << std::endl;
         is_multi_frame = false;
         /* Enter the switch case */
         processFrameData(can_socket, frame.can_id, sid, frame_data, is_multi_frame);
