@@ -35,10 +35,10 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
  * sets up the CAN interface, and prepares the frame receiver. */
 EngineModule::EngineModule()
 {
-    writeDataToFile();
-    checkDTC();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(ENGINE_ID, *engineModuleLogger);
+    writeDataToFile();
+    checkDTC();
     LOG_INFO(engineModuleLogger->GET_LOGGER(), "Engine object created successfully");
 }
 
@@ -64,7 +64,7 @@ void EngineModule::fetchEngineData()
         std::stringstream data_ss;
         for (auto& byte : data)
         {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID)
+            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
             {
                 byte = dist(gen);  
             }

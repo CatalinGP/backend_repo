@@ -25,9 +25,9 @@ HVACModule::HVACModule() : _logger(*hvacModuleLogger)
 
 void HVACModule::initHVAC()
 {
-    writeDataToFile();
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
     _ecu = new ECU(HVAC_ECU_ID, _logger);
+    writeDataToFile();
 }
 
 void HVACModule::fetchHvacData()

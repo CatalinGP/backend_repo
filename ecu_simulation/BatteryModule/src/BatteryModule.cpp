@@ -27,9 +27,9 @@ BatteryModule::BatteryModule() : energy(0.0),
 {
 
     /* ECU object responsible for common functionalities for all ECUs (sockets, frames, parameters) */
+    _ecu = new ECU(BATTERY_ID, *batteryModuleLogger);
     writeDataToFile();
     checkDTC();
-    _ecu = new ECU(BATTERY_ID, *batteryModuleLogger);
     LOG_INFO(batteryModuleLogger->GET_LOGGER(), "Battery object created successfully");
 }
 

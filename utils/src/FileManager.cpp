@@ -129,8 +129,12 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
         return 0;
     }
 
-    if(param == 3 && access((zip_ecu_path).c_str(), F_OK) != -1)
+    if(param == 3)
     {
+        if(access((zip_ecu_path).c_str(), F_OK) == -1)
+        {
+            return 0;
+        }
         ecu_path = zip_ecu_path;
         return 1;
     }
@@ -366,7 +370,7 @@ void FileManager::setDidValue(const uint16_t did, const std::vector<uint8_t>& va
     canid_t sender_id = (receiver_id << 8) | target_id; 
     /* Create the can frame : PCI, SID, DIS MSB, DID LSB, Data */
     std::vector<uint8_t> wdbi_frame;
-    wdbi_frame.push_back(0x03); /* PCI */
+    wdbi_frame.push_back(0x04); /* PCI */
     wdbi_frame.push_back(0x2e); /* Service ID */
     wdbi_frame.push_back((did >> 8) & 0xFF); /* did 0XE0*/
     wdbi_frame.push_back(did & 0xFF); /* did 0X01*/
