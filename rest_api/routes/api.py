@@ -1,7 +1,8 @@
 import sys
 from configs.data_identifiers import data_identifiers
 import os
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+PROJECT_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '..', '..', '..'))
 sys.path.append(PROJECT_ROOT)
 from flask import request, jsonify, Blueprint  # noqa: E402
 from actions.request_id_action import RequestIdAction  # noqa: E402
@@ -177,7 +178,8 @@ def read_dtc_info():
         try:
             ecu_id = int(ecu_id_str, 16)
         except ValueError:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
 
         requester = RequestIdAction()
         response_req_json = requester.read_ids()
@@ -185,16 +187,19 @@ def read_dtc_info():
         valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
 
         if ecu_id not in valid_values:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
         subfunc = request.args.get('subfunc', default=1, type=int)
         if subfunc not in [1, 2]:
-            errors.append({"error": "Invalid sub-function", "details": f"Sub-function {subfunc} is not supported"})
+            errors.append({"error": "Invalid sub-function",
+                          "details": f"Sub-function {subfunc} is not supported"})
         dtc_mask_bits = request.args.getlist('dtc_mask_bits')
         invalid_bits = [bit for bit in dtc_mask_bits if bit not in DTC_STATUS_BITS]
 
         if invalid_bits:
-            errors.append({"error": "Invalid DTC mask bits", "details": f"The following bits are not supported: {invalid_bits}"})
+            errors.append({"error": "Invalid DTC mask bits",
+                          "details": f"The following bits are not supported: {invalid_bits}"})
 
         if errors:
             return jsonify({"errors": errors}), 400
@@ -216,20 +221,22 @@ def clear_dtc_info():
         data = request.get_json()
         errors = []
         log_info_message(logger, f"Clear DTC Request received: {data}")
-        
+
         ecu_id_str = data.get('ecu_id')
         try:
             ecu_id = int(ecu_id_str, 16)
         except ValueError:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
-        
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+
         requester = RequestIdAction()
         response_req_json = requester.read_ids()
         ecu_values = response_req_json.get("ecus", [])
         valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
 
         if ecu_id not in valid_values:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
         dtc_group = data.get('dtc_group')
         if errors:
@@ -284,18 +291,21 @@ def access_timing():
     try:
         data = request.get_json()
         errors = []
-        log_info_message(logger, f"Read Access Timing Parameters Request received: {data}")
+        log_info_message(
+            logger, f"Read Access Timing Parameters Request received: {data}")
 
         sub_funct = int(data.get('sub_funct'))
         if sub_funct is None:
-            errors.append({"status": "error", "message": "Missing 'sub_funct' parameter"})
+            errors.append(
+                {"status": "error", "message": "Missing 'sub_funct' parameter"})
 
         ecu_id_str = data.get('ecu_id')
         try:
             ecu_id = int(ecu_id_str, 16)
         except ValueError:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
-        
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+
         requester = RequestIdAction()
         response_req_json = requester.read_ids()
         log_info_message(logger, f" JSON CU ID: {response_req_json}")
@@ -304,7 +314,8 @@ def access_timing():
         mcu_id = int(response_req_json.get("mcu_id"), 16)
 
         if ecu_id not in valid_values and ecu_id != mcu_id:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
         if errors:
             return jsonify({"errors": errors}), 400
@@ -335,18 +346,21 @@ def write_timing():
     try:
         data = request.get_json()
         errors = []
-        log_info_message(logger, f"Write Access Timing Parameters Request received: {data}")
+        log_info_message(
+            logger, f"Write Access Timing Parameters Request received: {data}")
 
         sub_funct = int(data.get('sub_funct'))
         if sub_funct is None:
-            error.append({"status": "error", "message": "Missing 'sub_funct' parameter"})
+            errors.append(
+                {"status": "error", "message": "Missing 'sub_funct' parameter"})
 
         ecu_id_str = data.get('ecu_id')
         try:
             ecu_id = int(ecu_id_str, 16)
         except ValueError:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
-        
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+
         requester = RequestIdAction()
         response_req_json = requester.read_ids()
         ecu_values = response_req_json.get("ecus", [])
@@ -354,7 +368,8 @@ def write_timing():
         mcu_id = int(response_req_json.get("mcu_id"), 16)
 
         if ecu_id not in valid_values and ecu_id != mcu_id:
-            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+            errors.append(
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
         writer = WriteAccessTiming()
         if sub_funct == 2:
@@ -383,3 +398,37 @@ def write_timing():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@api_bp.route('/rollback_software', methods=['POST'])
+def rollback_software():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "ECU ID is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.rollback_software(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
+
+@api_bp.route('/activate_software', methods=['POST'])
+def activate_software():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "ECU ID is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.activate_software(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
