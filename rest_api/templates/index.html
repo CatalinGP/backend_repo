@@ -119,15 +119,17 @@
         </div>
 
         <div class="btn-group-box mb-4">
-            <button id="ota-status-btn" class="btn btn-success mb-3" style="margin-right:25vw; margin-top:-2vh; float:right;" onclick="getOtaStatus('click')" ondblclick="getOtaStatus('dblclick')">Ota State</button>
-            <h3 class="text-color">OTA Features</h3>
-                <select id="ota-actions-dropdown" class="form-select" style="max-width: 200px;" onchange="selectOtaAction()">
-                  <option value="none" selected>Select OTA action</option>
-                  <option value="UpdateSoftwareAction">Update Software Action</option>
-                  <option value="TransferDataAction">Transfer Data Action</option>
-                  <option value="SyncOtaStatus">Sync OTA Status</option>
-                </select>
-                <div id="dynamic-ota-inputs" class="d-flex" style="flex: 1; justify-content: flex-start; margin-top: 1vh;"></div>
+            <div style="display: flex; justify-content: space-between; ">
+                <h3 class="text-color">OTA Features</h3>
+                <button id="ota-status-btn" class="btn btn-success mb-3" style="float: right;" onclick="getOtaStatus('click')" ondblclick="getOtaStatus('dblclick')">Ota State</button>
+            </div>
+            <select id="ota-actions-dropdown" class="form-select" style="max-width: 200px;" onchange="selectOtaAction()">
+                <option value="none" selected>Select OTA action</option>
+                <option value="UpdateSoftwareAction">Update Software Action</option>
+                <option value="TransferDataAction">Transfer Data Action</option>
+                <option value="SyncOtaStatus">Sync OTA Status</option>
+            </select>
+            <div id="dynamic-ota-inputs" class="d-flex" style="flex: 1; justify-content: flex-start; margin-top: 1vh;"></div>
         </div>
 
         <div class="mb-4">
