@@ -3,22 +3,22 @@ from configs.data_identifiers import *
 import time
 
 OTA_UPDATE_STATES = {
-    0x00: "IDLE",
-    0x10: "INIT",
-    0x20: "READY",
-    0x30: "PROCESSING",
-    0x31: "PROCESSING_TRANSFER_COMPLETE",
-    0x32: "PROCESSING_TRANSFER_FAILED",
-    0x40: "WAIT",
-    0x41: "WAIT_DOWNLOAD_COMPLETED",
-    0x42: "WAIT_DOWNLOAD_FAILED",
-    0x50: "VERIFY",
-    0x51: "VERIFY_COMPLETE",
-    0x52: "VERIFY_FAILED",
-    0x60: "ACTIVATE",
-    0x61: "ACTIVATE_INSTALL_COMPLETE",
-    0x62: "ACTIVATE_INSTALL_FAILED",
-    0x70: "ERROR"
+    0x00: "IDLE",				# Initial state of the FOTA Handler after the ECU startup procedure
+    0x10: "INIT",				# The FOTA Handler is initialized, and Dcm is set into the correct state (in Dcm FOTA session and security access has been granted) */
+	0x20: "WAIT",				# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
+	0x21: "WAIT_DOWNLOAD_COMPLETED",	# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
+	0x22: "WAIT_DOWNLOAD_FAILED",		# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
+	0x30: "PROCESSING",					# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
+	0x31: "PROCESSING_TRANSFER_COMPLETE",	# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
+	0x32: "PROCESSING_TRANSFER_FAILED",		# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
+	0x40: "READY",							# All FOTA data chunks have been installed, activation procedure can be triggered */
+	0x50: "VERIFY",						# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
+	0x51: "VERIFY_COMPLETE",			# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
+	0x52: "VERIFY_FAILED",				# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
+	0x60: "ACTIVATE",					# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
+	0x61: "ACTIVATE_INSTALL_COMPLETE",	# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
+	0x62: "ACTIVATE_INSTALL_FAILED",	# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
+	0xFF: "ERROR"						# Optional and implementer specific. Reserved state for e.g., implementer specific error handling, which is not (yet) covered by the FOTA Target */
 }
 
 
@@ -215,6 +215,7 @@ class Updates(Action):
             ROUTINE_CONTROL, "Error at install routine.")
         if frame_response.data[1] != 0x71:
             log_info_message(logger, "Update failed at install step.")
+            return
 
     def _verify_version(self):
         """
@@ -277,6 +278,20 @@ class Updates(Action):
 
             time.sleep(1)
 
+    
+    def get_ota_status(self, ecu_id):
+        try:
+            # Convert the hex string (e.g., "0x10") to an integer
+            hex_value = int(ecu_id, 16)
+            self.request_update_status(hex_value)
+            frame_response = self._passive_response(REQUEST_UPDATE_STATUS, "Request OTA state failed.")
+
+            return self.get_ota_update_state(frame_response.data[2])
+        
+        except ValueError:
+            return ToJSON()._to_json(f"Request OTA state failed", 0)
+
+    
     def rollback_software(self, ecu_id):
         """
         Handles the CAN frame sending for rolling back software.

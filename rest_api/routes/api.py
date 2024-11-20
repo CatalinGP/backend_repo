@@ -392,12 +392,29 @@ def write_timing():
             }
             result = writer._write_timing_info(sub_funct, ecu_id, timing_values)
         return jsonify(result)
-
+    
     except CustomError as e:
         return jsonify(e.message), 400
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@api_bp.route('ota_status', methods=['POST'])
+def ota_status():
+   
+    data = request.get_json()
+  
+    # Parse the hex value from the JSON input
+    ecu_id = data.get('ecu_id')
+    
+    if ecu_id is None:
+        return jsonify({"error": "Missing hex_value"}), 400
+
+    updater = Updates()
+    response = updater.get_ota_status(ecu_id)
+
+    return jsonify({"state": response})
 
 
 @api_bp.route('/rollback_software', methods=['POST'])
