@@ -51,14 +51,37 @@ void ECU::stopFrames()
 
 void ECU::checkSwVersion()
 {
-    auto current_sw_version = FileManager::getDidValue(SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, static_cast<canid_t>(_module_id), _logger);
+    OtaUpdateStatesEnum ota_state;
+    try
+    {
+        ota_state = static_cast<OtaUpdateStatesEnum>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, static_cast<canid_t>(_module_id), _logger)[0]);
+    }
+    catch(const std::runtime_error& e)
+    {
+        LOG_ERROR(_logger.GET_LOGGER(), "{}", e.what());
+        return;
+    }
+    /* Check if a software update has been started, if not, don't check for updates */
+    if(ota_state != ACTIVATE)
+    {
+        return;
+    }
 
     auto memory_manager_instance = MemoryManager::getInstance(_logger);
     memory_manager_instance->setPath(DEV_LOOP);
-    memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (_module_id % 0x10));
-    uint8_t previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - 1 + (_module_id % 0x10), 1, _logger)[0];
+    memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - (_module_id % 0x10) - 1);
+    uint8_t previous_sw_version = 0;
+    try
+    {
+        previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (_module_id % 0x10) - 1, 1, _logger)[0];
+    }
+    catch(const std::runtime_error& e)
+    {
+        LOG_ERROR(_logger.GET_LOGGER(), "Error at reading from address. Check sdcard, /dev/loop, permissions. Current dev/loop:{}", DEV_LOOP);
+        return;
+    }
 
-    if(current_sw_version[0] != previous_sw_version)
+    if(static_cast<uint8_t>(SOFTWARE_VERSION) != previous_sw_version)
     {
         /* Software has been upgraded/downgraded => success */
         FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE_INSTALL_COMPLETE}, static_cast<canid_t>(_module_id), _logger, _ecu_socket);
@@ -68,9 +91,10 @@ void ECU::checkSwVersion()
         /* Software unchanged */
         return;
     }
-    LOG_INFO(_logger.GET_LOGGER(), "Software has been updated from version {} to version {}.", previous_sw_version, current_sw_version[0]);
+    LOG_INFO(_logger.GET_LOGGER(), "Software has been changed from version {:x} to version {:x}.", previous_sw_version, static_cast<uint8_t>(SOFTWARE_VERSION));
 
-    memory_manager_instance->writeToAddress(current_sw_version);
+    std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
+    memory_manager_instance->writeToAddress(temp_vector);
 }
 
 ECU::~ECU()

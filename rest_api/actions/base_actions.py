@@ -115,7 +115,7 @@ class Action(GF):
             # First Frame (starts with 0x10)
             if msg.data[0] == 0x10:
                 total_data_length = msg.data[1]  # Total length from the first frame (byte 1 and 2)
-                collected_data = msg.data[2:]  # Store the data portion starting from byte 3
+                collected_data = msg.data[1:]  # Store the data portion starting from byte 3
                 log_info_message(logger, f"[Collect Response] First frame received. \
                                  Total length expected: {total_data_length}, \
                                  Data: {[hex(byte) for byte in collected_data]}")

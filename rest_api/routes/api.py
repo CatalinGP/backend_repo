@@ -210,14 +210,33 @@ def read_dtc_info():
         return jsonify({"error": "An unexpected error occurred", "details": str(err)}), 500
 
 
-@api_bp.route('/clear_dtc_info', methods=['GET'])
+@api_bp.route('/clear_dtc_info', methods=['POST'])
 def clear_dtc_info():
     try:
-        ecu_id_str = request.args.get('ecu_id', default='0x11')
-        ecu_id = int(ecu_id_str, 16)
+        data = request.get_json()
+        errors = []
+        log_info_message(logger, f"Clear DTC Request received: {data}")
+        
+        ecu_id_str = data.get('ecu_id')
+        try:
+            ecu_id = int(ecu_id_str, 16)
+        except ValueError:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+        
+        requester = RequestIdAction()
+        response_req_json = requester.read_ids()
+        ecu_values = response_req_json.get("ecus", [])
+        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
+
+        if ecu_id not in valid_values:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+
+        dtc_group = data.get('dtc_group')
+        if errors:
+            return jsonify({"errors": errors}), 400
+
         clearer = DiagnosticTroubleCode()
-        response_json = clearer.clear_dtc_info(ecu_id)
-        return jsonify(response_json), 200
+        return clearer.clear_dtc_info(dtc_group, ecu_id)
 
     except CustomError as e:
         return jsonify(e.message), 400
@@ -262,13 +281,43 @@ def get_data_identifiers():
 
 @api_bp.route('/read_access_timing', methods=['POST'])
 def access_timing():
-    data = request.get_json()
-    sub_funct = data.get('sub_funct')
-    if sub_funct is None:
-        return jsonify({"status": "error", "message": "Missing 'sub_funct' parameter"}), 400
-    requester = ReadAccessTiming()
-    response = requester._read_timing_info(id, sub_funct)
-    return jsonify(response)
+    try:
+        data = request.get_json()
+        errors = []
+        log_info_message(logger, f"Read Access Timing Parameters Request received: {data}")
+
+        sub_funct = int(data.get('sub_funct'))
+        if sub_funct is None:
+            errors.append({"status": "error", "message": "Missing 'sub_funct' parameter"})
+
+        ecu_id_str = data.get('ecu_id')
+        try:
+            ecu_id = int(ecu_id_str, 16)
+        except ValueError:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+        
+        requester = RequestIdAction()
+        response_req_json = requester.read_ids()
+        log_info_message(logger, f" JSON CU ID: {response_req_json}")
+        ecu_values = response_req_json.get("ecus", [])
+        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
+        mcu_id = int(response_req_json.get("mcu_id"), 16)
+
+        if ecu_id not in valid_values and ecu_id != mcu_id:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+
+        if errors:
+            return jsonify({"errors": errors}), 400
+
+        requester = ReadAccessTiming()
+        response = requester._read_timing_info(ecu_id, sub_funct)
+        return jsonify(response)
+
+    except CustomError as e:
+        return jsonify(e.message), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @api_bp.route('/reset_ecu', methods=['POST'])
@@ -283,23 +332,58 @@ def reset_module():
 
 @api_bp.route('/write_timing', methods=['POST'])
 def write_timing():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        errors = []
+        log_info_message(logger, f"Write Access Timing Parameters Request received: {data}")
 
-    if not data or 'p2_max' not in data or 'p2_star_max' not in data:
-        return jsonify({"message": "Missing required parameters"}), 400
+        sub_funct = int(data.get('sub_funct'))
+        if sub_funct is None:
+            error.append({"status": "error", "message": "Missing 'sub_funct' parameter"})
 
-    p2_max = data.get('p2_max')
-    p2_star_max = data.get('p2_star_max')
+        ecu_id_str = data.get('ecu_id')
+        try:
+            ecu_id = int(ecu_id_str, 16)
+        except ValueError:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+        
+        requester = RequestIdAction()
+        response_req_json = requester.read_ids()
+        ecu_values = response_req_json.get("ecus", [])
+        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
+        mcu_id = int(response_req_json.get("mcu_id"), 16)
 
-    timing_values = {
-        "p2_max": p2_max,
-        "p2_star_max": p2_star_max
-    }
+        if ecu_id not in valid_values and ecu_id != mcu_id:
+            errors.append({"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
 
-    writer = WriteAccessTiming()
-    result = writer._write_timing_info(id, timing_values)
+        writer = WriteAccessTiming()
+        if sub_funct == 2:
+            if errors:
+                return jsonify({"errors": errors}), 400
+            result = writer._write_timing_info(sub_funct, ecu_id)
+        else:
+            if not data or 'p2_max' not in data or 'p2_star_max' not in data:
+                errors.append({"message": "Missing required parameters"})
 
-    return jsonify(result)
+            if errors:
+                return jsonify({"errors": errors}), 400
+
+            p2_max = int(data.get('p2_max'))
+            p2_star_max = int(data.get('p2_star_max'))
+
+            timing_values = {
+                "p2_max": p2_max,
+                "p2_star_max": p2_star_max
+            }
+            result = writer._write_timing_info(sub_funct, ecu_id, timing_values)
+        return jsonify(result)
+    
+    except CustomError as e:
+        return jsonify(e.message), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @api_bp.route('ota_status', methods=['POST'])
 def ota_status():

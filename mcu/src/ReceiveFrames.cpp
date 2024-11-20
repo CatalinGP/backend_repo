@@ -288,7 +288,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
             {
                 auto now = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = now - start_time;
-                if (elapsed.count() > timer_value / 20.0)
+                if (elapsed.count() > timer_value / 1000.0)
                 { 
                     stopTimer(sid);
                 }

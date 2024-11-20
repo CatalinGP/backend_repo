@@ -61,7 +61,7 @@ class GenerateFrame(CanBridge):
         self.__generate_long_response(id, 0x62, identifier, response, first_frame)
 
     def request_read_dtc_information(self, id, sub_funct, dtc_status_mask):
-        data = [4, 0x19, sub_funct, dtc_status_mask]
+        data = [3, 0x19, sub_funct, dtc_status_mask]
         self.send(id, data)
 
     def read_memory_by_adress(self, id, memory_address, memory_size, response=[]):
@@ -108,7 +108,7 @@ class GenerateFrame(CanBridge):
         self.send(id, data)
 
     def request_transfer_exit(self, id, response=False):
-        data = [1, 0x77] if response is False else [1, 0x37]
+        data = [1, 0x77] if response is False else [0x02, 0x37, 0x00]
         self.send(id, data)
 
     def clear_diagnostic_information(self, id, group_of_dtc=0xFFFFFF, response=False):
@@ -144,14 +144,20 @@ class GenerateFrame(CanBridge):
         data = [2, 0x83, sub_function] if response is False else [2, 0xC3, sub_function]
         self.send(id, data)
 
-    def write_timming_parameters(self, id, sub_function, new_p2_max_time, new_p2_star_max_time, response=False):
-        new_p2_max_time_bytes = [(new_p2_max_time >> 8) & 0xFF, new_p2_max_time & 0xFF]
-        new_p2_star_max_time_bytes = [(new_p2_star_max_time >> 8) & 0xFF, new_p2_star_max_time & 0xFF]
-
-        if not response:
-            data = [6, 0x83, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
+    def write_timming_parameters(self, id, sub_function, new_p2_max_time=0, new_p2_star_max_time=0, response=False):
+        if sub_function == 2:
+            if not response:
+                data = [3, 0x83, sub_function]
+            else:
+                data = [3, 0xC3, sub_function]
         else:
-            data = [6, 0xC3, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
+            new_p2_max_time_bytes = [(new_p2_max_time >> 8) & 0xFF, new_p2_max_time & 0xFF]
+            new_p2_star_max_time_bytes = [(new_p2_star_max_time >> 8) & 0xFF, new_p2_star_max_time & 0xFF]
+
+            if not response:
+                data = [6, 0x83, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
+            else:
+                data = [6, 0xC3, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
 
         self.send(id, data)
 

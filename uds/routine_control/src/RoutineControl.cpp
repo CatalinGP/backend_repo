@@ -216,14 +216,18 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
             }
 
             routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
+            AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
             break;
         }
         case 0x0401:
         {
-            // if(ota_state != READY)
-            // {
-            //     return 0;
-            // }
+            if(ota_state != READY)
+            {
+                LOG_WARN(rc_logger.GET_LOGGER(), "Software data verification can be done only from the READY state, current state is {:x}", ota_state);
+                nrc.sendNRC(can_id, ROUTINE_CONTROL_SID, NegativeResponse::CNC);
+                AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
+                return;
+            }
 
             LOG_INFO(rc_logger.GET_LOGGER(), "Verify installation routine called.");
             if(verifySoftware(receiver_id) == false)
@@ -266,6 +270,8 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
         case 0x0601:
         {
             LOG_INFO(rc_logger.GET_LOGGER(), "Activate software routine called. Saving the current software..");
+            FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ACTIVATE}, aux_can_id, rc_logger, socket);
+
             if(saveCurrentSoftware() == false)
             {
                 LOG_ERROR(rc_logger.GET_LOGGER(), "Current software saving failed.");
@@ -345,7 +351,7 @@ bool RoutineControl::initialiseOta(uint8_t target_ecu, const std::vector<uint8_t
         routine_result[0] = version_size;
     }
 #elif PYTHON_ENABLED == 0
-    routine_result[0] = 0;
+    routine_result[0] = 1;
 #endif
     /* Map 0-15 to 1-16 */
     uint8_t highNibble = ((sw_version >> 4) & 0x0F) + 1;
@@ -575,6 +581,7 @@ bool RoutineControl::saveCurrentSoftware()
     /* Vector containing the binary_data_size format and the size in bytes */
     std::vector<uint8_t> binary_data_info;
     binary_data_info.push_back(binary_data_size_bytes.size());
+    /* Here there is an out of bound warning */
     binary_data_info.insert(binary_data_info.end(), binary_data_size_bytes.begin(), binary_data_size_bytes.end());
     /* Write at the start of partition 2 the informations about the binary */
     memory_manager->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_START);
