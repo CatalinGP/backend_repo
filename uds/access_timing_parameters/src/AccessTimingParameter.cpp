@@ -204,18 +204,28 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
         {
             case 0x10:
                 MCU::mcu->stop_flags[sid] = false;
+                MCU::mcu->stop_flags.erase(sid);
+                MCU::mcu->active_timers[sid].wait();
                 break;
             case 0x11:
                 battery->_ecu->stop_flags[sid] = false;
+                battery->_ecu->stop_flags.erase(sid);
+                battery->_ecu->active_timers[sid].wait();
                 break;
             case 0x12:
                 engine->_ecu->stop_flags[sid] = false;
+                engine->_ecu->stop_flags.erase(sid);
+                engine->_ecu->active_timers[sid].wait();
                 break;
             case 0x13:
                 doors->_ecu->stop_flags[sid] = false;
+                doors->_ecu->stop_flags.erase(sid);
+                doors->_ecu->active_timers[sid].wait();
                 break;
             case 0x14:
                 hvac->_ecu->stop_flags[sid] = false;
+                hvac->_ecu->stop_flags.erase(sid);
+                hvac->_ecu->active_timers[sid].wait();
                 break;
             default:
                 break; 

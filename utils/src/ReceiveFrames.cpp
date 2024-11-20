@@ -226,7 +226,7 @@ void ReceiveFrames::startTimer(uint8_t frame_dest_id, uint8_t sid) {
             while (engine->_ecu->stop_flags[sid]) {
                 auto now = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = now - start_time;
-                if (elapsed.count() > timer_value / 20.0) {
+                if (elapsed.count() > timer_value / 1000.0) {
                     stopTimer(frame_dest_id, sid);
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -243,7 +243,7 @@ void ReceiveFrames::startTimer(uint8_t frame_dest_id, uint8_t sid) {
             while (doors->_ecu->stop_flags[sid]) {
                 auto now = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = now - start_time;
-                if (elapsed.count() > timer_value / 20.0) {
+                if (elapsed.count() > timer_value / 1000.0) {
                     stopTimer(frame_dest_id, sid);
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -260,7 +260,7 @@ void ReceiveFrames::startTimer(uint8_t frame_dest_id, uint8_t sid) {
             while (hvac->_ecu->stop_flags[sid]) {
                 auto now = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = now - start_time;
-                if (elapsed.count() > timer_value / 20.0) {
+                if (elapsed.count() > timer_value / 1000.0) {
                     stopTimer(frame_dest_id, sid);
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
