@@ -301,3 +301,23 @@ class GenerateFrame(CanBridge):
             digits += 1
             number //= 10
         return digits
+    
+    def _erase_data(self, id , address, nrBytes, firstFrame=True):
+        data = []
+        octets = []
+        if firstFrame== True:
+            while address > 0:
+                octets.insert(0, address & 0xFF)
+                address >>= 8 
+            data = [0x31, 0x01, 0x01, 0x01]
+            data.extend(octets)
+            data.insert(0, len(data))
+        else:
+            while nrBytes > 0:
+                octets.insert(0, nrBytes & 0xFF)
+                nrBytes >>= 8 
+            data = [0x31, 0x01, 0x01, 0x02]
+            data.extend(octets)
+            data.insert(0, len(data))
+
+        self.send_frame(id, data)
