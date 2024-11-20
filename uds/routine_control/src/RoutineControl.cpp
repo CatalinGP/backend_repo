@@ -568,7 +568,7 @@ bool RoutineControl::saveCurrentSoftware()
     std::vector<uint8_t> binary_data_size_bytes;
     bool first_byte_found = false;
     uint8_t byte;
-    for(signed char i = sizeof(binary_data_size) - 1; i >=0; --i)
+    for(char i = sizeof(binary_data_size) - 1; i >=0; --i)
     {
         byte = (binary_data_size >> (i * 8)) & 0xFF;
         if(byte != 0 || first_byte_found == true)
