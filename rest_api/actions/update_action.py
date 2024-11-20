@@ -289,8 +289,6 @@ class Updates(Action):
             max_bytes = min(5, len(data) // 2)
             current_chunk = int(data[:max_bytes * 2], 16)
             
-            print(type(current_chunk))
-
             if max_bytes < 5 or len(data) == 5:
                 if self.change_ota_state(ecu_id, '0x31') == False:
                     log_info_message(logger, f"Transfer Data to Ecu failed at changing ota status to transfer complete")
