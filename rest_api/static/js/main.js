@@ -194,14 +194,14 @@ function writeInfoHVAC() {
 }
 
 function changeSession() {
-    const input = prompt('Enter sub-function code (1 for default session, 2 for programming session):');
+    const input = prompt('Enter sub-function code (1 for default session, 2 for programming session, 3 for extended session):');
     if (input === null) {
         alert('Operation cancelled.');
         return;
     };
 
     const sub_funct = parseInt(input, 10);
-    if (sub_funct !== 1 && sub_funct !== 2) {
+    if (sub_funct !== 1 && sub_funct !== 2 && sub_funct != 3) {
         alert('Invalid input. Please enter 1 or 2.');
         return;
     };
