@@ -607,12 +607,16 @@ function selectRoutineControl()
                 }
             case 'RollbackRoutine':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/rollback_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
                     break;
                 }
             case 'ActivateRoutine':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/activate_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
                     break;
                 }
             default: break;
