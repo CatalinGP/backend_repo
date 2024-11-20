@@ -592,12 +592,18 @@ function selectRoutineControl()
                 }
             case 'EraseDataRoutine':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/erase_memory', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                        address: dataForApiRequest['address-erase'],
+                        nrBytes: dataForApiRequest['size'],
+                    });
                     break;
                 }
             case 'VerifyDataRoutine':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/verify_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
                     break;
                 }
             case 'WriteToFileRoutine':
