@@ -216,6 +216,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
             }
 
             routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
+            AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
             break;
         }
         case 0x0401:

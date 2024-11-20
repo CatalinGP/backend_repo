@@ -29,7 +29,7 @@ void RequestDownloadService::requestDownloadRequest(canid_t id, std::vector<uint
     LOG_INFO(RDSlogger.GET_LOGGER(), "Service 0x34 RequestDownload");
     /* Auxiliary variable used for can_id in setDidValue method */
     canid_t aux_can_id = id;
-    auto ota_status = FileManager::getDidValue(OTA_UPDATE_STATUS_DID, aux_can_id, RDSlogger)[0];
+    OtaUpdateStates ota_status = static_cast<OtaUpdateStates>(FileManager::getDidValue(OTA_UPDATE_STATUS_DID, aux_can_id, RDSlogger)[0]);
     /* This will be replaced by OTA Session */
     /* Extract and switch sender and receiver */
     uint8_t receiver_id = id  & 0xFF;
@@ -73,7 +73,7 @@ void RequestDownloadService::requestDownloadRequest(canid_t id, std::vector<uint
         AccessTimingParameter::stopTimingFlag(receiver_id, 0x34);
         return;
     }
-    auto previousOtaStatus = ota_status;
+    OtaUpdateStates previousOtaStatus = ota_status;
     FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {WAIT}, aux_can_id, RDSlogger, socket);
 
     /** data format identifier is 0x00 when no compression or encryption method is used 
