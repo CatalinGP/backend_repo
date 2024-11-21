@@ -521,10 +521,16 @@ function selectRoutineControl()
                         }
                     case 'address-update':
                         {
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
                             break;
                         }
                     case 'address-transfer':
-                        {
+                        {   
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
                             break;
                         }
                     case 'data':
@@ -567,7 +573,8 @@ function selectRoutineControl()
                     performApiRequest('/api/update_to_version', 'POST', { 
                         update_file_type: dataForApiRequest['file-type'], 
                         update_file_version: dataForApiRequest['software-version'], 
-                        ecu_id: dataForApiRequest['target-ecu'] 
+                        ecu_id: dataForApiRequest['target-ecu'],
+                        address: dataForApiRequest['address-update']
                     });
                     break;
                 }

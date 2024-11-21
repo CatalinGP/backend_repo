@@ -42,7 +42,7 @@ class Updates(Action):
     - g: Instance of GenerateFrame for generating CAN bus frames.
     """
 
-    def update_to(self, type, version, id):
+    def update_to(self, type, version, id, address):
         """
         Method to update the software of the ECU to a specified version.
 
@@ -71,11 +71,12 @@ class Updates(Action):
             self.session_control(self.id, sub_funct=0x03)
             self._passive_response(SESSION_CONTROL, "Error changing session control")
 
-            log_info_message(
-                logger, f"Changing ECU {int} to session to extended diagonstic mode")
-            ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
-            self.session_control(ses_id, sub_funct=0x03)
-            self._passive_response(SESSION_CONTROL, "Error changing session control")
+            if int(id,16) != self.id_ecu[0]:
+                log_info_message(
+                    logger, f"Changing ECU {int} to session to extended diagonstic mode")
+                ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
+                self.session_control(ses_id, sub_funct=0x03)
+                self._passive_response(SESSION_CONTROL, "Error changing session control")
 
             log_info_message(logger, "Authenticating...")
             # -> security only to MCU
@@ -91,7 +92,7 @@ class Updates(Action):
             # Check if another OTA update is in progress ( OTA_STATE is not IDLE)
 
             log_info_message(logger, "Downloading... Please wait")
-            self._download_data(type, version, id)
+            self._download_data(type, version, id, address)
             log_info_message(logger, "Download finished, restarting ECU...")
 
             # Reset the ECU to apply the update
@@ -117,7 +118,7 @@ class Updates(Action):
         except CustomError as e:
             return e.message
 
-    def _download_data(self, type, version, id):
+    def _download_data(self, type, version, id, address):
         """
         Request Sid = 0x34
         Response Sid = 0x74
@@ -164,9 +165,11 @@ class Updates(Action):
         mem_size = frame_response.data[5]
 
         api_target_id = (0x00 << 16) + (0xFA << 8) + int(id, 16)
+        hex_address = ''.join(address)
+        
         self.request_download(api_target_id,
                               data_format_identifier=type,
-                              memory_address=0x0800,
+                              memory_address=int(hex_address, 16),
                               memory_size=mem_size,
                               version=version)
         frame_response = self._passive_response(
@@ -390,8 +393,13 @@ class Updates(Action):
         self._passive_response(REQUEST_DOWNLOAD, "Error requesting download")
 
         data = data[2:]
-        
         transfer_data_counter = 0x01
+        if len(data) <= 10:
+            self.transfer_data(id, transfer_data_counter, int(data[:2], 16))
+            self._passive_response(TRANSFER_DATA, "Error transfering data")
+            data = data[2:]
+            transfer_data_counter += 0x01
+
         while data:
             max_bytes = min(5, len(data) // 2)
             current_chunk = int(data[:max_bytes * 2], 16)

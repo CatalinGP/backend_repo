@@ -53,10 +53,12 @@ def update_to_version():
     sw_file_type = data.get('update_file_type')
     sw_file_version = data.get('update_file_version')
     ecu_id = data.get('ecu_id')
+    address = data.get('address')
     updater = Updates()
     response = updater.update_to(type=sw_file_type,
                                  version=sw_file_version,
-                                 id=ecu_id)
+                                 id=ecu_id,
+                                 address=address)
     return jsonify(response)
 
 
