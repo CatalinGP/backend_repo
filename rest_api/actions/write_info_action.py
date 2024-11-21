@@ -43,7 +43,7 @@ class WriteInfo(Action):
                 "battery_level": IDENTIFIER_BATTERY_ENERGY_LEVEL,
                 "voltage": IDENTIFIER_BATTERY_VOLTAGE,
                 "percentage": IDENTIFIER_BATTERY_PERCENTAGE,
-                "state_of_charge": IDENTIFIER_BATTERY_STATE_OF_CHARGE,
+                "battery_state_of_charge": IDENTIFIER_BATTERY_STATE_OF_CHARGE,
             }
 
             for key, value in data_dict.items():
