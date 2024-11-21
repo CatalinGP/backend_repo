@@ -342,9 +342,24 @@ class Updates(Action):
             fixed_value = "fa10"
             hex_string = f"{prefix}{target}{fixed_value}"
             can_id = int(hex_string, 16)
+            if isinstance(version, str):
+                if '.' not in version:
+                    version += '.0'
+                major, minor = map(int, version.split('.'))
+                major -= 1
+                if major < 0 or major > 15 or minor < 0 or minor > 15:
+                    raise ValueError(
+                        f"Invalid version: {version}. Major and minor must be between 0 and 15."
+                    )
+                version_byte = (major << 4) | minor  # Encode directly without reduction
+            elif isinstance(version, int):
+                # Assume the int is already in the correct format
+                version_byte = version
+            else:
+                raise ValueError(f"Invalid version format: {version}")
 
             # Construct and send the CAN frame
-            frame_data = [0x05, 0x31, 0x01, 0x02, 0x01, int(version,16)]
+            frame_data = [0x05, 0x31, 0x01, 0x02, 0x01, version_byte]
             log_info_message(
                 logger, f"Sending initialise OTA CAN frame with ID: {hex(can_id)} and data: {frame_data}")
             self.send_frame(can_id, frame_data)
