@@ -330,6 +330,46 @@ class Updates(Action):
 
         except ValueError:
             raise CustomError(f"Invalid ECU ID: {ecu_id}")
+    
+    def ota_init(self, target, version):
+        """
+        Handles the CAN frame sending for initialise OTA
+
+        Args:
+        - target: ID of the ECU or MCU in hexadecimal (e.g., "0x10").
+        - version: version of software in hexadecimal("00" to "FF")
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            prefix = "00"
+            fixed_value = "fa10"
+            hex_string = f"{prefix}{target}{fixed_value}"
+            can_id = int(hex_string, 16)
+
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x02, 0x01, int(version,16)]
+            log_info_message(
+                logger, f"Sending initialise OTA CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during initialise.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Initialise failed for ECU ID: {target} with version {version}")
+                raise CustomError(f"Initialise failed for ECU ID: {target} with version {version}")
+
+            log_info_message(logger, f"Initialise OTA successful for ECU ID: {target} with version {version}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Initialise OTA completed successfully for ECU ID: {target} with version {version}"
+            }
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {target} with version {version}")
+
 
     def activate_software(self, ecu_id):
         """

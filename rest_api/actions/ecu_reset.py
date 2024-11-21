@@ -27,6 +27,12 @@ class Reset(Action):
             id = self.my_id * 0x100 + self.id_ecu[0]
         elif ecu_id == "11":
             id = self.my_id * 0x100 + self.id_ecu[1]
+        elif ecu_id == "12":
+            id = self.my_id * 0x100 + self.id_ecu[2]
+        elif ecu_id == "13":
+            id = self.my_id * 0x100 + self.id_ecu[3]
+        elif ecu_id == "14":
+            id = self.my_id * 0x100 + self.id_ecu[4]
         else:
             log_error_message(logger, f"Invalid ECU ID: {ecu_id}")
             return {"status": "error", "message": f"Invalid ECU ID: {ecu_id}"}

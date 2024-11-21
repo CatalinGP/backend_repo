@@ -456,6 +456,31 @@ def rollback_software():
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
 
+@api_bp.route('/ota_init', methods=['POST'])
+def ota_init():
+    session = SessionManager()
+    session._change_session(3)
+
+    auth = Auth()
+    auth._auth_to()
+
+    data = request.get_json()
+    target = data.get('target')
+    version = data.get('version')
+
+    if not target:
+        return jsonify({"Error": "Target ID is required"}), 400
+    if not version:
+        return jsonify({"Error": "Version for software is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.ota_init(target, version)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
 
 @api_bp.route('/activate_software', methods=['POST'])
 def activate_software():
