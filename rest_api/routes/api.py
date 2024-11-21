@@ -478,6 +478,28 @@ def ota_init():
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
 
+@api_bp.route('/write_to_file', methods=['POST'])
+def write_to_file():
+    session = SessionManager()
+    session._change_session(2)
+
+    auth = Auth()
+    auth._auth_to()
+
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "Receiver ECU ID is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.write_to_file(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
 
 @api_bp.route('/activate_software', methods=['POST'])
 def activate_software():
