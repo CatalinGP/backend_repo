@@ -406,7 +406,7 @@ function selectRoutineControl()
         TransferDataAction: [
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
             { placeholder: 'Address', id: 'address-transfer', value: '0x0800'},
-            { placeholder: 'Data bytes', id: 'data', value: '0xae25f9'}
+            { placeholder: 'Data bytes', id: 'data', value: '0x123456789abcde'}
         ],
         SyncOtaStatus: [
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
@@ -634,11 +634,20 @@ function selectRoutineControl()
     }
 
     async function getOtaStatus(event){
-        if(event == 'click'){
+        if(event === 'click'){
             const response = await performApiRequest('/api/ota_status', 'POST', {
                 ecu_id: "0x10",
             });
-            document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
+            const button = document.getElementById('ota-status-btn');
+            button.innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
+            if(response.state.includes("ERROR")){
+                document.querySelector('option[value="UpdateSoftwareAction"]').disabled = true;
+                document.querySelector('option[value="TransferDataAction"]').disabled = true;
+            }
+            else{
+                document.querySelector('option[value="UpdateSoftwareAction"]').disabled = false;
+                document.querySelector('option[value="TransferDataAction"]').disabled = false;
+            }
         }
         else if(event == 'dblclick'){
             otaStatusRequestRunning ^= 1;
@@ -648,7 +657,7 @@ function selectRoutineControl()
                         ecu_id: "0x10"
                     });
                     document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
-                }, 1000);
+                }, 2000);
             }
             else{
                 clearInterval(otaStatusRequestIntervalId);
