@@ -333,7 +333,7 @@ function selectRoutineControl()
         ],
         InitialiseOTARoutine: [
             { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
-            { placeholder: 'Sw Version', id: 'software-number', value: '1.0'},
+            { placeholder: 'Sw Version', id: 'software-version', value: '1.0'},
         ],
         VerifyDataRoutine: [
             { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'}
@@ -597,12 +597,10 @@ function selectRoutineControl()
                 }
             case 'InitialiseOTARoutine':
                 {
-                    if(hexValue == 0x10){
-                        // performApiRequest();
-                    }
-                    else{
-                        console.log("OTA can be initialised only for mcu as receiver.")
-                    }
+                    performApiRequest('/api/ota_init', 'POST', {
+                        target: dataForApiRequest['target-ecu'],
+                        version: dataForApiRequest['software-version']
+                    });
                     break;
                 }
             case 'EraseDataRoutine':
