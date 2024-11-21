@@ -126,3 +126,15 @@ curl -X POST http://localhost:5000/api/ota_status
  -H "Content-Type: application/json"      
  -d '{"hex_value": "0x50", 
  "is_manual_flow": false}'
+
+
+ 24. /ota_init- POST Request
+
+ curl -X POST http://127.0.0.1:5000/api/ota_init -H "Content-Type: application/json" -d '{
+            "target": "0x11", "version": "1.2"
+    }'
+25. /write_to_file- POST request
+
+curl -X POST http://127.0.0.1:5000/api/write_to_file -H "Content-Type: application/json" -d '{
+            "ecu_id": "0x11"
+        }'
