@@ -203,6 +203,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
         switch(receiver_id)
         {
             case 0x10:
+            {
                 MCU::mcu->stop_flags[sid] = false;
                 MCU::mcu->stop_flags.erase(sid);
                 auto it = MCU::mcu->active_timers.find(sid);
@@ -211,7 +212,9 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                     MCU::mcu->active_timers[sid].wait();
                 }
                 break;
+            }
             case 0x11:
+            {
                 battery->_ecu->stop_flags[sid] = false;
                 battery->_ecu->stop_flags.erase(sid);
                 auto it = battery->_ecu->active_timers.find(sid);
@@ -220,7 +223,9 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                     battery->_ecu->active_timers[sid].wait();
                 }
                 break;
+            }
             case 0x12:
+            {
                 engine->_ecu->stop_flags[sid] = false;
                 engine->_ecu->stop_flags.erase(sid);
                 auto it = engine->_ecu->active_timers.find(sid);
@@ -229,7 +234,9 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                     engine->_ecu->active_timers[sid].wait();
                 }
                 break;
+            }
             case 0x13:
+            {
                 doors->_ecu->stop_flags[sid] = false;
                 doors->_ecu->stop_flags.erase(sid);
                 auto it = doors->_ecu->active_timers.find(sid);
@@ -238,7 +245,9 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                     doors->_ecu->active_timers[sid].wait();
                 }
                 break;
+            }
             case 0x14:
+            {
                 hvac->_ecu->stop_flags[sid] = false;
                 hvac->_ecu->stop_flags.erase(sid);
                 auto it = hvac->_ecu->active_timers.find(sid);
@@ -247,6 +256,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                     hvac->_ecu->active_timers[sid].wait();
                 }
                 break;
+            }
             default:
                 break; 
         }
