@@ -621,7 +621,9 @@ function selectRoutineControl()
                 }
             case 'WriteToFileRoutine':
                 {
-                    // performApiRequest();
+                    performApiRequest('/api/write_to_file', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
                     break;
                 }
             case 'RollbackRoutine':
