@@ -48,7 +48,7 @@ class Reset(Action):
 
             frame_response = self._passive_response(RESET_ECU, f"Error resetting device {hex(id)}")
 
-            if frame_response.data[1] == 0x51 and frame_response.data[2] == 0x02:
+            if frame_response.data[1] == 0x51:
                 response_json = {
                     "message": "ECU reset successful",
                     "can_id": f"0x{id:03X}",

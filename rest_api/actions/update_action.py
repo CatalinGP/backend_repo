@@ -338,10 +338,7 @@ class Updates(Action):
         """
         try:
             # Compute CAN ID from ECU ID
-            prefix = "00"
-            fixed_value = "fa10"
-            hex_string = f"{prefix}{target}{fixed_value}"
-            can_id = int(hex_string, 16)
+            can_id = (int(target, 16) << 16) + (self.my_id << 8) + self.id_ecu[0]
             if isinstance(version, str):
                 if '.' not in version:
                     version += '.0'
