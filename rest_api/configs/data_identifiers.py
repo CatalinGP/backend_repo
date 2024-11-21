@@ -92,7 +92,7 @@ data_identifiers = {
             "battery_level": hex(IDENTIFIER_BATTERY_ENERGY_LEVEL),
             "voltage": hex(IDENTIFIER_BATTERY_VOLTAGE),
             "percentage": hex(IDENTIFIER_BATTERY_PERCENTAGE),
-            "state_of_charge": hex(IDENTIFIER_BATTERY_STATE_OF_CHARGE),
+            "battery_state_of_charge": hex(IDENTIFIER_BATTERY_STATE_OF_CHARGE),
             # "temperature": IDENTIFIER_BATTERY_TEMPERATURE,
             # "life_cycle": IDENTIFIER_BATTERY_LIFE_CYCLE,
             # "fully_charged": IDENTIFIER_BATTERY_FULLY_CHARGED,

@@ -95,7 +95,7 @@ class ReadInfo(Action):
                     identifier = identifiers[item]
                     result_value = self._read_by_identifier(id, int(identifier, 16))
 
-                    if item == "state_of_charge" and result_value:
+                    if item == "battery_state_of_charge" and result_value:
                         result_value = self._get_battery_state_of_charge(result_value)
 
                     results[item] = result_value if result_value else "No data"
@@ -112,7 +112,7 @@ class ReadInfo(Action):
                 for key, identifier in identifiers.items():
                     result_value = self._read_by_identifier(id, int(identifier, 16))
 
-                    if key == "state_of_charge" and result_value:
+                    if key == "battery_state_of_charge" and result_value:
                         result_value = self._get_battery_state_of_charge(result_value)
 
                     results[key] = result_value if result_value else "No data"
@@ -121,7 +121,7 @@ class ReadInfo(Action):
                 "battery_level": self.hex_to_dec(results.get("battery_level")),
                 "voltage": self.hex_to_dec(results.get("voltage")),
                 "percentage": self.hex_to_dec(results.get("percentage")),
-                "battery_state_of_charge": results.get("state_of_charge"),
+                "battery_state_of_charge": results.get("battery_state_of_charge"),
                 # "life_cycle": self.hex_to_dec(results.get("life_cycle", "No data")),
                 # "fully_charged": self.hex_to_dec(results.get("fully_charged", "No data")),
                 # "serial_number": self.hex_to_dec(results.get("serial_number", "No data")),
