@@ -198,19 +198,24 @@ function writeInfoHVAC() {
 }
 
 function changeSession() {
-    const input = prompt('Enter sub-function code (1 for default session, 2 for programming session, 3 for extended session):');
-    if (input === null) {
+    const subfn_input = prompt('Enter sub-function code (1 for default session, 2 for programming session, 3 for extended session):');
+    if (subfn_input === null) {
         alert('Operation cancelled.');
         return;
     };
 
-    const sub_funct = parseInt(input, 10);
+    const sub_funct = parseInt(subfn_input, 10);
     if (sub_funct !== 1 && sub_funct !== 2 && sub_funct != 3) {
         alert('Invalid input. Please enter 1 or 2.');
         return;
     };
 
-    performApiRequest('/api/change_session', 'POST', { sub_funct: sub_funct });
+    let extraecu_input = prompt('Enter another ecu if you need to change its session. Leave empty if only mcu is needed.');
+    if (extraecu_input === "") {
+        extraecu_input = '0x10'
+    };
+    const extra_ecu = parseInt(extraecu_input, 16)
+    performApiRequest('/api/change_session', 'POST', { sub_funct: sub_funct, extra_ecu: extra_ecu });
 }
 
 function authenticate() {

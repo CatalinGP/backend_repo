@@ -276,8 +276,9 @@ def clear_dtc_info():
 def change_session():
     data = request.get_json()
     sub_funct = data.get('sub_funct')
+    extra_ecu = data.get('extra_ecu')
     session = SessionManager()
-    response = session._change_session(sub_funct)
+    response = session._change_session(sub_funct, extra_ecu)
     return jsonify(response)
 
 
