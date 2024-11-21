@@ -151,7 +151,7 @@ def createArchive(executable_path, archive_name):
 
 
 def uploadRelease(directory_path: str):
-    google_drive_api_path = PROJECT_SRC_PATH + '/src/ota/google_drive_api'
+    google_drive_api_path = PROJECT_SRC_PATH + '/backend/ota/google_drive_api'
     sys.path.append(google_drive_api_path)
     from GoogleDriveApi import gDrive, DRIVE_MCU_SW_VERSIONS_FILE, DRIVE_ECU_BATTERY_SW_VERSIONS_FILE, DRIVE_ECU_ENGINE_SW_VERSIONS_FILE, DRIVE_ECU_DOORS_SW_VERSIONS_FILE, DRIVE_ECU_HVAC_SW_VERSIONS_FILE
 
