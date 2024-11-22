@@ -1,3 +1,6 @@
+let otaStatusRequestRunning = false;
+let otaStatusRequestIntervalId;
+
 // Utility function to display JSON response in the output container
 function displayResponse(data) {
     const responseContainer = document.getElementById('response-output');
@@ -43,6 +46,7 @@ function performApiRequest(url, method, body = null) {
       .then(data => {
           displayResponse(data);
           fetchLogs();
+          return data;
       })
       .catch(error => {
           console.error('Error:', error);
@@ -194,19 +198,24 @@ function writeInfoHVAC() {
 }
 
 function changeSession() {
-    const input = prompt('Enter sub-function code (1 for default session, 2 for programming session):');
-    if (input === null) {
+    const subfn_input = prompt('Enter sub-function code (1 for default session, 2 for programming session, 3 for extended session):');
+    if (subfn_input === null) {
         alert('Operation cancelled.');
         return;
     };
 
-    const sub_funct = parseInt(input, 10);
-    if (sub_funct !== 1 && sub_funct !== 2) {
+    const sub_funct = parseInt(subfn_input, 10);
+    if (sub_funct !== 1 && sub_funct !== 2 && sub_funct != 3) {
         alert('Invalid input. Please enter 1 or 2.');
         return;
     };
 
-    performApiRequest('/api/change_session', 'POST', { sub_funct: sub_funct });
+    let extraecu_input = prompt('Enter another ecu if you need to change its session. Leave empty if only mcu is needed.');
+    if (extraecu_input === "") {
+        extraecu_input = '0x10'
+    };
+    const extra_ecu = parseInt(extraecu_input, 16)
+    performApiRequest('/api/change_session', 'POST', { sub_funct: sub_funct, extra_ecu: extra_ecu });
 }
 
 function authenticate() {
@@ -307,3 +316,368 @@ function writeTimingInfo() {
 function readInfoHvac() {
     performApiRequest('/api/read_info_hvac', 'GET');
 }
+
+function selectRoutineControl()
+{
+    const dropdown = document.getElementById('routine-dropdown');
+    const inputsContainer = document.getElementById('dynamic-routine-inputs');
+    const selectedRoutine = dropdown.value;
+  
+    inputsContainer.innerHTML = '';
+  
+    const routineInputs = {
+        EraseDataRoutine: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
+            { placeholder: 'Address', id: 'address-erase', value: '0x0800'},
+            { placeholder: 'Nr of bytes', id: 'size', value: '0x05'}
+        ],
+        InitialiseOTARoutine: [
+            { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
+            { placeholder: 'Sw Version', id: 'software-version', value: '1.0'},
+        ],
+        VerifyDataRoutine: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'}
+        ],
+        WriteToFileRoutine: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
+        ],
+        RollbackRoutine: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
+        ],
+        ActivateRoutine: [
+            { placeholder: 'Receiver', id: 'receiver-ecu', value: '0x10'},
+        ],
+    };
+  
+    const inputs = routineInputs[selectedRoutine] || [];
+  
+    inputs.forEach((inputConfig) => {
+        const inputGroup = document.createElement('div');
+        inputGroup.style.display = 'flex';
+        inputGroup.style.flexDirection = 'column';
+        inputGroup.style.alignItems = 'center';
+        inputGroup.style.marginRight = '10px';
+
+        const label = document.createElement('label');
+        label.htmlFor = inputConfig.id;
+        label.textContent = inputConfig.placeholder;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.placeholder = inputConfig.placeholder;
+        input.id = inputConfig.id;
+        input.style.maxWidth = '150px';
+        input.style.marginLeft = '10px';
+        input.value = inputConfig.value;
+        input.required = true;
+
+        inputGroup.appendChild(input);
+        inputGroup.appendChild(label);
+        inputsContainer.appendChild(inputGroup);
+
+    });
+
+    if(inputs.length > 0) {
+        const submitButton = document.createElement('button');
+        submitButton.id = 'submit-routine-btn'
+        submitButton.type = 'button';
+        submitButton.className = "btn btn-primary mx-2";
+        submitButton.textContent = 'Request routine';
+        submitButton.style.marginLeft = '10px';
+        submitButton.style.borderRadius = '10%';
+
+        inputsContainer.appendChild(submitButton);
+        submitButton.addEventListener('click', () => {
+            handleRequest(selectedRoutine, 'routine')
+        })
+    }
+  }
+
+  function selectOtaAction(){
+    const dropdown = document.getElementById('ota-actions-dropdown');
+    const inputsContainer = document.getElementById('dynamic-ota-inputs');
+    const selectedAction = dropdown.value;
+  
+    inputsContainer.innerHTML = '';
+  
+    const otaActionsInputs = {
+        UpdateSoftwareAction: [
+            { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
+            { placeholder: 'Address', id: 'address-update', value: '0x0800'},
+            { placeholder: 'Sw Version', id: 'software-version', value: '1.0'},
+            { placeholder: 'File type', id: 'file-type', value: 'zip'}
+        ],
+        TransferDataAction: [
+            { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
+            { placeholder: 'Address', id: 'address-transfer', value: '0x0800'},
+            { placeholder: 'Data bytes', id: 'data', value: '0x123456789abcde'}
+        ],
+        SyncOtaStatus: [
+            { placeholder: 'Target', id: 'target-ecu', value: '0x11'},
+            { placeholder: 'Ota State', id: 'ota-state', value: '0x00'}
+        ],
+    };
+  
+    const inputs = otaActionsInputs[selectedAction] || [];
+  
+    inputs.forEach((inputConfig) => {
+        const inputGroup = document.createElement('div');
+        inputGroup.style.display = 'flex';
+        inputGroup.style.flexDirection = 'column';
+        inputGroup.style.alignItems = 'center';
+        inputGroup.style.marginRight = '10px';
+
+        const label = document.createElement('label');
+        label.htmlFor = inputConfig.id;
+        label.textContent = inputConfig.placeholder;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.id = inputConfig.id;
+        input.style.maxWidth = '150px';
+        input.style.marginLeft = '10px';
+        input.required = true,
+        input.value = inputConfig.value;
+        input.disabled = (inputConfig.value == 'zip');
+
+        inputGroup.appendChild(input);
+        inputGroup.appendChild(label);
+        inputsContainer.appendChild(inputGroup);
+    });
+
+    if(inputs.length > 0) {
+        const submitButton = document.createElement('button');
+        submitButton.id = 'submit-action-btn'
+        submitButton.type = 'button';
+        submitButton.className = "btn btn-primary mx-2";
+        submitButton.textContent = 'Request action';
+        submitButton.style.marginLeft = '10px';
+        submitButton.style.borderRadius = '10%';
+
+        inputsContainer.appendChild(submitButton);
+        submitButton.addEventListener('click', () => {
+            handleRequest(selectedAction, 'ota-action')
+        })
+    }
+  }
+  /**
+   * sw_file_type = data.get('update_file_type')
+    sw_file_version = data.get('update_file_version')
+    ecu_id = data.get('ecu_id')
+   */
+    function handleRequest(request, type){
+        let formInputs;
+        if(type == 'routine'){
+            formInputs = document.querySelectorAll('#dynamic-routine-inputs input');
+        }
+        else if(type == 'ota-action'){
+            formInputs = document.querySelectorAll('#dynamic-ota-inputs input');
+        }
+        else{
+            return;
+        }
+        formInputs = Array.from(formInputs);
+        
+        dataForApiRequest = {};
+        let inputsValid = true;
+        const hexPattern = /^0x[0-9A-Fa-f]+$/;
+        const validEcuIds = [0x10, 0x11, 0x12, 0x13, 0x14];
+    
+        formInputs.forEach((input) => {
+            const hexValue = parseInt(input.value, 16);
+            if(input.id != 'file-type' && input.id != 'software-version' && hexPattern.test(input.value) == false){
+                inputsValid = false;
+            }
+            else{
+                switch(input.id)
+                {
+                    case 'receiver-ecu':
+                        {
+                            /* Same as below */
+                        }
+                    case 'target-ecu':
+                        {
+                            if(validEcuIds.includes(hexValue) == false){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'software-version':
+                        {
+                            const versionRegex = /^(?:[1-9]|1[0-6])\.(?:[0-9]|1[0-5])$/;
+                            if(versionRegex.test(input.value) == false){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'address-erase':
+                        {
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'address-update':
+                        {
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'address-transfer':
+                        {   
+                            if(hexValue < 0x0800){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'data':
+                        {
+                            break;
+                        }
+                    case 'file-type':
+                        {
+                            break;
+                        }
+                    case 'size':
+                        {
+                            if(size <= 0){
+                                inputsValid = false;
+                            }
+                            break;
+                        }
+                    case 'ota-state':
+                        {
+                            break;
+                        }
+                    default: break;
+                }
+            }
+
+            if(inputsValid){
+                dataForApiRequest[input.id] = input.value;
+            }
+            else{
+                console.log("Invalid input");
+                return;
+            }
+        })
+
+        /* Call request */
+        switch(request){
+            /* Extra validations for specific endpoints here */
+            case 'UpdateSoftwareAction':
+                {
+                    performApiRequest('/api/update_to_version', 'POST', { 
+                        update_file_type: dataForApiRequest['file-type'], 
+                        update_file_version: dataForApiRequest['software-version'], 
+                        ecu_id: dataForApiRequest['target-ecu'],
+                        address: dataForApiRequest['address-update']
+                    });
+                    break;
+                }
+            case 'TransferDataAction':
+                {
+                    performApiRequest('/api/transfer_data_to_ecu', 'POST',{
+                        ecu_id: dataForApiRequest['target-ecu'],
+                        address: dataForApiRequest['address-transfer'],
+                        data_bytes: dataForApiRequest['data']
+                    });
+                    break;
+                }
+            case 'SyncOtaStatus':
+                {
+                    performApiRequest('/api/sync_ota_status', 'POST', {
+                        ecu_id: dataForApiRequest['target-ecu'],
+                        ota_state: dataForApiRequest['ota-state']
+                    });
+                    break;
+                }
+            case 'InitialiseOTARoutine':
+                {
+                    performApiRequest('/api/ota_init', 'POST', {
+                        target: dataForApiRequest['target-ecu'],
+                        version: dataForApiRequest['software-version']
+                    });
+                    break;
+                }
+            case 'EraseDataRoutine':
+                {
+                    performApiRequest('/api/erase_memory', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                        address: dataForApiRequest['address-erase'],
+                        nrBytes: dataForApiRequest['size'],
+                    });
+                    break;
+                }
+            case 'VerifyDataRoutine':
+                {
+                    performApiRequest('/api/verify_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
+                    break;
+                }
+            case 'WriteToFileRoutine':
+                {
+                    performApiRequest('/api/write_to_file', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
+                    break;
+                }
+            case 'RollbackRoutine':
+                {
+                    performApiRequest('/api/rollback_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
+                    break;
+                }
+            case 'ActivateRoutine':
+                {
+                    performApiRequest('/api/activate_software', 'POST', {
+                        ecu_id: dataForApiRequest['receiver-ecu'],
+                    });
+                    break;
+                }
+            default: break;
+        }
+        console.log("Endpoint called");
+    }
+
+    async function getOtaStatus(event){
+        if(event === 'click'){
+            const response = await performApiRequest('/api/ota_status', 'POST', {
+                ecu_id: "0x10",
+            });
+            const button = document.getElementById('ota-status-btn');
+            button.innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
+            if(response.state.includes("ERROR")){
+                document.querySelector('option[value="UpdateSoftwareAction"]').disabled = true;
+                document.querySelector('option[value="TransferDataAction"]').disabled = true;
+            }
+            else{
+                document.querySelector('option[value="UpdateSoftwareAction"]').disabled = false;
+                document.querySelector('option[value="TransferDataAction"]').disabled = false;
+            }
+        }
+        else if(event == 'dblclick'){
+            otaStatusRequestRunning ^= 1;
+            if(otaStatusRequestRunning){
+                otaStatusRequestIntervalId = setInterval(async() => {
+                    const response = await performApiRequest('/api/ota_status', 'POST', {
+                        ecu_id: "0x10"
+                    });
+                    document.getElementById('ota-status-btn').innerHTML = `Ota State<br><span style="color: black;">${response.state}`;
+                }, 2000);
+            }
+            else{
+                clearInterval(otaStatusRequestIntervalId);
+                document.getElementById('ota-status-btn').innerHTML = `Ota State`;
+            }
+        }
+    }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('routine-dropdown').selectedIndex = 0;
+    document.getElementById('ota-actions-dropdown').selectedIndex = 0;
+  });

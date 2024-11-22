@@ -53,10 +53,12 @@ def update_to_version():
     sw_file_type = data.get('update_file_type')
     sw_file_version = data.get('update_file_version')
     ecu_id = data.get('ecu_id')
+    address = data.get('address')
     updater = Updates()
     response = updater.update_to(type=sw_file_type,
                                  version=sw_file_version,
-                                 id=ecu_id)
+                                 id=ecu_id,
+                                 address=address)
     return jsonify(response)
 
 
@@ -276,8 +278,9 @@ def clear_dtc_info():
 def change_session():
     data = request.get_json()
     sub_funct = data.get('sub_funct')
+    extra_ecu = data.get('extra_ecu')
     session = SessionManager()
-    response = session._change_session(sub_funct)
+    response = session._change_session(sub_funct, extra_ecu)
     return jsonify(response)
 
 
@@ -516,3 +519,24 @@ def activate_software():
 
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
+
+      
+@api_bp.route('/sync_ota_status', methods=['POST'])
+def sync_ota_status():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    ota_state = data.get('ota_state')
+    updater = Updates()
+    response = updater.change_ota_state(ecu_id=ecu_id, ota_status_value=ota_state)
+    return jsonify(response)
+
+  
+@api_bp.route('/transfer_data_to_ecu', methods=['POST'])
+def transfer_data_to_ecu():
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+    address = data.get('address')
+    data_bytes = data.get('data_bytes')
+    updater = Updates()
+    response = updater.transfer_data_to_ecu(ecu_id=ecu_id, address=address, data=data_bytes)
+    return jsonify(response)

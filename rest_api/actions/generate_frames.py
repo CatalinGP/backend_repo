@@ -227,8 +227,13 @@ class GenerateFrame(CanBridge):
 
         self.send(id, data)
 
-    def transfer_data(self, id, block_sequence_counter):
-        data = [0x02, 0x36, block_sequence_counter]
+    def transfer_data(self, id, block_sequence_counter, data_to_transfer=None):
+        data = []
+        if data_to_transfer != None:
+            data = [1 + ((self.__count_digits(data_to_transfer)) // 2), 0x36, block_sequence_counter]
+            self.__add_to_list(data, data_to_transfer)
+        else:
+            data = [0x02, 0x36, block_sequence_counter]
         self.send(id, data)
 
     def transfer_data_long(self, id, block_sequence_counter, transfer_data, first_frame=True):

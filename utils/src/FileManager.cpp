@@ -212,10 +212,10 @@ bool FileManager::getEcuPath(uint8_t ecu_id, std::string& ecu_path, uint8_t para
         break;
     }
     /* Checks for valid path here */
-    // if(param == 1 && access((ecu_path).c_str(), F_OK) == -1)
-    // {
-    //     return 0;
-    // }
+    if(param == 0 && access((ecu_path).c_str(), F_OK) == -1)
+    {
+        return 0;
+    }
     
     return 1;
 }

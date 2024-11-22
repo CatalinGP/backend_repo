@@ -73,7 +73,7 @@ void TransferData::processDataForTransfer(canid_t can_id, std::vector<uint8_t>& 
         uint8_t byte;
         bool first_byte_found = false;
 
-        for(char i = sizeof(total_size) - 1; i >=0; --i)
+        for(signed char i = sizeof(total_size) - 1; i >=0; --i)
         {
             byte = (total_size >> (i * 8)) & 0xFF;
             if(byte != 0 || first_byte_found == true)
@@ -139,7 +139,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
         /* Incorrect message length or invalid format - prepare a negative response */
         nrc.sendNRC(can_id, TD_SID, NegativeResponse::IMLOIF);
         FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {PROCESSING_TRANSFER_FAILED}, aux_can_id, transfer_data_logger, socket);
-        AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+        // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
         return;
     }
 
@@ -175,7 +175,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
     {
         LOG_WARN(transfer_data_logger.GET_LOGGER(), "Data transfer is not initialized. Use Request Download in order to initialize a data transfer. Current OTA state:{}", ota_state);
         nrc.sendNRC(can_id, TD_SID, NegativeResponse::CNC);
-        AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+        // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
         return;
     }
 
@@ -183,7 +183,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
     {
         /* Wrong block sequence counter - prepare a negative response */
         nrc.sendNRC(can_id, TD_SID, NegativeResponse::WBSC);
-        AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+        // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
         return;
     }
 
@@ -201,7 +201,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
             {
                 nrc.sendNRC(can_id, TD_SID, NegativeResponse::TDS);
                FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {PROCESSING_TRANSFER_FAILED}, aux_can_id, transfer_data_logger, socket);
-                AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+                // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
                 LOG_INFO(transfer_data_logger.GET_LOGGER(), "Data transfer failed at writting in memory.");
                 return;
             }
@@ -214,7 +214,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
             response.emplace_back(static_cast<uint8_t>(ota_state));
             /* Send the postive response frame */
             generate_frames.sendFrame(can_id, response);
-            AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+            // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
             LOG_INFO(transfer_data_logger.GET_LOGGER(), "Data transfer complete.");
         }
         return;
@@ -228,7 +228,7 @@ void TransferData::transferData(canid_t can_id, std::vector<uint8_t>& transfer_r
     response.emplace_back(static_cast<uint8_t>(ota_state));
     /* Send the postive response frame */
     generate_frames.sendFrame(can_id, response);
-    AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
+    // AccessTimingParameter::stopTimingFlag(receiver_id, TRANSFER_DATA_SID);
 
     /* Increment expected_block_sequence_number only if it matches the current block_sequence_counter */
     expected_block_sequence_number++;

@@ -14,6 +14,7 @@ YELLOW = '\033[93m'
 RESET = '\033[0m'
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), "..", "..", ".."))
+print(PROJECT_PATH)
 CREDS_PATH = PROJECT_PATH + '/key.json'
 OAUTH2_SCOPE = 'https://www.googleapis.com/auth/drive'
 DRIVE_BASE_FILE = {
@@ -26,7 +27,7 @@ DRIVE_ECU_ENGINE_SW_VERSIONS_FILE = '16e1Hp9QYl1oEjZ0XK927XiwF9h5ySmVn'
 DRIVE_ECU_BATTERY_SW_VERSIONS_FILE = '1QkgBWPEaKg5bnOU0eXjPOEcz6lqNCG-N'
 DRIVE_MCU_SW_VERSIONS_FILE = '1aGo68MWCYBxMVSPd0-jZ4cBGICGdMRxp'
 # TO BE CHANGED WITH THE DESIRED PATH FOR DOWNLOADS
-DRIVE_DOWNLOAD_PATH = PROJECT_PATH
+DRIVE_DOWNLOAD_PATH = PROJECT_PATH + '/src/'
 
 # QUERY STRINGS for google drive api filest.list() method
 FOLDER_MIMETYPE_QUERY = "mimeType = 'application/vnd.google-apps.folder'"
