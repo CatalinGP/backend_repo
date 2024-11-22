@@ -456,6 +456,53 @@ def rollback_software():
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
 
+@api_bp.route('/ota_init', methods=['POST'])
+def ota_init():
+    session = SessionManager()
+    session._change_session(3)
+
+    auth = Auth()
+    auth._auth_to()
+
+    data = request.get_json()
+    target = data.get('target')
+    version = data.get('version')
+
+    if not target:
+        return jsonify({"Error": "Target ID is required"}), 400
+    if not version:
+        return jsonify({"Error": "Version for software is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.ota_init(target, version)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
+@api_bp.route('/write_to_file', methods=['POST'])
+def write_to_file():
+    session = SessionManager()
+    session._change_session(2)
+
+    auth = Auth()
+    auth._auth_to()
+
+    data = request.get_json()
+    ecu_id = data.get('ecu_id')
+
+    if not ecu_id:
+        return jsonify({"Error": "Receiver ECU ID is required"}), 400
+
+    try:
+        updater = Updates()
+        response = updater.write_to_file(ecu_id)
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"Error": str(e)}), 500
+
 
 @api_bp.route('/activate_software', methods=['POST'])
 def activate_software():
