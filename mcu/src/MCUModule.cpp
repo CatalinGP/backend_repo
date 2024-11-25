@@ -17,7 +17,7 @@ namespace MCU
             {0xF18C, {0x48, 0x57, 0x30, 0x30, 0x31, 0x37, 0x38, 0x35, 0x32, 0x30, 0x32, 0x32}},
             {OTA_UPDATE_STATUS_DID, {IDLE}},
 #ifdef SOFTWARE_VERSION
-            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}},
 #else
             {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}},
 #endif
