@@ -20,6 +20,8 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
 };
 const std::vector<uint16_t> BatteryModule::writable_Battery_DID =
 {
+    OTA_UPDATE_STATUS_DID,
+    SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
 
 /** Constructor - initializes the BatteryModule with default values,

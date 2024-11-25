@@ -35,6 +35,8 @@ const std::vector<uint16_t> EngineModule::writable_Engine_DID =
 {
     /* Throttle Position */
      0x0110,
+    OTA_UPDATE_STATUS_DID,
+    SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
 
 /** Constructor - initializes the EngineModule with default values,

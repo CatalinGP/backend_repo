@@ -55,7 +55,9 @@ namespace MCU
         /* System Calibration Identification Number */
         0xF1A8,
         /* System Calibration Verification Number (CVN) */
-        0xF1A9
+        0xF1A9,
+        OTA_UPDATE_STATUS_DID,
+        SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
     };
     /* Constructor */
     MCUModule::MCUModule(uint8_t interfaces_number) : 

@@ -23,7 +23,9 @@ const std::vector<uint16_t> HVACModule::writable_HVAC_DID =
     /* represents Fan Speed */
      0x04C0,
     /* represents HVAC operating modes */
-     0x04D0 
+     0x04D0,
+    OTA_UPDATE_STATUS_DID,
+    SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
 
 HVACModule::HVACModule() : _logger(*hvacModuleLogger)

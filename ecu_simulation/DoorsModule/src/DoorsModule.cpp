@@ -21,7 +21,9 @@ const std::vector<uint16_t> DoorsModule::writable_Doors_DID =
     /* represents Door Driver Locked Status (0:unlocked; 1:locked) */
      0x03C0,
      /* represents Door Passenger Locked Status (0:unlocked; 1:locked) */
-    0x03D0
+    0x03D0,
+    OTA_UPDATE_STATUS_DID,
+    SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
 
 /** Constructor - initializes the DoorsModule with default values,
