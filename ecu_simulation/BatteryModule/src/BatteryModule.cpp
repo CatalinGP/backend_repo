@@ -1,6 +1,12 @@
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <random>
+
 #include "BatteryModule.h"
-
-
+#include "BatteryModuleLogger.h"
+#include "FileManager.h"
+#include "RequestUpdateStatus.h"
 Logger* batteryModuleLogger = nullptr;
 BatteryModule* battery = nullptr;
 

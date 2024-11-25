@@ -1,4 +1,6 @@
 #include "GenerateFrames.h"
+#include <linux/can.h>
+#include <unistd.h>
 
 GenerateFrames::GenerateFrames(Logger& logger)
     : logger(logger)

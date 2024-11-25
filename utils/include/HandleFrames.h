@@ -19,23 +19,7 @@
 #include <linux/can.h>
 #include <iostream>
 #include <vector>
-#include <chrono>
-
-#include "ReadDataByIdentifier.h"
-#include "WriteDataByIdentifier.h"
-#include "EcuReset.h"
-#include "TesterPresent.h"
-#include "SecurityAccess.h"
 #include "DiagnosticSessionControl.h"
-#include "ReadDtcInformation.h"
-#include "RoutineControl.h"
-#include "AccessTimingParameter.h"
-#include "ReadMemoryByAddress.h"
-#include "RequestDownload.h"
-#include "RequestUpdateStatus.h"
-#include "TransferData.h"
-#include "ClearDtc.h"
-#include "MemoryManager.h"
 
 class HandleFrames 
 {

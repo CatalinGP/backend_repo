@@ -13,23 +13,13 @@
 
 #include <iostream>
 #include <vector>
-#include <cstdint>
-#include <string>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include<linux/can.h>
-#include <unordered_set>
-#include<iomanip>
-#include <algorithm>
+
+#include <linux/can.h>
+
 
 #include "GenerateFrames.h"
 #include "Logger.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
-#include "FileManager.h"
+
 
 class WriteDataByIdentifier
 {

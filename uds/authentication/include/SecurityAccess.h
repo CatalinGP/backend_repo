@@ -13,15 +13,12 @@
 
 #include <linux/can.h>
 #include <vector>
-#include <unordered_map>
 #include <bitset>
 #include <iomanip>
-#include <random>
 #include <chrono>
 
 #include "GenerateFrames.h"
 #include "Logger.h"
-#include "NegativeResponse.h"
 
 class SecurityAccess
 {

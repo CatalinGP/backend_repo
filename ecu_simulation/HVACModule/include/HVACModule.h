@@ -22,14 +22,8 @@
 
 #include <iostream>
 #include <unordered_map>
-#include <vector>
-#include <thread>
-#include <random>
-#include <string>
-#include <ctime>
+#include <vector> 
 #include "ECU.h"
-#include "HVACModuleLogger.h"
-#include "HVACIncludes.h"
 
 class HVACModule
 {

@@ -1,4 +1,8 @@
 #include "MCUModule.h"
+#include "MCULogger.h"
+#include <thread>
+#include "FileManager.h"
+#include "MemoryManager.h"
 
 Logger* MCULogger = nullptr;
 namespace MCU

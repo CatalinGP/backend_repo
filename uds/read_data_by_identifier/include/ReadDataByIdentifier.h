@@ -14,16 +14,10 @@
 
 #include <linux/can.h>
 #include <vector>
-#include <unordered_map>
-#include <bitset>
-#include <fstream>
-#include <sstream>
-#include <string>
+// #include <fstream>
 
 #include "GenerateFrames.h"
 #include "Logger.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
 
 class ReadDataByIdentifier
 {

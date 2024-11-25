@@ -15,17 +15,11 @@
 #define INTERFACE_MODULE_H
 
 #include <iostream>
-#include <string>
-#include <cstring>
-
-#include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <net/if.h>
+#include <linux/can.h>
 
-#include<linux/can.h>
-#include<string.h>
-#include <fcntl.h>
 #include "Logger.h"
+
 /* class designed to manage the virtual CAN network interface (vcan) */
 class CreateInterface
 {   

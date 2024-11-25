@@ -1,5 +1,8 @@
 #include "HVACModule.h"
+#include "HVACModuleLogger.h"
 
+#include <thread>
+#include <unistd.h>
 int main()
 {
     #ifdef UNIT_TESTING_MODE

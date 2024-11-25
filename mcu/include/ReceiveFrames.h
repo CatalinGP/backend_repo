@@ -35,31 +35,18 @@
 #ifndef POC_SRC_MCU_RECEIVE_FRAME_MODULE_H
 #define POC_SRC_MCU_RECEIVE_FRAME_MODULE_H
 
-#include<string>
-#include<stdlib.h>
-#include<iostream>
-#include<unistd.h>
-#include<cstring>
-#include<sstream>
 #include<vector>
 #include<queue>
 #include<mutex>
 #include<condition_variable>
-#include<algorithm>
 #include<linux/can.h>
 #include<map>
 #include<chrono>
 #include<thread>
-#include <future>
-#include <atomic>
-#include <set>
-#include <future>
-#include <atomic>
 #include <set>
 
 #include "HandleFrames.h"
 #include "GenerateFrames.h"
-#include "MCULogger.h"
 
 
 namespace MCU

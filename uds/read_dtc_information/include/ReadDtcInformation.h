@@ -14,15 +14,10 @@
 #include "GenerateFrames.h"
 
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <map>
-#include <chrono>
 
-#include <poll.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
+
 
 class ReadDTC
 {

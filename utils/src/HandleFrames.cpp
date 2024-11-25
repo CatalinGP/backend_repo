@@ -1,6 +1,25 @@
 
 #include "HandleFrames.h"
 
+#include "ReadDataByIdentifier.h"
+#include "WriteDataByIdentifier.h"
+#include "EcuReset.h"
+#include "TesterPresent.h"
+#include "SecurityAccess.h"
+#include "ReadDtcInformation.h"
+#include "RoutineControl.h"
+#include "AccessTimingParameter.h"
+#include "ReadMemoryByAddress.h"
+#include "RequestDownload.h"
+#include "RequestUpdateStatus.h"
+#include "TransferData.h"
+#include "ClearDtc.h"
+#include "MemoryManager.h"
+#include "NegativeResponse.h"
+#include "RequestTransferExit.h"
+#include <chrono>
+
+
 HandleFrames::HandleFrames(int socket, Logger& logger)
             : _socket(socket), _logger(logger), mcuDiagnosticSessionControl(_logger, _socket)
 {

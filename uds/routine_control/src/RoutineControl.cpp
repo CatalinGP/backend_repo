@@ -5,6 +5,14 @@
 #include "HVACModule.h"
 #include "MCUModule.h"
 #include <limits.h>
+#include "MemoryManager.h"
+#include "FileManager.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
+#include "AccessTimingParameter.h"
+#include "RequestDownload.h"
+#include "TransferData.h"
+#include <unistd.h>
 
 RoutineControl::RoutineControl(int socket, Logger& rc_logger)
             : generate_frames(socket, rc_logger), rc_logger(rc_logger)

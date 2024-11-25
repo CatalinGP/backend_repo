@@ -23,11 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <linux/can.h>
-#include <map>
 #include "Logger.h"
-#include "NegativeResponse.h"
-#include "ReadDataByIdentifier.h"
-#include "GenerateFrames.h"
 
 #define REQUEST_UPDATE_STATUS_REQUEST_SIZE      0x02
 #define REQUEST_UPDATE_STATUS_RESPONSE_SUCCESS_SIZE	    0x03

@@ -1,4 +1,7 @@
 #include "ReadMemoryByAddress.h"
+#include "SecurityAccess.h"
+#include "NegativeResponse.h"
+#include <vector>
 
 ReadMemoryByAddress::ReadMemoryByAddress(MemoryManager* memManager, GenerateFrames& frameGen, int socket, Logger& log)
     : memoryManager(memManager), frameGenerator(frameGen), socket(socket), logger(log) {}

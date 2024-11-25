@@ -19,22 +19,17 @@
 
 #include <iostream>
 #include <vector>
-#include <unistd.h>
 #include <linux/can.h>
-#include <sstream>
-#include <iomanip>
-#include <cstring>
+// #include <iomanip>
+// #include <cstring>
 #include <deque>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
-#include <poll.h> 
-#include <future>
 #include <set>
 
 #include "HandleFrames.h"
-#include "GenerateFrames.h"
 #include "Logger.h"
 
 /* List of service we have implemented. */

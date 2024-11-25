@@ -14,9 +14,10 @@
 
 #include <iostream>
 #include "Logger.h"
-#include "GenerateFrames.h"
 #include "CreateInterface.h"
 #include "ReceiveFrames.h"
+#include <future>
+#include <map>
 
 #define ECU_INTERFACE_NUMBER 0x00
 #define SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID 0xF1A2

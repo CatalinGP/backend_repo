@@ -9,17 +9,11 @@
 #ifndef ECU_RESET_H
 #define ECU_RESET_H
 
-#include "GenerateFrames.h"
-#include "CreateInterface.h"
 #include "Logger.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
 
-#include <linux/can.h>
 #include <iostream>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <unistd.h>
+// #include <sys/ioctl.h>
+// #include <sys/socket.h>
 
 class EcuReset
 {

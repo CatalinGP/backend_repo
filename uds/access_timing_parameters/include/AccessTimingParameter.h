@@ -22,15 +22,10 @@
 #ifndef UDS_ATP_SERVICE
 #define UDS_ATP_SERVICE
 
-#include "GenerateFrames.h"
 #include "Logger.h"
-#include "NegativeResponse.h"
-
 
 #include <linux/can.h>
-#include <cstdlib>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
+
 
 class AccessTimingParameter
 {

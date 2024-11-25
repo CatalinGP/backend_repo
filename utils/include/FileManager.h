@@ -13,12 +13,11 @@
 #define FILEMANAGER_H
 
 #include <iostream>
-#include <cstdint>
 #include <vector>
 #include <unordered_map>
-#include <fstream>
-#include <iomanip>
 #include <string>
+#include <linux/can.h>
+
 #include "Logger.h"
 #include "GenerateFrames.h"
 

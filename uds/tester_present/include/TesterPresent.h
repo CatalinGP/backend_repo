@@ -12,14 +12,10 @@
 #define TESTER_PRESENT_H
 
 #include "GenerateFrames.h"
-#include "CreateInterface.h"
 #include "DiagnosticSessionControl.h"
-#include "NegativeResponse.h"
 #include <iostream>
 #include <vector>
-#include <thread>
 #include <chrono>
-#include <atomic>
 class TesterPresent
 {
 public:

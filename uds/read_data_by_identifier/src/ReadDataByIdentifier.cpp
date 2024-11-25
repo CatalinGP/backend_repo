@@ -4,6 +4,12 @@
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
+#include "AccessTimingParameter.h"
+#include "FileManager.h"
+#include "NegativeResponse.h"
+#include "SecurityAccess.h"
+#include <string>
+#include <sstream>
 
 ReadDataByIdentifier::ReadDataByIdentifier(int socket, Logger& rdbi_logger) 
             : generate_frames(socket, rdbi_logger), rdbi_logger(rdbi_logger)

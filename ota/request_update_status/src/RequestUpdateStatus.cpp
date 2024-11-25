@@ -11,6 +11,9 @@
 
 #include "RequestUpdateStatus.h"
 #include "AccessTimingParameter.h"
+#include "NegativeResponse.h"
+#include "ReadDataByIdentifier.h"
+#include "GenerateFrames.h"
 
 RequestUpdateStatus::RequestUpdateStatus(int socket, Logger& logger) : socket(socket), _logger(logger)
 {}

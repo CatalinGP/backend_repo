@@ -4,6 +4,10 @@
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
+#include "NegativeResponse.h"
+#include "AccessTimingParameter.h"
+#include <atomic>
+#include <thread>
 
 TesterPresent::TesterPresent(int socket, Logger& logger,  DiagnosticSessionControl& sessionControl)
                 :  socket(socket), logger(logger),generate_frames(socket, logger),

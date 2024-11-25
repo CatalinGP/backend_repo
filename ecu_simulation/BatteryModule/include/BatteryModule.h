@@ -19,18 +19,11 @@
 
 #define BATTERY_MODULE_ID 0x11
 
-#include <thread>
-#include <cstdlib>
-#include <chrono>
 #include <iostream>
-#include <unistd.h>
-#include <future>
-#include <fstream>
-#include "CreateInterface.h"
-#include "ReceiveFrames.h"
-#include "GenerateFrames.h"
-#include "BatteryModuleLogger.h"
+#include <unordered_map>
+#include <vector> 
 #include "ECU.h"
+
 
 class BatteryModule
 {

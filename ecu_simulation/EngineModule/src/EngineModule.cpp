@@ -1,4 +1,12 @@
 #include "EngineModule.h"
+#include "EngineModuleLogger.h"
+#include "FileManager.h"
+#include "RequestUpdateStatus.h"
+
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <random>
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;

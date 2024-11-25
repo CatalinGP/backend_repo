@@ -1,4 +1,7 @@
 #include "DoorsModule.h"
+#include "DoorsModuleLogger.h"
+#include <thread>
+#include <unistd.h>
 
 int main() {
     #ifdef UNIT_TESTING_MODE
