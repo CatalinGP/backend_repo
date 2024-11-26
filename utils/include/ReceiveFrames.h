@@ -20,8 +20,6 @@
 #include <iostream>
 #include <vector>
 #include <linux/can.h>
-// #include <iomanip>
-// #include <cstring>
 #include <deque>
 #include <thread>
 #include <mutex>

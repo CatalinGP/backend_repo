@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <string>
 #include <sys/socket.h>
-// #include <cstring>
 
 /* Initialize static instance to nullptr */
 CreateInterface* CreateInterface::create_interface_instance = nullptr;
