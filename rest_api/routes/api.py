@@ -204,13 +204,9 @@ def read_dtc_info():
                 {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
 
         requester = RequestIdAction()
-        response_req_json = requester.read_ids()
-        ecu_values = response_req_json.get("ecus", [])
-        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
-
-        if ecu_id not in valid_values:
+        if not requester.check_ecu_up(ecu_id):
             errors.append(
-                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is either not supported or not running."})
 
         subfunc = request.args.get('subfunc', default=1, type=int)
         if subfunc not in [1, 2]:
@@ -224,7 +220,7 @@ def read_dtc_info():
                           "details": f"The following bits are not supported: {invalid_bits}"})
 
         if errors:
-            return jsonify({"errors": errors}), 400
+            return jsonify({"errors": errors})
 
         dtc_instance = DiagnosticTroubleCode()
         return dtc_instance.read_dtc_info(subfunc, dtc_mask_bits, ecu_id)
@@ -252,17 +248,13 @@ def clear_dtc_info():
                 {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
 
         requester = RequestIdAction()
-        response_req_json = requester.read_ids()
-        ecu_values = response_req_json.get("ecus", [])
-        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
-
-        if ecu_id not in valid_values:
+        if not requester.check_ecu_up(ecu_id):
             errors.append(
-                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is either not supported or not running."})
 
         dtc_group = data.get('dtc_group')
         if errors:
-            return jsonify({"errors": errors}), 400
+            return jsonify({"errors": errors})
 
         clearer = DiagnosticTroubleCode()
         return clearer.clear_dtc_info(dtc_group, ecu_id)
@@ -330,18 +322,14 @@ def access_timing():
                 {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
 
         requester = RequestIdAction()
-        response_req_json = requester.read_ids()
-        log_info_message(logger, f" JSON CU ID: {response_req_json}")
-        ecu_values = response_req_json.get("ecus", [])
-        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
         mcu_id = int(response_req_json.get("mcu_id"), 16)
 
-        if ecu_id not in valid_values and ecu_id != mcu_id:
+        if not requester.check_ecu_up(ecu_id) and ecu_id != mcu_id:
             errors.append(
-                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is either not supported or not running."})
 
         if errors:
-            return jsonify({"errors": errors}), 400
+            return jsonify({"errors": errors})
 
         requester = ReadAccessTiming()
         response = requester._read_timing_info(ecu_id, sub_funct)
@@ -385,26 +373,23 @@ def write_timing():
                 {"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
 
         requester = RequestIdAction()
-        response_req_json = requester.read_ids()
-        ecu_values = response_req_json.get("ecus", [])
-        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
         mcu_id = int(response_req_json.get("mcu_id"), 16)
 
-        if ecu_id not in valid_values and ecu_id != mcu_id:
+        if not requester.check_ecu_up(ecu_id) and ecu_id != mcu_id:
             errors.append(
-                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is not supported"})
+                {"error": "Invalid ecu", "details": f"Ecu {hex(ecu_id)} is either not supported or not running."})
 
         writer = WriteAccessTiming()
         if sub_funct == 2:
             if errors:
-                return jsonify({"errors": errors}), 400
+                return jsonify({"errors": errors})
             result = writer._write_timing_info(sub_funct, ecu_id)
         else:
             if not data or 'p2_max' not in data or 'p2_star_max' not in data:
                 errors.append({"message": "Missing required parameters"})
 
             if errors:
-                return jsonify({"errors": errors}), 400
+                return jsonify({"errors": errors})
 
             p2_max = int(data.get('p2_max'))
             p2_star_max = int(data.get('p2_star_max'))
@@ -539,4 +524,43 @@ def transfer_data_to_ecu():
     data_bytes = data.get('data_bytes')
     updater = Updates()
     response = updater.transfer_data_to_ecu(ecu_id=ecu_id, address=address, data=data_bytes)
+    return jsonify(response)
+
+@api_bp.route('/read_info', methods=['GET'])
+@requires_auth
+def read_info():
+    item = request.args.get('item', default=None, type=str)
+    
+    ecu_id_str = request.args.get('ecu_id', default=None, type=str)
+    try:
+        ecu_id = int(ecu_id_str, 16)
+    except ValueError:
+        return jsonify({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+    
+    requester = RequestIdAction()
+    if not requester.check_ecu_up(ecu_id):
+        return jsonify({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is either not supported or not running."})
+    
+    reader = ReadInfo()     
+    response = reader.read_info(item, ecu_id)
+    return jsonify(response)
+
+
+@api_bp.route('/write_info', methods=['POST'])
+@requires_auth
+def write_info():
+    data = request.get_json()
+
+    ecu_id_str = data["ecu_id"]
+    try:
+        ecu_id = int(ecu_id_str, 16)
+    except ValueError:
+        return jsonify({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is not a valid hexadecimal value"})
+    
+    requester = RequestIdAction()
+    if not requester.check_ecu_up(ecu_id):
+        return jsonify({"error": "Invalid ecu", "details": f"Ecu {ecu_id_str} is either not supported or not running."})
+    
+    writer = WriteInfo(data)
+    response = writer.write_data(ecu_id, data)
     return jsonify(response)

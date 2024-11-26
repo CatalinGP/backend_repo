@@ -460,6 +460,17 @@ class Action(GF):
         }
         return response_to_frontend
 
+    def _to_json_no_values(self, ecu_type):
+        response_to_frontend = {
+            "message": f"No data was written to the {ecu_type} ECU.",
+            "reason": (
+                "Provided keys did not match any known identifiers, "
+                "or no valid data was provided for writing."
+            ),
+            "time_stamp": datetime.datetime.now().isoformat()
+        }
+        return response_to_frontend
+
     def _to_json_error(self, message, issue_count):
         response_to_frontend = {
             "Error": message,

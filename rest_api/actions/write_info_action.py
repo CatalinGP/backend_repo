@@ -73,8 +73,12 @@ class WriteInfo(Action):
                 log_info_message(logger, f"Successfully wrote '{value}' to {key}")
                 written_values[key] = value
 
-            log_info_message(logger, f"Data written successfully to ECU ID: {ECU_BATTERY}")
-            response_json = self._to_json("Battery", written_values)
+            if len(written_values):
+                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_BATTERY}")
+                response_json = self._to_json("Battery", written_values)
+            else:
+                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                response_json = self._to_json_no_values("Battery")
             return response_json
 
         except CustomError:
@@ -140,8 +144,12 @@ class WriteInfo(Action):
                 log_info_message(logger, f"Successfully wrote '{value}' to {key}")
                 written_values[key] = value
 
-            log_info_message(logger, f"Data written successfully to ECU ID: {ECU_DOORS}")
-            response_json = self._to_json("Doors", written_values)
+            if len(written_values):
+                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_DOORS}")
+                response_json = self._to_json("Doors", written_values)
+            else:
+                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                response_json = self._to_json_no_values("Doors")
             return response_json
 
         except CustomError:
@@ -213,8 +221,12 @@ class WriteInfo(Action):
                 log_info_message(logger, f"Successfully wrote '{value}' to {key}")
                 written_values[key] = value
 
-            log_info_message(logger, f"Data written successfully to ECU ID: {ECU_ENGINE}")
-            response_json = self._to_json("Engine", written_values)
+            if len(written_values):
+                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_ENGINE}")
+                response_json = self._to_json("Engine", written_values)
+            else:
+                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                response_json = self._to_json_no_values("Engine")
             return response_json
 
         except CustomError:
@@ -282,8 +294,12 @@ class WriteInfo(Action):
                 log_info_message(logger, f"Successfully wrote '{value}' to {key}")
                 written_values[key] = value
 
-            log_info_message(logger, f"Data written successfully to ECU ID: {ECU_HVAC}")
-            response_json = self._to_json("HVAC", written_values)
+            if len(written_values):
+                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_HVAC}")
+                response_json = self._to_json("HVAC", written_values)
+            else:
+                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                response_json = self._to_json_no_values("HVAC")
             return response_json
 
         except CustomError:
@@ -294,3 +310,32 @@ class WriteInfo(Action):
                 "message": "Issue encountered during Write by ID",
                 "negative_response": negative_response
             }
+
+    def write_data(self, ecu_id=None, data=None):
+
+        """
+        Method to write information to any module. Handles authentication, data preparation,
+        and writing operations.
+
+        Json receive:
+        - is_manual_flow: True or False
+        - ecu_id : 11 | 12 | 13 |14
+        - data_identifiers: value to be written
+
+        Returns:
+        - JSON response.
+
+        Endpoint test (external flow):
+
+        curl -X POST http://127.0.0.1:5000/api/write_info -H "Content-Type: application/json" -d '{"is_manual_flow": false,"cabin_temperature_driver_set": 25, "fan_speed": 45, "hvac_modes":0, "ecu_id": "14"}'
+        """
+        log_info_message(logger, "Write info function called.")
+
+        if ecu_id == 17:
+            return self.write_to_battery(data)
+        elif ecu_id == 18:
+            return self.write_to_engine(data)
+        elif ecu_id == 19:
+            return self.write_to_doors(data)
+        elif ecu_id == 20:
+            return self.write_to_hvac(data)
