@@ -16,12 +16,7 @@
 
 #include <iostream>
 #include <vector>
-// #include <sstream>
-// #include <cstring>
-// #include <utility>
-// #include <sys/ioctl.h>
 #include <linux/can.h>
-// #include <net/if.h>
 
 #include "GenerateFrames.h"
 #include "Logger.h"

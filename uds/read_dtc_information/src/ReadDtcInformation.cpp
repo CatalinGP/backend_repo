@@ -7,8 +7,6 @@
 #include "AccessTimingParameter.h"
 #include <map>
 #include <fstream>
-// #include <sys/ioctl.h>
-// #include <net/if.h>
 ReadDTC::ReadDTC(Logger logger, std::string path_folder, int socket)
 {
     this->path_folder = path_folder;

@@ -13,6 +13,7 @@
 #include "RequestDownload.h"
 #include "TransferData.h"
 #include <unistd.h>
+#include <pybind11/embed.h>
 
 RoutineControl::RoutineControl(int socket, Logger& rc_logger)
             : generate_frames(socket, rc_logger), rc_logger(rc_logger)

@@ -10,16 +10,8 @@
 #include "SecurityAccess.h"
 #include "FileManager.h"
 #include "AccessTimingParameter.h"
-// #include <unordered_set>
-// #include <iomanip>
 #include <algorithm>
-// #include <cstdint>
-// #include <string>
-// #include <sys/ioctl.h>
-// #include <sys/socket.h>
-// #include <net/if.h>
-// #include <unistd.h>
-// #include <fcntl.h>
+
 WriteDataByIdentifier::WriteDataByIdentifier(Logger& wdbi_logger, int socket)
             : generate_frames(socket, wdbi_logger), wdbi_logger(wdbi_logger)
 {   

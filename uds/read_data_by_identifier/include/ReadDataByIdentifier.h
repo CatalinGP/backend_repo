@@ -14,7 +14,6 @@
 
 #include <linux/can.h>
 #include <vector>
-// #include <fstream>
 
 #include "GenerateFrames.h"
 #include "Logger.h"

@@ -16,7 +16,6 @@
 #ifndef DIAGNOSTICSESSIONCONTROL_H
 #define DIAGNOSTICSESSIONCONTROL_H
 
-// #include <cstdlib>
 #include <iostream>
 #include "Logger.h"
 #include <linux/can.h>

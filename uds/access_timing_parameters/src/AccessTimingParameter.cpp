@@ -6,9 +6,6 @@
 #include "MCUModule.h"
 #include "NegativeResponse.h"
 #include "GenerateFrames.h"
-// #include <cstdlib>
-// #include <sys/ioctl.h>
-// #include <sys/socket.h>
 
 // Define static constants
 const uint16_t AccessTimingParameter::DEFAULT_P2_MAX_TIME = 2000;
