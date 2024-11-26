@@ -113,3 +113,173 @@ class Routine(Action):
 
             log_error_message(logger, "[Erase Memory] No Message received from CAN ")
             return self._to_json_status("The MCU/ECU is not responding", 1)
+
+
+    def rollback_software(self, ecu_id):
+        """
+        Handles the CAN frame sending for rolling back software.
+
+        Args:
+        - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
+            can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
+
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x05, 0x01, 0x00]
+            log_info_message(
+                logger, f"Sending rollback CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during rollback.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Rollback failed for ECU ID: {ecu_id}")
+                raise CustomError(f"Rollback failed for ECU ID: {ecu_id}")
+
+            log_info_message(logger, f"Rollback successful for ECU ID: {ecu_id}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Rollback completed successfully for ECU ID: {ecu_id}"
+            }
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {ecu_id}")
+        
+    def activate_software(self, ecu_id):
+        """
+        Handles the CAN frame sending for activating software.
+
+        Args:
+        - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
+            can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
+
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x06, 0x01, 0x00]
+            log_info_message(
+                logger, f"Sending CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during activation.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Activation failed for ECU ID: {ecu_id}")
+                raise CustomError(f"Activation failed for ECU ID: {ecu_id}")
+
+            log_info_message(logger, f"Activation successful for ECU ID: {ecu_id}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Activation completed successfully for ECU ID: {ecu_id}"
+            }
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {ecu_id}")
+            
+    
+    def ota_init(self, target, version):
+        """
+        Handles the CAN frame sending for initialise OTA
+        curl -X POST http://127.0.0.1:5000/api/ota_init -H "Content-Type: application/json" -d '{
+            "target": "0x11", 
+            "version": "1.2"
+        }'
+
+
+        Args:
+        - target: ID of the ECU or MCU in hexadecimal (e.g., "0x10").
+        - version: version of software in hexadecimal("00" to "FF")
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            can_id = (int(target, 16) << 16) + (self.my_id << 8) + self.id_ecu[0]
+            if isinstance(version, str):
+                if '.' not in version:
+                    version += '.0'
+                major, minor = map(int, version.split('.'))
+                major -= 1
+                if major < 0 or major > 15 or minor < 0 or minor > 15:
+                    raise ValueError(
+                        f"Invalid version: {version}. Major and minor must be between 0 and 15."
+                    )
+                version_byte = (major << 4) | minor  # Encode directly without reduction
+            elif isinstance(version, int):
+                # Assume the int is already in the correct format
+                version_byte = version
+            else:
+                raise ValueError(f"Invalid version format: {version}")
+
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x02, 0x01, version_byte]
+            log_info_message(
+                logger, f"Sending initialise OTA CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during initialise.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Initialise failed for ECU ID: {target} with version {version}")
+                raise CustomError(f"Initialise failed for ECU ID: {target} with version {version}")
+
+            log_info_message(logger, f"Initialise OTA successful for ECU ID: {target} with version {version}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Initialise OTA completed successfully for ECU ID: {target} with version {version}"
+            }
+
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {target} with version {version}")
+        
+
+    def write_to_file(self, ecu_id):
+        """
+         This routine reads the data from a memory address and write the data in zip 
+         file “main_battery_new.zip” and unzip it. This is called after the verify routine 
+         is successfully.
+
+        curl -X POST http://127.0.0.1:5000/api/write_to_file -H "Content-Type: application/json" -d '{
+            "ecu_id": "0x11"
+        }'
+        Args:
+        - target: ID of the ECU or MCU in hexadecimal (e.g., "0x10").
+        """
+        try:
+            # Compute CAN ID from ECU ID
+            ecu_numeric_id = int(ecu_id, 16)
+            can_id = 0xFA00 + ecu_numeric_id
+            # Construct and send the CAN frame
+            frame_data = [0x05, 0x31, 0x01, 0x03, 0x01, 0x00]
+            log_info_message(
+                logger, f"Sending CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.send_frame(can_id, frame_data)
+
+            # Wait for response and handle it
+            frame_response = self._passive_response(
+                ROUTINE_CONTROL, "Error during write to file.")
+            if frame_response.data[1] != 0x71:
+                log_info_message(logger, f"Write to file failed for ECU ID: {ecu_id}")
+                raise CustomError(f"Write to file failed for ECU ID: {ecu_id}")
+
+            log_info_message(logger, f"Write to file successful for ECU ID: {ecu_id}")
+
+            # Return positive response
+            return {
+                "status": "success",
+                "message": f"Write to file completed successfully for ECU ID: {ecu_id}"
+            }
+        except ValueError:
+            raise CustomError(f"Invalid ECU ID: {ecu_id}")

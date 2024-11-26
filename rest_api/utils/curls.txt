@@ -138,3 +138,17 @@ curl -X POST http://localhost:5000/api/ota_status
 curl -X POST http://127.0.0.1:5000/api/write_to_file -H "Content-Type: application/json" -d '{
             "ecu_id": "0x11"
         }'
+
+26. /verify_software - POST Request
+
+curl -X POST http://127.0.0.1:5000/api/verify_software -H "Content-Type: application/json" -d '{
+            "ecu_id": "0x10"
+        }'
+
+27. /erase_memory - POST Request
+
+curl -X POST http://127.0.0.1:5000/api/erase_memory -H "Content-Type: application/json" -d '{
+                "ecu_id": "0x10",
+                "address": "0x0800",
+                "nrBytes": "0x4"
+            }'
