@@ -449,8 +449,8 @@ def rollback_software():
         return jsonify({"Error": "ECU ID is required"}), 400
 
     try:
-        updater = Updates()
-        response = updater.rollback_software(ecu_id)
+        routine = Routine()
+        response = routine.rollback_software(ecu_id)
         return jsonify(response)
 
     except Exception as e:
@@ -474,8 +474,8 @@ def ota_init():
         return jsonify({"Error": "Version for software is required"}), 400
 
     try:
-        updater = Updates()
-        response = updater.ota_init(target, version)
+        routine = Routine()
+        response = routine.ota_init(target, version)
         return jsonify(response)
 
     except Exception as e:
@@ -496,8 +496,8 @@ def write_to_file():
         return jsonify({"Error": "Receiver ECU ID is required"}), 400
 
     try:
-        updater = Updates()
-        response = updater.write_to_file(ecu_id)
+        routine = Routine()
+        response = routine.write_to_file(ecu_id)
         return jsonify(response)
 
     except Exception as e:
@@ -513,8 +513,8 @@ def activate_software():
         return jsonify({"Error": "ECU ID is required"}), 400
 
     try:
-        updater = Updates()
-        response = updater.activate_software(ecu_id)
+        routine = Routine()
+        response = routine.activate_software(ecu_id)
         return jsonify(response)
 
     except Exception as e:
