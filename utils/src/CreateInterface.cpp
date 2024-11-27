@@ -1,8 +1,9 @@
-#include "CreateInterface.h"
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <string>
 #include <sys/socket.h>
+
+#include "CreateInterface.h"
 
 /* Initialize static instance to nullptr */
 CreateInterface* CreateInterface::create_interface_instance = nullptr;

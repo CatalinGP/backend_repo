@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <linux/can.h>
+
 #include "Logger.h"
 
 #define REQUEST_UPDATE_STATUS_REQUEST_SIZE      0x02

@@ -11,11 +11,13 @@
 #ifndef TESTER_PRESENT_H
 #define TESTER_PRESENT_H
 
-#include "GenerateFrames.h"
-#include "DiagnosticSessionControl.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
+
+#include "GenerateFrames.h"
+#include "DiagnosticSessionControl.h"
+
 class TesterPresent
 {
 public:

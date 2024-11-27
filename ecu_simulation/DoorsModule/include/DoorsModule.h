@@ -21,7 +21,8 @@
 
 #include <iostream>
 #include <unordered_map>
-#include <vector> 
+#include <vector>
+
 #include "ECU.h"
 
 class DoorsModule

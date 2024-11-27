@@ -11,13 +11,11 @@
 #ifndef READ_DTC_INFROMATION_H
 #define READ_DTC_INFROMATION_H
 
-#include "GenerateFrames.h"
-
 #include <iostream>
 #include <vector>
 #include <string>
 
-
+#include "GenerateFrames.h"
 
 class ReadDTC
 {

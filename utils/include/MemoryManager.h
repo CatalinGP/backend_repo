@@ -74,7 +74,6 @@
 #include <cstring>
 #include <vector>
 
-
 #include "Logger.h"
 
 #define DEV_LOOP "/dev/loop0"

@@ -1,10 +1,13 @@
+#include <unistd.h>
+#include <pybind11/embed.h>
+#include <limits.h>
+
 #include "RoutineControl.h"
 #include "BatteryModule.h"
 #include "EngineModule.h"
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
-#include <limits.h>
 #include "MemoryManager.h"
 #include "FileManager.h"
 #include "NegativeResponse.h"
@@ -12,8 +15,6 @@
 #include "AccessTimingParameter.h"
 #include "RequestDownload.h"
 #include "TransferData.h"
-#include <unistd.h>
-#include <pybind11/embed.h>
 
 RoutineControl::RoutineControl(int socket, Logger& rc_logger)
             : generate_frames(socket, rc_logger), rc_logger(rc_logger)

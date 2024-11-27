@@ -17,8 +17,9 @@
 #define DIAGNOSTICSESSIONCONTROL_H
 
 #include <iostream>
-#include "Logger.h"
 #include <linux/can.h>
+
+#include "Logger.h"
 
 /* Diagnostic Control Session codes */
 const uint8_t SID_DIAGNOSTIC_SESSION_CONTROL = 0x10;

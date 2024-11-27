@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "Logger.h"
+
 /* Enumeration for frame types */
 enum FrameType {
     DATA_FRAME,

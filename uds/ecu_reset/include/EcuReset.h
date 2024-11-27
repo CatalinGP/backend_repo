@@ -9,9 +9,9 @@
 #ifndef ECU_RESET_H
 #define ECU_RESET_H
 
-#include "Logger.h"
-
 #include <iostream>
+
+#include "Logger.h"
 
 class EcuReset
 {

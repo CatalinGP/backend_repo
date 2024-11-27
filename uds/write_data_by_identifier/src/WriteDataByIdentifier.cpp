@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "WriteDataByIdentifier.h"
 #include "BatteryModule.h"
 #include "EngineModule.h"
@@ -10,7 +12,6 @@
 #include "SecurityAccess.h"
 #include "FileManager.h"
 #include "AccessTimingParameter.h"
-#include <algorithm>
 
 WriteDataByIdentifier::WriteDataByIdentifier(Logger& wdbi_logger, int socket)
             : generate_frames(socket, wdbi_logger), wdbi_logger(wdbi_logger)

@@ -1,3 +1,6 @@
+#include <map>
+#include <fstream>
+
 #include "ReadDtcInformation.h"
 #include "BatteryModule.h"
 #include "EngineModule.h"
@@ -5,8 +8,7 @@
 #include "HVACModule.h"
 #include "MCUModule.h"
 #include "AccessTimingParameter.h"
-#include <map>
-#include <fstream>
+
 ReadDTC::ReadDTC(Logger logger, std::string path_folder, int socket)
 {
     this->path_folder = path_folder;

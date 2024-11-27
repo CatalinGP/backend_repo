@@ -1,3 +1,6 @@
+#include <string>
+#include <sstream>
+
 #include "ReadDataByIdentifier.h"
 #include "BatteryModule.h"
 #include "EngineModule.h"
@@ -8,8 +11,6 @@
 #include "FileManager.h"
 #include "NegativeResponse.h"
 #include "SecurityAccess.h"
-#include <string>
-#include <sstream>
 
 ReadDataByIdentifier::ReadDataByIdentifier(int socket, Logger& rdbi_logger) 
             : generate_frames(socket, rdbi_logger), rdbi_logger(rdbi_logger)

@@ -13,9 +13,7 @@
 
 #include <iostream>
 #include <vector>
-
 #include <linux/can.h>
-
 
 #include "GenerateFrames.h"
 #include "Logger.h"

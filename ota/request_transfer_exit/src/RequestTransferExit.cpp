@@ -10,6 +10,7 @@
 #include "MCUModule.h"
 #include "FileManager.h"
 #include "NegativeResponse.h"
+
 /* Constructor that initializes the callback_ to nullptr */
 RequestTransferExit::RequestTransferExit(int socket, Logger& RTESLogger) : callback_(nullptr), RTESLogger(RTESLogger), generate_frames(socket, RTESLogger)
 {

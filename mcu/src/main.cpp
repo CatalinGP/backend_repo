@@ -1,7 +1,8 @@
-#include "MCUModule.h"
-#include "MCULogger.h"
 #include <thread>
 #include <unistd.h>
+
+#include "MCUModule.h"
+#include "MCULogger.h"
 
 int main() {
 

@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <unistd.h>
+
 #include "ReceiveFrames.h"
 #include "MCUModule.h"
 #include "MCULogger.h"
@@ -5,8 +8,6 @@
 #include "TransferData.h"
 #include "AccessTimingParameter.h"
 #include "NegativeResponse.h"
-#include <algorithm>
-#include <unistd.h>
 namespace MCU
 {
     ReceiveFrames::ReceiveFrames(int socket_canbus, int socket_api)

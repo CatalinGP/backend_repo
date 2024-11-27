@@ -3,6 +3,7 @@
 #include "RequestUpdateStatus.h"
 #include "FileManager.h"
 #include "MemoryManager.h"
+
 std::map<uint8_t, double> ECU::timing_parameters;
 std::map<uint8_t, std::future<void>> ECU::active_timers;
 std::map<uint8_t, std::atomic<bool>> ECU::stop_flags;

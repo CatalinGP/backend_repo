@@ -9,6 +9,7 @@
 #define TRANSFER_DATA_H
 
 #include <linux/can.h>
+
 #include "Logger.h"
 #include "GenerateFrames.h"
 #include "MemoryManager.h"

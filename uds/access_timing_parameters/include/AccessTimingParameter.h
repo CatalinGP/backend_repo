@@ -22,10 +22,9 @@
 #ifndef UDS_ATP_SERVICE
 #define UDS_ATP_SERVICE
 
-#include "Logger.h"
-
 #include <linux/can.h>
 
+#include "Logger.h"
 
 class AccessTimingParameter
 {
