@@ -118,3 +118,13 @@ class RequestIdAction(Action):
         except CustomError as e:
             log_error_message(logger, f"Error reading version for ECU ID {id_ecu_int}: {str(e)}")
             return None
+            
+    def check_ecu_up(self, ecu_id: int):
+        response_req_json = self.read_ids()
+        ecu_values = response_req_json.get("ecus", [])
+        valid_values = [int(ecu["ecu_id"], 16) for ecu in ecu_values]
+
+        if ecu_id not in valid_values:
+            return False
+
+        return True

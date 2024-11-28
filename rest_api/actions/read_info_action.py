@@ -342,3 +342,15 @@ class ReadInfo(Action):
                 "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
+
+    def read_info(self, item=None, ecu_id=None):
+        log_info_message(logger, "Read info function called.")
+
+        if ecu_id == 17:
+                return self.read_from_battery(item)
+        elif ecu_id == 18:
+                return self.read_from_engine(item)
+        elif ecu_id == 19:
+                return self.read_from_doors(item)
+        elif ecu_id == 20:
+                return self.read_from_hvac(item)
