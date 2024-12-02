@@ -171,7 +171,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
             auto it = std::find(service_sids.begin(), service_sids.end(), frame.data[1]);
 
             if (it != service_sids.end() && receiver_id == 0x10) {
-                startTimer(frame.data[1]);
+                startTimer(frame.data[1], sender_id);
             }
 
             /* Compare the CAN ID with the expected hexValueId */
@@ -264,7 +264,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
         }
     }
 
-    void ReceiveFrames::startTimer(uint8_t sid) {
+    void ReceiveFrames::startTimer(uint8_t sid, uint8_t sender_id) {
         /* Define the correct timer value based on SID */
         uint16_t timer_value;
         if (sids_using_p2_max_time.find(sid) != sids_using_p2_max_time.end())
@@ -282,7 +282,11 @@ bool ReceiveFrames::receiveFramesFromAPI()
         /* Initialize stop flag for this SID */
         mcu->stop_flags[sid] = true;
 
-        mcu->active_timers[sid] = std::async(std::launch::async, [sid, this, start_time, timer_value]()
+        if (mcu->active_timers.find(sid) != mcu->active_timers.end()) {
+            mcu->active_timers.erase(sid);
+        }
+
+        mcu->active_timers[sid] = std::async(std::launch::async, [sid, this, start_time, timer_value, sender_id]()
         {
             while (mcu->stop_flags[sid])
             {
@@ -290,14 +294,14 @@ bool ReceiveFrames::receiveFramesFromAPI()
                 std::chrono::duration<double> elapsed = now - start_time;
                 if (elapsed.count() > timer_value / 1000.0)
                 { 
-                    stopTimer(sid);
+                    stopTimer(sid,sender_id);
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         });
     }
 
-    void ReceiveFrames::stopTimer(uint8_t sid) {
+    void ReceiveFrames::stopTimer(uint8_t sid, uint8_t sender_id) {
         LOG_INFO(MCULogger->GET_LOGGER(), "stopTimer function called for frame with SID {:x}.", sid);
 
         auto end_time = std::chrono::steady_clock::now();
@@ -311,14 +315,13 @@ bool ReceiveFrames::receiveFramesFromAPI()
             /* Set stop flag to false for this SID */
             if(mcu->stop_flags[sid])
             {
-                int id = ((sid & 0xFF) << 8) | ((sid >> 8) & 0xFF);
+                int id = (0x10 << 8) | sender_id;
                 LOG_INFO(MCULogger->GET_LOGGER(), "Service with SID {:x} sent the response pending frame.", sid);
                 NegativeResponse negative_response(socket_api, *MCULogger);
                 negative_response.sendNRC(id, sid, 0x78);
                 mcu->stop_flags[sid] = false;
             }
             mcu->stop_flags.erase(sid);
-            mcu->active_timers[sid].wait();
         }
     }
 
