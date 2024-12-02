@@ -2,7 +2,6 @@
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;
-
 std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_engine = {
         /* Engine RPM */
         {0x0100, {0}},
@@ -22,6 +21,8 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         {0x012C, {0}},
         /* Intake Air Temperature */
         {0x0130, {0}},
+        /* Mass air flow sensor */
+        {0x0134, {0}},
         /* OTA Status */
         {OTA_UPDATE_STATUS_DID, {0}},
 #ifdef SOFTWARE_VERSION
@@ -30,6 +31,13 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
 #endif
     };
+const std::vector<uint16_t> EngineModule::writable_Engine_DID =
+{
+    /* Throttle Position */
+     0x0110,
+    OTA_UPDATE_STATUS_DID,
+    SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
+};
 
 /** Constructor - initializes the EngineModule with default values,
  * sets up the CAN interface, and prepares the frame receiver. */

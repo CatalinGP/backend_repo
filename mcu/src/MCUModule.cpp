@@ -7,40 +7,57 @@ namespace MCU
     std::map<uint8_t, double> MCUModule::timing_parameters;
     std::map<uint8_t, std::future<void>> MCUModule::active_timers;
     std::map<uint8_t, std::atomic<bool>> MCUModule::stop_flags;
-    const std::vector<uint16_t> MCUModule::VALID_DID_MCU =
+    std::unordered_map<uint16_t, std::vector<uint8_t>> MCUModule::default_DID_MCU = 
+        {
+            /** Vehicle Identification Number (VIN) */
+            {0xF190, {0x31, 0x48, 0x47, 0x43, 0x4D, 0x38, 0x32, 0x36, 0x33, 0x3A, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36}},
+            /** ECU Serial Number */
+            {0xF17F, {0x45, 0x43, 0x55, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32}},
+            /** System Supplier ECU Hardware Number */
+            {0xF18C, {0x48, 0x57, 0x30, 0x30, 0x31, 0x37, 0x38, 0x35, 0x32, 0x30, 0x32, 0x32}},
+            {OTA_UPDATE_STATUS_DID, {IDLE}},
+#ifdef SOFTWARE_VERSION
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}},
+#else
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}},
+#endif
+            /** System Supplier ECU Software Number */
+            {0xF1A0, {0x53, 0x57, 0x45, 0x43, 0x55, 0x34, 0x35, 0x36, 0x37}},
+            /** System Name or Engine Type */
+            {0xF187, {0x32, 0x30, 0x4C, 0x20, 0x54, 0x75, 0x72, 0x62, 0x6F, 0x20, 0x49, 0x34}},
+            /** System Supplier ECU Hardware Version Number */
+            {0xF1A1, {0x48, 0x56, 0x34, 0x2E, 0x35, 0x2E, 0x36}},
+            /** System Supplier ECU Manufacturing Date */
+            {0xF1A4, {0x32, 0x30, 0x32, 0x32, 0x2D, 0x30, 0x35, 0x2D, 0x31, 0x35}},
+            /** System Supplier ECU Coding/Configuration Part Number */
+            {0xF1A5, {0x43, 0x46, 0x47, 0x39, 0x38, 0x37, 0x36, 0x35, 0x34}},
+            /** System Calibration Identification Number */
+            {0xF1A8, {0x43, 0x41, 0x4C, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37}},
+            /** System Calibration Verification Number (CVN) */
+            {0xF1A9, {0x43, 0x56, 0x4E, 0x31, 0x31, 0x32, 0x32, 0x33, 0x33}},
+            /** System ECU Boot Software Identification Number */
+            {0xF1AA, {0x42, 0x4F, 0x4F, 0x54, 0x33, 0x33, 0x34, 0x34, 0x35}},
+            /** System ECU Application Software Identification Number */
+            {0xF1AB, {0x41, 0x50, 0x50, 0x35, 0x35, 0x36, 0x36, 0x37, 0x37}},
+            /** System ECU Data Set Identification Number */
+            {0xF1AC, {0x44, 0x41, 0x54, 0x41, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32}},
+            /** System ECU Flash Software Version Number */
+            {0xF1AD, {0x46, 0x4C, 0x41, 0x53, 0x48, 0x32, 0x2E, 0x33, 0x2E, 0x34}}
+        };
+    const std::vector<uint16_t> MCUModule::writable_MCU_DID =
     {
-        /* Vehicle Identification Number (VIN) */
-        0xF190,
-        /** ECU Serial Number */
-        0xF17F,
-        /* System Supplier ECU Hardware Number */
-        0xF18C,
         /* System Supplier ECU Software Number */
         0xF1A0,
-        /* System Name or Engine Type */
-        0xF187,
         /* System Supplier ECU Software Version Number */
         0xF1A2,
-        /* System Supplier ECU Hardware Version Number */
-        0xF1A1,
-        /* System Supplier ECU Manufacturing Date */
-        0xF1A4,
         /* System Supplier ECU Coding/Configuration Part Number */
         0xF1A5,
         /* System Calibration Identification Number */
         0xF1A8,
         /* System Calibration Verification Number (CVN) */
         0xF1A9,
-        /* System ECU Boot Software Identification Number */
-        0xF1AA,
-        /* System ECU Application Software Identification Number */
-        0xF1AB,
-        /* System ECU Data Set Identification Number */
-        0xF1AC,
-        /* System ECU Flash Software Version Number */
-        0xF1AD,
-        /* OTA Update Status */
-        0xE001
+        OTA_UPDATE_STATUS_DID,
+        SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
     };
     /* Constructor */
     MCUModule::MCUModule(uint8_t interfaces_number) : 
@@ -134,6 +151,68 @@ namespace MCU
             queue_thread_listen.join();
         }
     }
+
+    void MCUModule::fetchMCUData()
+    {
+        /* Path to mcu data file */
+        std::string file_path = "mcu_data.txt";
+
+        /* Generate random values for each DID */
+        std::unordered_map<uint16_t, std::string> updated_values;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dist(0, 255);
+
+        for (auto& [did, data] : default_DID_MCU)
+        {
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
+                {
+                    byte = dist(gen);  
+                }
+                /* Generate a random value between 0 and 255 */
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
+        }
+
+        /* Read the current file contents into memory */
+        std::ifstream infile(file_path);
+        std::stringstream buffer;
+        buffer << infile.rdbuf();
+        infile.close();
+
+        std::string file_contents = buffer.str();
+        std::istringstream file_stream(file_contents);
+        std::string updated_file_contents;
+        std::string file_line;
+
+        /* Update the relevant DID values in the file contents */
+        while (std::getline(file_stream, file_line))
+        {
+            for (const auto& pair : updated_values)
+            {
+                std::stringstream did_ss;
+                did_ss << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << pair.first;
+                if (file_line.find(did_ss.str()) != std::string::npos)
+                {
+                    updated_file_contents += did_ss.str() + " " + pair.second + "\n";
+                    break;
+                }
+            }
+        }
+
+        /* Write the updated contents back to the file */
+        std::ofstream outfile(file_path);
+        outfile << updated_file_contents;
+        outfile.close();
+
+        LOG_INFO(MCULogger->GET_LOGGER(), "MCU data file updated with random values.");
+    }
+
+
     void MCUModule::writeDataToFile()
     {
         std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
@@ -179,6 +258,7 @@ namespace MCU
             }
         }
         outfile.close();
+        fetchMCUData();
     }
 
     void MCUModule::checkSwVersion()
