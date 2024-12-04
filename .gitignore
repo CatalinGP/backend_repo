@@ -13,6 +13,9 @@ rest_api/utils/__pycache__
 # remove rest api loggers
 rest_api/utils/log*
 
+#remove db api
+rest_api/instance/db.sqlite
+
 # remove build folder
 ecu_simulation/BatteryModule/obj
 ecu_simulation/DoorsModule/obj
