@@ -1,0 +1,14 @@
+curl -X POST http://127.0.0.1:5000/auth/login -H "Content-Type: application/json" -d '{
+    "username": "admin", "password": "admin"}'
+
+curl -X POST http://127.0.0.1:5000/auth/register -H "Content-Type: application/json" -d '{
+    "username": "admin", "password": "admin", "role":"admin"}'
+
+curl -X POST "http://127.0.0.1:5000/auth/logout" \
+-H "Authorization: Bearer <TOKEN>"
+
+
+curl -X GET "http://127.0.0.1:5000/api/read_info_battery?is_manual_flow=false" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzIzNzg5OCwianRpIjoiZDNiN2IyNzMtNjQzOC00YTUyLTg5YjItYzVlM2ZiNTMzZjQxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MSwicm9sZSI6ImFkbWluIiwidG9rZW5faWRlbnRpZmllciI6IjIwM2Y0ZWUxLTA5MDctNGIxMS04N2FmLWFjMGVhNTM2NmVkZiJ9LCJuYmYiOjE3MzMyMzc4OTgsImNzcmYiOiJlOTdkMDZkNy1lMTMyLTRjNDMtYjE4Ni0yYTA2ZTg5NmFmNWEiLCJleHAiOjE3MzMyMzg3OTh9.DeE-StWApRdKZN5ZhPI0BH4nlr7AEay2mlemErtAAn0"
+
+curl -X POST http://127.0.0.1:5000/api/write_info_battery -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczMzIzNzg5OCwianRpIjoiZDNiN2IyNzMtNjQzOC00YTUyLTg5YjItYzVlM2ZiNTMzZjQxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MSwicm9sZSI6ImFkbWluIiwidG9rZW5faWRlbnRpZmllciI6IjIwM2Y0ZWUxLTA5MDctNGIxMS04N2FmLWFjMGVhNTM2NmVkZiJ9LCJuYmYiOjE3MzMyMzc4OTgsImNzcmYiOiJlOTdkMDZkNy1lMTMyLTRjNDMtYjE4Ni0yYTA2ZTg5NmFmNWEiLCJleHAiOjE3MzMyMzg3OTh9.DeE-StWApRdKZN5ZhPI0BH4nlr7AEay2mlemErtAAn0" 
+-H "Content-Type: application/json" -d '{"is_manual_flow": false, "battery_level": 75, "voltage": 10, "battery_state_of_charge": 2, "percentage": 10}'
