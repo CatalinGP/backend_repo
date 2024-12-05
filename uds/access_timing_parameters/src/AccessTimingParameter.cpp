@@ -212,6 +212,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                 {
                     MCU::mcu->active_timers[sid].wait();
                 }
+                MCU::mcu->active_timers.erase(sid);
                 break;
             }
             case 0x11:
@@ -223,6 +224,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                 {
                     battery->_ecu->active_timers[sid].wait();
                 }
+                battery->_ecu->active_timers.erase(sid);
                 break;
             }
             case 0x12:
@@ -234,6 +236,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                 {
                     engine->_ecu->active_timers[sid].wait();
                 }
+                engine->_ecu->active_timers.erase(sid);
                 break;
             }
             case 0x13:
@@ -245,6 +248,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                 {
                     doors->_ecu->active_timers[sid].wait();
                 }
+                doors->_ecu->active_timers.erase(sid);
                 break;
             }
             case 0x14:
@@ -256,6 +260,7 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
                 {
                     hvac->_ecu->active_timers[sid].wait();
                 }
+                hvac->_ecu->active_timers.erase(sid);
                 break;
             }
             default:

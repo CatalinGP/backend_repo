@@ -181,9 +181,9 @@ public:
     void receive(HandleFrames &handle_frame);
 
     /* Method that start time processing frame. */
-    void startTimer(uint8_t frame_dest_id, uint8_t sid);
+    void startTimer(uint8_t sender_id, uint8_t receiver_id, uint8_t sid);
     /* Method that stop time processing frame. */
-    void stopTimer(uint8_t frame_dest_id, uint8_t sid);
+    void stopTimer(uint8_t sender_id, uint8_t receiver_id, uint8_t sid);
 
     /**
      * @brief Stops the receive process gracefully.

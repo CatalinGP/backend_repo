@@ -226,9 +226,9 @@ namespace MCU
     bool running;
 
     /* Method that start time processing frame. */
-    void startTimer(uint8_t sid);
+    void startTimer(uint8_t sid, uint8_t sender_id);
     /* Method that stop time processing frame. */
-    void stopTimer(uint8_t sid);
+    void stopTimer(uint8_t sid, uint8_t sender_id);
 
   protected:
     /* The socket from where we read the frames */
