@@ -13,8 +13,10 @@
 #define ECU_H
 
 #include <iostream>
+#include <future>
+#include <map>
+
 #include "Logger.h"
-#include "GenerateFrames.h"
 #include "CreateInterface.h"
 #include "ReceiveFrames.h"
 

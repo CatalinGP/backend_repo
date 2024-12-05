@@ -7,17 +7,15 @@
 #ifndef POC_MCU_MODULE_H
 #define POC_MCU_MODULE_H
 
-#include "HandleFrames.h"
-#include "CreateInterface.h"
-#include "ReceiveFrames.h"
-#include "MCULogger.h"
-#include "TesterPresent.h"
 
-#include <thread>
 #include <future>
 #include <fstream>
 #include <stdexcept>
 #include <filesystem>
+
+#include "CreateInterface.h"
+#include "ReceiveFrames.h"
+#include "RequestUpdateStatus.h"
 
 #define SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID 0xF1A2
 

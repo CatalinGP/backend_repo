@@ -1,6 +1,9 @@
+#include <random>
+
 #include "SecurityAccess.h"
 #include "BatteryModule.h"
 #include "MCUModule.h"
+#include "NegativeResponse.h"
 
 /* Set the default security access to false. */
 bool SecurityAccess::mcu_state = false;

@@ -1,10 +1,13 @@
+#include <map>
+#include <fstream>
+
 #include "ReadDtcInformation.h"
 #include "BatteryModule.h"
 #include "EngineModule.h"
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
-
+#include "AccessTimingParameter.h"
 
 ReadDTC::ReadDTC(Logger logger, std::string path_folder, int socket)
 {

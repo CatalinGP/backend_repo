@@ -13,10 +13,10 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <linux/can.h>
 
 #include "Logger.h"
 #include "GenerateFrames.h"
-#include "NegativeResponse.h"
 
 /* Define the callback function type */
 using transferCompleteCallBack = std::function<bool(bool)>;

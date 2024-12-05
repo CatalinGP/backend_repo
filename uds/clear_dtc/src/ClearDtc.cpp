@@ -4,6 +4,7 @@
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
+#include "AccessTimingParameter.h"
 
 ClearDtc::ClearDtc(std::string path_to_dtc, Logger& logger, int socket)
                 : path_to_dtc(path_to_dtc), logger(logger), socket(socket)

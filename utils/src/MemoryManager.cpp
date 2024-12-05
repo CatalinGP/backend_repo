@@ -1,6 +1,10 @@
-#include "MemoryManager.h"
 #include <unistd.h>
 #include <sys/stat.h>
+#include <iomanip>
+#include <fstream>
+#include <fcntl.h>
+
+#include "MemoryManager.h"
 
 MemoryManager* MemoryManager::instance = nullptr;
 bool MemoryManager::dev_loop_path_configured = false;

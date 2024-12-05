@@ -1,4 +1,8 @@
+#include <thread>
+#include <unistd.h>
+
 #include "HVACModule.h"
+#include "HVACModuleLogger.h"
 
 int main()
 {

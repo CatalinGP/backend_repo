@@ -16,11 +16,10 @@
 #ifndef DIAGNOSTICSESSIONCONTROL_H
 #define DIAGNOSTICSESSIONCONTROL_H
 
-#include <cstdlib>
 #include <iostream>
-#include "GenerateFrames.h"
+#include <linux/can.h>
+
 #include "Logger.h"
-#include "NegativeResponse.h"
 
 /* Diagnostic Control Session codes */
 const uint8_t SID_DIAGNOSTIC_SESSION_CONTROL = 0x10;

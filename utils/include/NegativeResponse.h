@@ -11,9 +11,6 @@
 #ifndef NEGATIVE_RESPONSE_H
 #define NEGATIVE_RESPONSE_H
 
-#include <linux/can.h>
-#include <vector>
-#include <unordered_map>
 #include <cstdint>
 #include <map>
 #include <string>

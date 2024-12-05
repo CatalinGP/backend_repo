@@ -13,9 +13,6 @@
 
 #include "GenerateFrames.h"
 #include "Logger.h"
-#include "MemoryManager.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
 
 #define ERASE_MEMORY_RC_ID (0x0101)
 #define INSTALL_UPDATES_RC_ID (0x0201)

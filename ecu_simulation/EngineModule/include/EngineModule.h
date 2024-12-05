@@ -3,17 +3,11 @@
 
 #define ENGINE_MODULE_ID 0x12
 
-#include <thread>
-#include <cstdlib>
-#include <chrono>
+
 #include <iostream>
-#include <unistd.h>
-#include <future>
-#include <fstream>
-#include "CreateInterface.h"
-#include "ReceiveFrames.h"
-#include "GenerateFrames.h"
-#include "EngineModuleLogger.h"
+#include <unordered_map>
+#include <vector> 
+
 #include "ECU.h"
 
 class EngineModule

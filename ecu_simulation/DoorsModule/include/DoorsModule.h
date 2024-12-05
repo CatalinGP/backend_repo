@@ -19,17 +19,10 @@
 
 #define DOORS_MODULE_ID 0x13
 
-#include <thread>
-#include <cstdlib>
-#include <chrono>
 #include <iostream>
-#include <unistd.h>
-#include <future>
-#include <fstream>
-#include "CreateInterface.h"
-#include "ReceiveFrames.h"
-#include "GenerateFrames.h"
-#include "DoorsModuleLogger.h"
+#include <unordered_map>
+#include <vector>
+
 #include "ECU.h"
 
 class DoorsModule

@@ -1,5 +1,8 @@
 #include "TransferData.h"
 #include "MCUModule.h"
+#include "FileManager.h"
+#include "RequestDownload.h"
+#include "NegativeResponse.h"
 
 TransferData::TransferData(int socket, Logger transfer_data_logger)
                 : transfer_data_logger(transfer_data_logger), 

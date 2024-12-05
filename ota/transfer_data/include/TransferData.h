@@ -9,11 +9,10 @@
 #define TRANSFER_DATA_H
 
 #include <linux/can.h>
+
 #include "Logger.h"
 #include "GenerateFrames.h"
 #include "MemoryManager.h"
-#include "NegativeResponse.h"
-#include "RequestTransferExit.h"
 
 #define TRANSFER_DATA_SID 0x36
 class TransferData 

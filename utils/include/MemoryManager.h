@@ -71,14 +71,8 @@
 #define MEMORY_MANAGER_H
 
 #include <iostream>
-#include <fstream>
 #include <cstring>
 #include <vector>
-#include <iomanip>
-#include <stdexcept>
-
-#include <unistd.h>
-#include <fcntl.h>
 
 #include "Logger.h"
 

@@ -1,4 +1,11 @@
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <random>
+
 #include "DoorsModule.h"
+#include "DoorsModuleLogger.h"
+#include "RequestUpdateStatus.h"
 
 Logger* doorsModuleLogger = nullptr;
 DoorsModule* doors = nullptr;

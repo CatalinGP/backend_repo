@@ -1,4 +1,8 @@
 #include "ECU.h"
+#include "GenerateFrames.h"
+#include "RequestUpdateStatus.h"
+#include "FileManager.h"
+#include "MemoryManager.h"
 
 std::map<uint8_t, double> ECU::timing_parameters;
 std::map<uint8_t, std::future<void>> ECU::active_timers;
@@ -23,7 +27,7 @@ void ECU::sendNotificationToMCU()
     std::vector<uint8_t> data = {0x01, 0xD9};
 
     /* Send the CAN frame with ID sender-ECU, receiver-MCU and the data vector */
-    uint16_t frame_id = (_module_id << 8) | MCU_ID;
+    uint16_t frame_id = (_module_id << 8) | 0x10;
     notifyFrame.sendFrame(frame_id, data);
 
     LOG_INFO(_logger.GET_LOGGER(), "{:#x} sent UP notification to MCU", _module_id);

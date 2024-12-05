@@ -1,5 +1,12 @@
-#include "HVACModule.h"
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <random>
 
+#include "HVACModule.h"
+#include "HVACIncludes.h"
+#include "HVACModuleLogger.h"
+#include "RequestUpdateStatus.h"
 Logger *hvacModuleLogger = nullptr;
 HVACModule *hvac = nullptr;
 std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac =

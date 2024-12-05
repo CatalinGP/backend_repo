@@ -4,7 +4,8 @@
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
-
+#include "NegativeResponse.h"
+#include "GenerateFrames.h"
 
 // Define static constants
 const uint16_t AccessTimingParameter::DEFAULT_P2_MAX_TIME = 2000;

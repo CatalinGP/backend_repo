@@ -1,4 +1,8 @@
+#include <thread>
+#include <unistd.h>
+
 #include "BatteryModule.h"
+#include "BatteryModuleLogger.h"
 
 int main() {
     #ifdef UNIT_TESTING_MODE

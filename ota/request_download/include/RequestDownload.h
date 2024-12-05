@@ -16,23 +16,11 @@
 
 #include <iostream>
 #include <vector>
-#include <sstream>
-#include <cstring>
-#include <string>
-#include <utility>
-#include <chrono>
-#include <sys/ioctl.h>
 #include <linux/can.h>
-#include <net/if.h>
-#include "CreateInterface.h"
+
 #include "GenerateFrames.h"
 #include "Logger.h"
-#include "DiagnosticSessionControl.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
-#include "ReadDataByIdentifier.h"
-#include "MemoryManager.h"
-#include <pybind11/embed.h>
+
 
 /* ECU permitted transfer data bytes in a request. Set to 5 because we use only 8 bytes for requests (1 pci, 1 sid, 1 blc_indx => remaining 5 bytes)*/
 #define MAX_TRANSER_DATA_BYTES 5

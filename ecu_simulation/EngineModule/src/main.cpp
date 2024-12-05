@@ -1,5 +1,8 @@
+#include <thread>
+#include <unistd.h>
 
 #include "EngineModule.h"
+#include "EngineModuleLogger.h"
 
 int main() {
     #ifdef UNIT_TESTING_MODE

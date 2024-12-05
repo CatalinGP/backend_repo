@@ -1,6 +1,9 @@
-#include "FileManager.h"
 #include <unistd.h>
 #include <zip.h>
+#include <fstream>
+#include <iomanip>
+
+#include "FileManager.h"
 
 void FileManager::writeMapToFile(const std::string& file_name, const std::unordered_map<uint16_t, std::vector<uint8_t>>& data_map)
 {

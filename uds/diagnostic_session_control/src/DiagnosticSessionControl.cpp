@@ -4,6 +4,9 @@
 #include "DoorsModule.h"
 #include "HVACModule.h"
 #include "MCUModule.h"
+#include "AccessTimingParameter.h"
+#include "NegativeResponse.h"
+#include "GenerateFrames.h"
 
 // Initialize current_session
 #ifndef UNIT_TESTING_MODE

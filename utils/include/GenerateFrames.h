@@ -18,12 +18,10 @@
 #define POC_INCLUDE_GENERATEFRAMES_H_
 
 #include <iostream>
-#include <cstdlib>
 #include <vector>
 
-#include <unistd.h>
-#include <linux/can.h>
 #include "Logger.h"
+
 /* Enumeration for frame types */
 enum FrameType {
     DATA_FRAME,

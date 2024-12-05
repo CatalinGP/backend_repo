@@ -11,12 +11,9 @@
 #ifndef READ_MEMORY_BY_ADDRESS_H
 #define READ_MEMORY_BY_ADDRESS_H
 
-#include <vector>
 #include "Logger.h"
 #include "MemoryManager.h"
 #include "GenerateFrames.h"
-#include "NegativeResponse.h"
-#include "SecurityAccess.h"
 
 class ReadMemoryByAddress {
 private:
