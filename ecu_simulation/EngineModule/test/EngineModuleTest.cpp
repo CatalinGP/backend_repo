@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../include/EngineModule.h"
+#include "Globals.h"
 
 bool containsLine(const std::string& output, const std::string& line)
 {

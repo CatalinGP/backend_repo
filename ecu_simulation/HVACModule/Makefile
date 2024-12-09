@@ -1,10 +1,8 @@
 ######### Makefile for HVACModule
 ######### Author: Theodor Stoica (contact theodor.stoica@randstaddigital.com for any help)
 
-#POC Project root path
-PROJECT_PATH := $(shell cd $(shell pwd)/../../../ && pwd)
 SOFTWARE_VERSION = 0
-PROJECT_DEFINES = -DPROJECT_PATH=\"$(PROJECT_PATH)\" -DSOFTWARE_VERSION=${SOFTWARE_VERSION}
+PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION}
 #Python flags
 PYTHON_INCL_DIR=-I/usr/include/python3.8
 PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -lcrypt -ldl -lutil -lm -lpthread
@@ -83,7 +81,8 @@ UTILS_OBJS = $(OBJ_DIR)/MemoryManager.o \
 			 $(OBJ_DIR)/ReceiveFrames.o \
 			 $(OBJ_DIR)/HandleFrames.o \
 			 $(OBJ_DIR)/ECU.o \
-			 $(OBJ_DIR)/FileManager.o
+			 $(OBJ_DIR)/FileManager.o \
+			 $(OBJ_DIR)/Globals.o
 
 # UDS object files
 UDS_OBJS = $(OBJ_DIR)/DiagnosticSessionControl.o \
@@ -220,6 +219,9 @@ $(OBJ_DIR)/ReadMemoryByAddress.o: $(UDS_DIR)/read_memory_by_address/src/ReadMemo
 
 $(OBJ_DIR)/FileManager.o: $(UTILS_DIR)/FileManager.cpp
 	$(CXX) $(CFLAGS) -c $(UTILS_DIR)/FileManager.cpp -o $(OBJ_DIR)/FileManager.o
+
+$(OBJ_DIR)/Globals.o: $(UTILS_DIR)/Globals.cpp
+	$(CXX) $(CFLAGS) -c $(UTILS_DIR)/Globals.cpp -o $(OBJ_DIR)/Globals.o
 
 .PHONY: clean
 clean:

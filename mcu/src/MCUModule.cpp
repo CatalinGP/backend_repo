@@ -1,9 +1,13 @@
 #include <thread>
+#include <random>
+#include <sstream>
+#include <iomanip>
 
 #include "MCUModule.h"
 #include "MCULogger.h"
 #include "FileManager.h"
 #include "MemoryManager.h"
+#include "Globals.h"
 
 Logger* MCULogger = nullptr;
 namespace MCU

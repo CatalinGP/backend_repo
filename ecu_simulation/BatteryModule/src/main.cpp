@@ -3,8 +3,10 @@
 
 #include "BatteryModule.h"
 #include "BatteryModuleLogger.h"
+#include "Globals.h"
 
 int main() {
+    loadProjectPathForECU();
     #ifdef UNIT_TESTING_MODE
     batteryModuleLogger = new Logger;
     #else

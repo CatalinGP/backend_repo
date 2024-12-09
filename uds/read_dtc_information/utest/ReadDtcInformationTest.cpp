@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <gtest/gtest.h>
 #include <net/if.h>
+#include "Globals.h"
 
 int socket_;
 int socket2_;

@@ -8,6 +8,7 @@
 
 #include "../include/WriteDataByIdentifier.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "Globals.h"
 
 int socket1;
 int socket2;

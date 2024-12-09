@@ -12,6 +12,7 @@
 #include "SecurityAccess.h"
 #include "FileManager.h"
 #include "AccessTimingParameter.h"
+#include "Globals.h"
 
 WriteDataByIdentifier::WriteDataByIdentifier(Logger& wdbi_logger, int socket)
             : generate_frames(socket, wdbi_logger), wdbi_logger(wdbi_logger)

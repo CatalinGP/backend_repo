@@ -1,11 +1,9 @@
 ######### Makefile for MCU module
 ######### Author: Theodor Stoica (contact theodor.stoica@randstaddigital.com for any help)
 
-#POC Project root path
-PROJECT_PATH := $(shell cd $(shell pwd)/../../ && pwd)
 SOFTWARE_VERSION = 0
 PYTHON_ENABLED = 1
-PROJECT_DEFINES = -DPROJECT_PATH=\"$(PROJECT_PATH)\" -DSOFTWARE_VERSION=${SOFTWARE_VERSION} -DPYTHON_ENABLED=${PYTHON_ENABLED}
+PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION} -DPYTHON_ENABLED=${PYTHON_ENABLED}
 
 #Python flags needed for pybing library
 PYTHON_INCL_DIR= -I/usr/include/python3.8
@@ -17,7 +15,7 @@ PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -l
 
 # Compiler flags
 CXX = g++
-CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
+CFLAGS = -std=c++17 -O3 -Wall -Werror -pthread \
          -I../include \
          -I./include \
          -I../utils/include \
@@ -94,7 +92,8 @@ UTILS_OBJS = $(OBJ_DIR)/MemoryManager.o \
 			 $(OBJ_DIR)/ECU_ReceiveFrames.o \
 			 $(OBJ_DIR)/HandleFrames.o \
 			 $(OBJ_DIR)/FileManager.o \
-			 $(OBJ_DIR)/ECU.o
+			 $(OBJ_DIR)/ECU.o \
+			 $(OBJ_DIR)/Globals.o
 
 # UDS object files
 UDS_OBJS = $(OBJ_DIR)/DiagnosticSessionControl.o \
@@ -232,6 +231,9 @@ $(OBJ_DIR)/AccessTimingParameter.o: $(UDS_DIR)/access_timing_parameters/src/Acce
   
 $(OBJ_DIR)/NegativeResponse.o: $(UTILS_DIR)/NegativeResponse.cpp
 	$(CXX) $(CFLAGS) -c $(UTILS_DIR)/NegativeResponse.cpp -o $(OBJ_DIR)/NegativeResponse.o
+
+$(OBJ_DIR)/Globals.o: $(UTILS_DIR)/Globals.cpp
+	$(CXX) $(CFLAGS) -c $(UTILS_DIR)/Globals.cpp -o $(OBJ_DIR)/Globals.o
 
 #----------------------------------------------------UNIT TESTS-----------------------------------------------------
 
