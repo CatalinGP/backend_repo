@@ -136,14 +136,8 @@ if [ -f "$IMG_PATH" ]; then
     fi
   fi
 
-  # Use a specific loop /dev/loop20
-  LOOP_DEVICE="/dev/loop20"
-
-  # Detach the existing loop device if /dev/loop10 is already in use
-  if losetup | grep -q "$LOOP_DEVICE"; then
-    echo "Detaching existing $LOOP_DEVICE..."
-    sudo losetup -d "$LOOP_DEVICE"
-  fi
+  # Use a specific loop /dev/loop1000
+  LOOP_DEVICE="/dev/loop1000"
 
   # Attach the image file to the specified loop device
   sudo losetup "$LOOP_DEVICE" "$IMG_PATH"
@@ -160,8 +154,8 @@ else
   echo "Creating image..."
   sudo truncate -s +300M "$IMG_PATH"
 
-  # Use a specific loop /dev/loop20
-  LOOP_DEVICE="/dev/loop20"
+  # Use a specific loop /dev/loop1000
+  LOOP_DEVICE="/dev/loop1000"
 
   # Step 8: Create a loop device and attach it to the specified loop device
   sudo losetup "$LOOP_DEVICE" "$IMG_PATH"
