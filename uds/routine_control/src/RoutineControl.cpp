@@ -15,6 +15,7 @@
 #include "AccessTimingParameter.h"
 #include "RequestDownload.h"
 #include "TransferData.h"
+#include "Globals.h"
 
 RoutineControl::RoutineControl(int socket, Logger& rc_logger)
             : generate_frames(socket, rc_logger), rc_logger(rc_logger)

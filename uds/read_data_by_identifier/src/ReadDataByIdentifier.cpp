@@ -11,6 +11,7 @@
 #include "FileManager.h"
 #include "NegativeResponse.h"
 #include "SecurityAccess.h"
+#include "Globals.h"
 
 ReadDataByIdentifier::ReadDataByIdentifier(int socket, Logger& rdbi_logger) 
             : generate_frames(socket, rdbi_logger), rdbi_logger(rdbi_logger)

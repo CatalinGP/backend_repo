@@ -7,6 +7,7 @@
 #include "../include/FileManager.h"
 #include <filesystem>
 #include <cstdio>
+#include "Globals.h"
 
 class FileManagerTest : public testing::Test
 {

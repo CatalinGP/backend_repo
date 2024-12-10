@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include "../include/ReadDataByIdentifier.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "Globals.h"
 
 int socket1;
 int socket2;

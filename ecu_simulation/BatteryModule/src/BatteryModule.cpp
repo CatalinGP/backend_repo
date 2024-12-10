@@ -7,6 +7,7 @@
 #include "BatteryModuleLogger.h"
 #include "FileManager.h"
 #include "RequestUpdateStatus.h"
+#include "Globals.h"
 
 Logger* batteryModuleLogger = nullptr;
 BatteryModule* battery = nullptr;

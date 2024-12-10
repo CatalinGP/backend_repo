@@ -136,10 +136,17 @@ if [ -f "$IMG_PATH" ]; then
     fi
   fi
 
-  LOOP_DEVICE=$(losetup -fP --show "$IMG_PATH")
-   # Extract the loop number from LOOP_DEVICE
+  # Use a specific loop /dev/loop1000
+  LOOP_DEVICE="/dev/loop1000"
+
+  # Attach the image file to the specified loop device
+  sudo losetup "$LOOP_DEVICE" "$IMG_PATH"
+  echo "Loop device set to: $LOOP_DEVICE"
+
+  # Extract the loop number from LOOP_DEVICE
   LOOP_NUMBER=$(basename "$LOOP_DEVICE" | grep -o '[0-9]*')
-  #Change permissions of the loop device
+
+  # Ensure the loop device has appropriate permissions
   sudo chmod 777 "$LOOP_DEVICE"
   
 else
@@ -147,9 +154,12 @@ else
   echo "Creating image..."
   sudo truncate -s +300M "$IMG_PATH"
 
-  # Step 8: Create a loop device
-  LOOP_DEVICE=$(losetup -fP --show "$IMG_PATH")
-  echo "Loop device created: $LOOP_DEVICE"
+  # Use a specific loop /dev/loop1000
+  LOOP_DEVICE="/dev/loop1000"
+
+  # Step 8: Create a loop device and attach it to the specified loop device
+  sudo losetup "$LOOP_DEVICE" "$IMG_PATH"
+  echo "Loop device created and attached to $LOOP_DEVICE"
 
   # Extract the loop number from LOOP_DEVICE
   LOOP_NUMBER=$(basename "$LOOP_DEVICE" | grep -o '[0-9]*')

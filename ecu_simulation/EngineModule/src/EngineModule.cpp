@@ -7,6 +7,7 @@
 #include "EngineModuleLogger.h"
 #include "FileManager.h"
 #include "RequestUpdateStatus.h"
+#include "Globals.h"
 
 Logger* engineModuleLogger = nullptr;
 EngineModule* engine = nullptr;
