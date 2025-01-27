@@ -87,6 +87,7 @@ data_identifiers = {
             "oil_temperature": hex(IDENTIFIER_OIL_TEMPERATURE),
             "fuel_pressure": hex(IDENTIFIER_FUEL_PRESSURE),
             "intake_air_temperature": hex(IDENTIFIER_ENGINE_AIR_INTAKE),
+            "mass_air_flow": hex(IDENTIFIER_MASS_AIR_FLOW_MAF_SENSOR)
         },
         "Battery_Identifiers": {
             "battery_level": hex(IDENTIFIER_BATTERY_ENERGY_LEVEL),
@@ -108,7 +109,6 @@ data_identifiers = {
             "ajar": hex(IDENTIFIER_AJAR_STATUS)
         },
         "HVAC_Identifiers": {
-            "mass_air_flow": hex(IDENTIFIER_MASS_AIR_FLOW_MAF_SENSOR),
             "ambient_air_temperature": hex(IDENTIFIER_AMBIENT_AIR_TEMPERATURE),
             "cabin_temperature": hex(IDENTIFIER_CABIN_TEMPERATURE),
             "cabin_temperature_driver_set": hex(IDENTIFIER_CABIN_TEMPERATURE_DRIVER_SET),

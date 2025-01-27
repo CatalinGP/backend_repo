@@ -16,6 +16,7 @@ class IDsToJson():
         response = {
             "status": data.get("status"),
             "mcu_id": data.get("mcu_id"),
+            "mcu_version": data.get("mcu_version"),
             "ecus": ecus,
             "time_stamp": datetime.datetime.now().isoformat()
         }
@@ -71,9 +72,21 @@ class RequestIdAction(Action):
                     # Positive response
                     mcu_id = int(f"{data[2]:02X}", 16)
                     ecu_ids = [int(f"{byte:02X}", 16) for byte in data[3:]]
+
+                    # Take mcu version
+                    mcu_id_string = f"{mcu_id:02X}"
+                    formatted_ecu_id = f"0x{mcu_id_string}"
+                    version = self._read_version(formatted_ecu_id)
+                    if version:
+                        formatted_version = ".".join(version)
+                        mcu_version = formatted_version
+                    else:
+                        mcu_version = "no version read"
+
                     data_dict = {
                         "status": "Success",
-                        "mcu_id": f"{mcu_id:02X}",
+                        "mcu_id": mcu_id_string,
+                        "mcu_version": mcu_version,
                         "ecu_ids": [f"{ecu_id:02X}" for ecu_id in ecu_ids]
                     }
                 return data_dict

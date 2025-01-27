@@ -71,22 +71,23 @@ class Updates(Action):
             self.session_control(self.id, sub_funct=0x03)
             self._passive_response(SESSION_CONTROL, "Error changing session control")
 
+            ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
             if int(id,16) != self.id_ecu[0]:
                 log_info_message(
                     logger, f"Changing ECU {int} to session to extended diagonstic mode")
-                ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
                 self.session_control(ses_id, sub_funct=0x03)
                 self._passive_response(SESSION_CONTROL, "Error changing session control")
 
             log_info_message(logger, "Authenticating...")
             # -> security only to MCU
             self._authentication(self.my_id * 0x100 + self.id_ecu[0])
-
-            log_info_message(logger, "Reading data from battery")
-            current_version = self._verify_version()
-            if current_version == version:
+            log_info_message(logger, f"Version to be updated {version}")
+            current_version = self._verify_version(ses_id)
+            log_info_message(logger, f"Curent version {current_version}")
+            if current_version == version.replace(".", ""):
                 response_json = ToJSON()._to_json(
                     f"Version {version} already installed", 0)
+                log_info_message(logger, "Version {version} already installed")
                 return response_json
 
             # Check if another OTA update is in progress ( OTA_STATE is not IDLE)
@@ -220,7 +221,7 @@ class Updates(Action):
             log_info_message(logger, "Update failed at install step.")
             return
 
-    def _verify_version(self):
+    def _verify_version(self, ses_id):
         """
         Private method to verify if the current software version matches the desired version.
 
@@ -234,7 +235,7 @@ class Updates(Action):
         log_info_message(logger, "Reading current version")
 
         current_version = self._read_by_identifier(
-            self.id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
+            ses_id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
         return current_version
 
     def _check_errors(self):
