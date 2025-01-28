@@ -329,4 +329,49 @@ namespace MCU
         std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
         memory_manager_instance->writeToAddress(temp_vector);
     }
+
+    void MCUModule::stopProcess()
+    {
+        /* Use popen to capture the output of the command */
+        FILE* fp = popen("pgrep -f './main_mcu' | grep -v 'pgrep' | wc -l", "r");
+        if (fp == nullptr) {
+            std::cerr << "Failed to run command" << std::endl;
+            return;
+        }
+
+        int count = 0;
+        /* Read the output of the command and check if it is valid */
+        if (fscanf(fp, "%d", &count) != 1) {
+            std::cerr << "Failed to read process count" << std::endl;
+            fclose(fp);
+            return;
+        }
+        fclose(fp);
+
+        /* Loop while there are more than 2 processes running */
+        while (count > 2) {
+            std::cout << "More than one process found. Killing old instances..." << std::endl;
+
+            /* Kill the oldest process */
+            int result = system("pkill -o -f './main_mcu'");
+            if (result == 0) {
+                std::cout << "Old process terminated successfully." << std::endl;
+            } else {
+                std::cerr << "Failed to terminate old process." << std::endl;
+            }
+
+            /* Reload the process count after killing one process */
+            fp = popen("pgrep -f './main_mcu' | wc -l", "r");
+            if (fp == nullptr) {
+                std::cerr << "Failed to run command" << std::endl;
+                return;
+            }
+            if (fscanf(fp, "%d", &count) != 1) {
+                std::cerr << "Failed to read process count" << std::endl;
+                fclose(fp);
+                return;
+            }
+            fclose(fp);
+        }
+    }
 }
