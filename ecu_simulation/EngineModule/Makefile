@@ -1,7 +1,8 @@
 ######### Makefile for EngineModule
 
 #POC Project root path
-SOFTWARE_VERSION = 0
+# 16 is 1.0 in hex
+SOFTWARE_VERSION = 16
 PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION}
 #Python flags
 PYTHON_INCL_DIR=-I/usr/include/python3.8

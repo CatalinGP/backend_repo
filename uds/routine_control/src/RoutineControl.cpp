@@ -291,6 +291,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                 return;
             }
             LOG_INFO(rc_logger.GET_LOGGER(), "Current software saved. Activating the new software..");
+            routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
 
             if(activateSoftware() == false)
             {

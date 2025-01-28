@@ -1,7 +1,8 @@
 ######### Makefile for MCU module
 ######### Author: Theodor Stoica (contact theodor.stoica@randstaddigital.com for any help)
 
-SOFTWARE_VERSION = 0
+# 16 is 1.0 in hex
+SOFTWARE_VERSION = 16
 PYTHON_ENABLED = 1
 PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION} -DPYTHON_ENABLED=${PYTHON_ENABLED}
 

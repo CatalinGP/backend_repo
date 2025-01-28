@@ -20,6 +20,8 @@ class SessionManager(Action):
         Returns:
         - A dictionary with the status and message of the operation.
         """
+        if extra_ecu is None:
+            extra_ecu = 0x10
         ecu_ids = [(API_ID << 8) + 0x10]
         if extra_ecu != 0x10:
             ecu_ids.append(((API_ID << 8) + extra_ecu))
