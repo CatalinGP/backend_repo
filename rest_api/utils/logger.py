@@ -14,6 +14,7 @@ class MemoryHandler(logging.Handler):
     """
     A custom logging handler that stores log entries in memory.
     """
+
     def emit(self, record):
         log_entry = self.format(record)
         log_memory.append(log_entry)
@@ -29,8 +30,9 @@ def setup_logger():
     log_file = os.path.join(LOG_DIRECTORY, 'api.log')
     log_handler = logging.FileHandler(log_file)
     log_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-                                  '[filename: %(filename)s: line no: %(lineno)d func: (%(funcName)s)]')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        '[filename: %(filename)s: line no: %(lineno)d func: (%(funcName)s)]')
     log_handler.setFormatter(formatter)
 
     def decorator(app):
@@ -39,7 +41,8 @@ def setup_logger():
 
         @app.before_request
         def log_request_info():
-            app.logger.info(f'Request: {request.method} {request.url} - Body: {request.get_data()}')
+            app.logger.info(
+                f'Request: {request.method} {request.url} - Body: {request.get_data()}')
 
         @app.after_request
         def log_response_info(response):
@@ -71,8 +74,9 @@ class SingletonLogger:
         if not self._logger.hasHandlers():
             log_handler = logging.FileHandler(log_path)
             log_handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'
-                                          '[filename: %(filename)s: line no: %(lineno)d func: (%(funcName)s)]')
+            formatter = logging.Formatter(
+                '%(asctime)s - %(levelname)s - %(message)s'
+                '[filename: %(filename)s: line no: %(lineno)d func: (%(funcName)s)]')
             log_handler.setFormatter(formatter)
             self._logger.addHandler(log_handler)
 

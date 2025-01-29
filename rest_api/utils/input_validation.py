@@ -13,7 +13,11 @@ def validate_update_request(func):
             errors['update_file_type'] = 'Invalid value. Allowed values are "zip" or "tar".'
 
         update_file_version = data.get('update_file_version')
-        if not isinstance(update_file_version, str) or not update_file_version.replace('.', '').isdigit() or update_file_version.count('.') != 1:
+        if not isinstance(
+                update_file_version,
+                str) or not update_file_version.replace(
+                '.',
+                '').isdigit() or update_file_version.count('.') != 1:
             errors['update_file_version'] = 'Invalid format. Must be in the format "0.0" and contain only numbers.'
 
         ecu_id = data.get('ecu_id')

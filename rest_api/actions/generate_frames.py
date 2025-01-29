@@ -52,7 +52,9 @@ class GenerateFrame(CanBridge):
             data = [3, 0x22, identifier // 0x100, identifier % 0x100]
         else:
             if len(response) <= 4:
-                data = [len(response) + 3, 0x62, identifier // 0x100, identifier % 0x100] + response
+                data = [
+                    len(response) + 3, 0x62, identifier // 0x100, identifier %
+                    0x100] + response
             else:
                 return
         self.send(id, data)
@@ -85,7 +87,13 @@ class GenerateFrame(CanBridge):
                 return
         self.send(id, data)
 
-    def read_memory_by_adress_long(self, id, memory_address, memory_size, response=[], first_frame=True):
+    def read_memory_by_adress_long(
+            self,
+            id,
+            memory_address,
+            memory_size,
+            response=[],
+            first_frame=True):
         address_length = (self.__count_digits(memory_address) + 1) // 2
         size_length = (self.__count_digits(memory_size) + 1) // 2
 
@@ -100,11 +108,12 @@ class GenerateFrame(CanBridge):
         else:
             last_data = response[bytes_first_frame:]
             for i in range(0, len(last_data) // 7):
-                data = [0x21 + i] + last_data[i * 7: (i+1) * 7]
+                data = [0x21 + i] + last_data[i * 7: (i + 1) * 7]
                 self.send(id, data)
             # Send remaining data
             if len(last_data) % 7:
-                data = [0x21 + len(last_data) // 7] + last_data[len(last_data) - len(last_data) % 7:]
+                data = [0x21 + len(last_data) // 7] + \
+                    last_data[len(last_data) - len(last_data) % 7:]
         self.send(id, data)
 
     def request_transfer_exit(self, id, response=False):
@@ -112,7 +121,10 @@ class GenerateFrame(CanBridge):
         self.send(id, data)
 
     def clear_diagnostic_information(self, id, group_of_dtc=0xFFFFFF, response=False):
-        group_of_dtc_bytes = [(group_of_dtc >> 16) & 0xFF, (group_of_dtc >> 8) & 0xFF, group_of_dtc & 0xFF]
+        group_of_dtc_bytes = [
+            (group_of_dtc >> 16) & 0xFF,
+            (group_of_dtc >> 8) & 0xFF,
+            group_of_dtc & 0xFF]
         pci_l = len(group_of_dtc_bytes) + 1
         data = [pci_l, 0x14] + group_of_dtc_bytes if not response else [1, 0x54]
         self.send(id, data)
@@ -122,18 +134,33 @@ class GenerateFrame(CanBridge):
         self.send(id, data)
 
     def routine_control(self, id, sub_funct, routine_id, response=False):
-        data = [4, 0x71, sub_funct, routine_id // 0x100, routine_id % 0x100] \
-            if response is False else [4, 0x31, sub_funct, routine_id // 0x100, routine_id % 0x100]
+        data = [
+            4,
+            0x71,
+            sub_funct,
+            routine_id //
+            0x100,
+            routine_id %
+            0x100] if response is False else [
+            4,
+            0x31,
+            sub_funct,
+            routine_id //
+            0x100,
+            routine_id %
+            0x100]
         self.send(id, data)
 
     def authentication_seed(self, id, sid_send, sid_recv, subf, seed=[]):
         length_seed = len(seed)
-        data = [length_seed + 2, sid_recv, subf] + seed if length_seed > 0 else [2, sid_send, subf]
+        data = [length_seed + 2, sid_recv, subf] + \
+            seed if length_seed > 0 else [2, sid_send, subf]
         self.send(id, data)
 
     def authentication_key(self, id, sid_send, sid_recv, subf, key=[]):
         length_key = len(key)
-        data = [length_key + 2, sid_recv, subf] + key if length_key > 0 else [2, sid_send, subf]
+        data = [length_key + 2, sid_recv, subf] + \
+            key if length_key > 0 else [2, sid_send, subf]
         self.send(id, data)
 
     def tester_present(self, id, response=False):
@@ -144,24 +171,42 @@ class GenerateFrame(CanBridge):
         data = [2, 0x83, sub_function] if response is False else [2, 0xC3, sub_function]
         self.send(id, data)
 
-    def write_timming_parameters(self, id, sub_function, new_p2_max_time=0, new_p2_star_max_time=0, response=False):
+    def write_timming_parameters(
+            self,
+            id,
+            sub_function,
+            new_p2_max_time=0,
+            new_p2_star_max_time=0,
+            response=False):
         if sub_function == 2:
             if not response:
                 data = [3, 0x83, sub_function]
             else:
                 data = [3, 0xC3, sub_function]
         else:
-            new_p2_max_time_bytes = [(new_p2_max_time >> 8) & 0xFF, new_p2_max_time & 0xFF]
-            new_p2_star_max_time_bytes = [(new_p2_star_max_time >> 8) & 0xFF, new_p2_star_max_time & 0xFF]
+            new_p2_max_time_bytes = [
+                (new_p2_max_time >> 8) & 0xFF,
+                new_p2_max_time & 0xFF]
+            new_p2_star_max_time_bytes = [
+                (new_p2_star_max_time >> 8) & 0xFF,
+                new_p2_star_max_time & 0xFF]
 
             if not response:
-                data = [6, 0x83, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
+                data = [6, 0x83, sub_function] + \
+                    new_p2_max_time_bytes + new_p2_star_max_time_bytes
             else:
-                data = [6, 0xC3, sub_function] + new_p2_max_time_bytes + new_p2_star_max_time_bytes
+                data = [6, 0xC3, sub_function] + \
+                    new_p2_max_time_bytes + new_p2_star_max_time_bytes
 
         self.send(id, data)
 
-    def request_download(self, id, data_format_identifier, memory_address, memory_size, version):
+    def request_download(
+            self,
+            id,
+            data_format_identifier,
+            memory_address,
+            memory_size,
+            version):
         # Define the data format identifier mapping
         DATA_FORMAT_IDENTIFIER_MAP = {
             0x00: "No compression/encryption",
@@ -178,17 +223,29 @@ class GenerateFrame(CanBridge):
         # Handle data_format_identifier
         if isinstance(data_format_identifier, str):
             if data_format_identifier.lower() not in DATA_FORMAT_IDENTIFIER_MAP:
-                raise ValueError(f"Invalid data format identifier: {data_format_identifier}")
-            data_format_identifier = DATA_FORMAT_IDENTIFIER_MAP[data_format_identifier.lower()]
+                raise ValueError(
+                    f"Invalid data format identifier: {data_format_identifier}")
+            data_format_identifier = DATA_FORMAT_IDENTIFIER_MAP[data_format_identifier.lower(
+            )]
         elif isinstance(data_format_identifier, int):
             if data_format_identifier not in DATA_FORMAT_IDENTIFIER_MAP:
-                raise ValueError(f"Invalid data format identifier: {data_format_identifier}")
+                raise ValueError(
+                    f"Invalid data format identifier: {data_format_identifier}")
         else:
-            raise ValueError(f"Invalid data format identifier type: {type(data_format_identifier)}")
+            raise ValueError(
+                f"Invalid data format identifier type: {type(data_format_identifier)}")
 
         # Handle memory address and size
-        memory_address_bytes = memory_address.to_bytes((memory_address.bit_length() + 7) // 8, byteorder='big') if isinstance(memory_address, int) else memory_address
-        memory_size_bytes = memory_size.to_bytes((memory_size.bit_length() + 7) // 8, byteorder='big') if isinstance(memory_size, int) else memory_size
+        memory_address_bytes = memory_address.to_bytes(
+            (memory_address.bit_length() + 7) // 8,
+            byteorder='big') if isinstance(
+            memory_address,
+            int) else memory_address
+        memory_size_bytes = memory_size.to_bytes(
+            (memory_size.bit_length() + 7) // 8,
+            byteorder='big') if isinstance(
+            memory_size,
+            int) else memory_size
 
         # Calculate the Address and Length Format Identifier
         address_length = len(memory_address_bytes)  # noqa: F841
@@ -203,7 +260,8 @@ class GenerateFrame(CanBridge):
             major, minor = map(int, version.split('.'))
             major -= 1
             if major < 0 or major > 15 or minor < 0 or minor > 15:
-                raise ValueError(f"Invalid version: {version}. Major and minor must be between 0 and 15.")
+                raise ValueError(
+                    f"Invalid version: {version}. Major and minor must be between 0 and 15.")
             version_byte = (major << 4) | minor  # Encode directly without reduction
         elif isinstance(version, int):
             # Assume the int is already in the correct format
@@ -229,16 +287,23 @@ class GenerateFrame(CanBridge):
 
     def transfer_data(self, id, block_sequence_counter, data_to_transfer=None):
         data = []
-        if data_to_transfer != None:
-            data = [1 + ((self.__count_digits(data_to_transfer)) // 2), 0x36, block_sequence_counter]
+        if data_to_transfer is not None:
+            data = [1 + ((self.__count_digits(data_to_transfer)) // 2),
+                    0x36, block_sequence_counter]
             self.__add_to_list(data, data_to_transfer)
         else:
             data = [0x02, 0x36, block_sequence_counter]
         self.send(id, data)
 
-    def transfer_data_long(self, id, block_sequence_counter, transfer_data, first_frame=True):
+    def transfer_data_long(
+            self,
+            id,
+            block_sequence_counter,
+            transfer_data,
+            first_frame=True):
         if first_frame:
-            data = [0x10, len(transfer_data) + 2, 0x36, block_sequence_counter] + transfer_data[:4]
+            data = [0x10, len(transfer_data) + 2, 0x36,
+                    block_sequence_counter] + transfer_data[:4]
             self.send(id, data)
         else:
             # Delete first 3 byts of data
@@ -248,13 +313,16 @@ class GenerateFrame(CanBridge):
                 self.send(id, data)
             # Send remaining data
             if len(last_data) % 7:
-                data = [0x21 + len(last_data)//7] + last_data[len(last_data) - len(last_data) % 7:]
+                data = [0x21 + len(last_data) // 7] + \
+                    last_data[len(last_data) - len(last_data) % 7:]
                 self.send(id, data)
 
     def write_data_by_identifier(self, id, identifier, data_parameter):
         if len(data_parameter) > 0:
             if len(data_parameter) <= 4:
-                data = [len(data_parameter) + 3 , 0x2E, identifier // 0x100, identifier % 0x100] + data_parameter
+                data = [
+                    len(data_parameter) + 3, 0x2E, identifier // 0x100, identifier %
+                    0x100] + data_parameter
             else:
                 # "ERROR: To many data parameters, consider using write_data_by_identifier_long!"
                 return
@@ -273,7 +341,8 @@ class GenerateFrame(CanBridge):
             major, minor = map(int, version.split('.'))
             major -= 1
             if major < 0 or major > 15 or minor < 0 or minor > 15:
-                raise ValueError(f"Invalid version: {version}. Major and minor must be between 0 and 15.")
+                raise ValueError(
+                    f"Invalid version: {version}. Major and minor must be between 0 and 15.")
             version_byte = (major << 4) | minor  # Encode directly without reduction
         elif isinstance(version, int):
             # Assume the int is already in the correct format
@@ -289,21 +358,29 @@ class GenerateFrame(CanBridge):
         _id = (0x00 << 16) + (0xFA << 8) + ecu_id
         self.send_frame(_id, data)
 
-    def __generate_long_response(self, id, sid, identifier, response , first_frame):
+    def __generate_long_response(self, id, sid, identifier, response, first_frame):
         if first_frame:
-            data = [0x10, len(response) + 3, sid, identifier // 0x100, identifier % 0x100] + response[:3]
+            data = [0x10, len(response) + 3, sid, identifier // 0x100,
+                    identifier % 0x100] + response[:3]
             self.send(id, data)
         else:
             last_data = response[3:]
-            for i in range(0, len(last_data)//7):
-                data = [(0x21 + i % 8)] + last_data[i * 7 : (i+1) * 7]
+            for i in range(0, len(last_data) // 7):
+                data = [(0x21 + i % 8)] + last_data[i * 7: (i + 1) * 7]
                 self.send(id, data)
             if len(last_data) % 7:
-                data = [0x21 + len(last_data) // 7] + last_data[len(last_data) - len(last_data) % 7:]
+                data = [0x21 + len(last_data) // 7] + \
+                    last_data[len(last_data) - len(last_data) % 7:]
                 self.send(id, data)
 
     def __add_to_list(self, data_list, number):
-        temp_list = [(number >> (8 * i)) & 0xFF for i in range((number.bit_length() + 7) // 8)]
+        temp_list = [
+            (number >> (
+                8 *
+                i)) & 0xFF for i in range(
+                (number.bit_length() +
+                 7) //
+                8)]
         data_list.extend(temp_list[::-1])
 
     def __count_digits(self, number):
@@ -312,21 +389,21 @@ class GenerateFrame(CanBridge):
             digits += 1
             number //= 10
         return digits
-    
-    def _erase_data(self, id , address, nrBytes, firstFrame=True):
+
+    def _erase_data(self, id, address, nrBytes, firstFrame=True):
         data = []
         octets = []
-        if firstFrame== True:
+        if firstFrame:
             while address > 0:
                 octets.insert(0, address & 0xFF)
-                address >>= 8 
+                address >>= 8
             data = [0x31, 0x01, 0x01, 0x01]
             data.extend(octets)
             data.insert(0, len(data))
         else:
             while nrBytes > 0:
                 octets.insert(0, nrBytes & 0xFF)
-                nrBytes >>= 8 
+                nrBytes >>= 8
             data = [0x31, 0x01, 0x01, 0x02]
             data.extend(octets)
             data.insert(0, len(data))

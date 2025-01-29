@@ -20,5 +20,5 @@ class Config:
     SECRET_KEY = key_data.get('private_key_id')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///db.sqlite'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY =  key_data.get('private_key_id')
+    JWT_SECRET_KEY = key_data.get('private_key_id')
     JWT_ACCESS_TOKEN_EXPIRES = False
