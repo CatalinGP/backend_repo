@@ -56,16 +56,19 @@ class WriteInfo(Action):
                 try:
                     value = int(value)
                     if not (0 <= value <= 255):
-                        log_error_message(logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
+                        log_error_message(
+                            logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
                         continue
                 except ValueError:
-                    log_error_message(logger, f"Invalid value type for key '{key}': {value}")
+                    log_error_message(
+                        logger, f"Invalid value type for key '{key}': {value}")
                     continue
 
                 data_parameter = [value]
                 if len(data_parameter) <= 4:
                     self.write_data_by_identifier(id, identifier, data_parameter)
-                    self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
+                    self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
 
                 else:
                     self.write_data_by_identifier_long(id, identifier, data_parameter)
@@ -74,16 +77,21 @@ class WriteInfo(Action):
                 written_values[key] = value
 
             if len(written_values):
-                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_BATTERY}")
+                log_info_message(
+                    logger, f"Data written successfully to ECU ID: {ECU_BATTERY}")
                 response_json = self._to_json("Battery", written_values)
             else:
-                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                log_info_message(
+                    logger,
+                    "Provided keys did not match any known identifiers or no valid data was provided for writing.")
                 response_json = self._to_json_no_values("Battery")
             return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Write by ID",
@@ -128,16 +136,19 @@ class WriteInfo(Action):
                 try:
                     value = int(value)
                     if not (0 <= value <= 255):
-                        log_error_message(logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
+                        log_error_message(
+                            logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
                         continue
                 except ValueError:
-                    log_error_message(logger, f"Invalid value type for key '{key}': {value}")
+                    log_error_message(
+                        logger, f"Invalid value type for key '{key}': {value}")
                     continue
 
                 data_parameter = [value]
                 if len(data_parameter) <= 4:
                     self.write_data_by_identifier(id, identifier, data_parameter)
-                    self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
+                    self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
                 else:
                     self.write_data_by_identifier_long(id, identifier, data_parameter)
 
@@ -145,16 +156,21 @@ class WriteInfo(Action):
                 written_values[key] = value
 
             if len(written_values):
-                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_DOORS}")
+                log_info_message(
+                    logger, f"Data written successfully to ECU ID: {ECU_DOORS}")
                 response_json = self._to_json("Doors", written_values)
             else:
-                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                log_info_message(
+                    logger,
+                    "Provided keys did not match any known identifiers or no valid data was provided for writing.")
                 response_json = self._to_json_no_values("Doors")
             return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Write by ID",
@@ -205,16 +221,19 @@ class WriteInfo(Action):
                 try:
                     value = int(value)
                     if not (0 <= value <= 255):
-                        log_error_message(logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
+                        log_error_message(
+                            logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
                         continue
                 except ValueError:
-                    log_error_message(logger, f"Invalid value type for key '{key}': {value}")
+                    log_error_message(
+                        logger, f"Invalid value type for key '{key}': {value}")
                     continue
 
                 data_parameter = [value]
                 if len(data_parameter) <= 4:
                     self.write_data_by_identifier(id, identifier, data_parameter)
-                    self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
+                    self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
                 else:
                     self.write_data_by_identifier_long(id, identifier, data_parameter)
 
@@ -222,16 +241,21 @@ class WriteInfo(Action):
                 written_values[key] = value
 
             if len(written_values):
-                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_ENGINE}")
+                log_info_message(
+                    logger, f"Data written successfully to ECU ID: {ECU_ENGINE}")
                 response_json = self._to_json("Engine", written_values)
             else:
-                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                log_info_message(
+                    logger,
+                    "Provided keys did not match any known identifiers or no valid data was provided for writing.")
                 response_json = self._to_json_no_values("Engine")
             return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Write by ID",
@@ -278,16 +302,19 @@ class WriteInfo(Action):
                 try:
                     value = int(value)
                     if not (0 <= value <= 255):
-                        log_error_message(logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
+                        log_error_message(
+                            logger, f"Value '{value}' for key '{key}' is out of byte range (0-255).")
                         continue
                 except ValueError:
-                    log_error_message(logger, f"Invalid value type for key '{key}': {value}")
+                    log_error_message(
+                        logger, f"Invalid value type for key '{key}': {value}")
                     continue
 
                 data_parameter = [value]
                 if len(data_parameter) <= 4:
                     self.write_data_by_identifier(id, identifier, data_parameter)
-                    self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
+                    self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {identifier}")
                 else:
                     self.write_data_by_identifier_long(id, identifier, data_parameter)
 
@@ -295,16 +322,21 @@ class WriteInfo(Action):
                 written_values[key] = value
 
             if len(written_values):
-                log_info_message(logger, f"Data written successfully to ECU ID: {ECU_HVAC}")
+                log_info_message(
+                    logger, f"Data written successfully to ECU ID: {ECU_HVAC}")
                 response_json = self._to_json("HVAC", written_values)
             else:
-                log_info_message(logger,"Provided keys did not match any known identifiers or no valid data was provided for writing.")
+                log_info_message(
+                    logger,
+                    "Provided keys did not match any known identifiers or no valid data was provided for writing.")
                 response_json = self._to_json_no_values("HVAC")
             return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Write by ID",
@@ -312,7 +344,6 @@ class WriteInfo(Action):
             }
 
     def write_data(self, ecu_id=None, data=None):
-
         """
         Method to write information to any module. Handles authentication, data preparation,
         and writing operations.

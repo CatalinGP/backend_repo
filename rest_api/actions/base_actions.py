@@ -31,12 +31,14 @@ ACCESS_TIMING_PARAMETERS = 0X83
 
 class FrameWithData:
     """Base class for frames with data extraction methods."""
+
     def _data_from_frame(self):
         pass
 
 
 class ReadByIdentifier(FrameWithData):
     """Extracts data from frames read by identifier."""
+
     def _data_from_frame(self, msg: can.Message):
         data = msg.data[4:]
         return data
@@ -44,6 +46,7 @@ class ReadByIdentifier(FrameWithData):
 
 class ReadByAddress(FrameWithData):
     """Extracts data from frames read by address."""
+
     def _data_from_frame(self, msg: can.Message):
         addr_siz_len = msg.data[2]
         byte_start_data = addr_siz_len % 0x10 + addr_siz_len // 0x10
@@ -53,6 +56,7 @@ class ReadByAddress(FrameWithData):
 
 class AuthenticationSeed(FrameWithData):
     """Extracts seed from frame request seed."""
+
     def _data_from_frame(self, msg: can.Message):
         data = msg.data[3:]
         return data
@@ -60,6 +64,7 @@ class AuthenticationSeed(FrameWithData):
 
 class CustomError(Exception):
     """Custom exception class for handling specific update errors."""
+
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
@@ -105,25 +110,33 @@ class Action(GF):
 
         # Handle multi-frame responses
         while msg is not None:
-            # Check for response pending (negative response, 0x7F with 0x78 sub-function)
+            # Check for response pending (negative response, 0x7F with 0x78
+            # sub-function)
             if msg.data[1] == 0x7F and msg.data[3] == 0x78:
-                log_info_message(logger, f"[Collect Response] Response pending for SID {msg.data[2]:02X}. Waiting for actual response...")
+                log_info_message(
+                    logger,
+                    f"[Collect Response] Response pending for SID {msg.data[2]:02X}. Waiting for actual response...")
                 msg = self.bus.recv(Config.BUS_RECEIVE_TIMEOUT)
                 self.last_msg = msg
                 continue
 
             # First Frame (starts with 0x10)
             if msg.data[0] == 0x10:
-                total_data_length = msg.data[1]  # Total length from the first frame (byte 1 and 2)
-                collected_data = msg.data[1:]  # Store the data portion starting from byte 3
+                # Total length from the first frame (byte 1 and 2)
+                total_data_length = msg.data[1]
+                # Store the data portion starting from byte 3
+                collected_data = msg.data[1:]
                 log_info_message(logger, f"[Collect Response] First frame received. \
                                  Total length expected: {total_data_length}, \
                                  Data: {[hex(byte) for byte in collected_data]}")
 
             # Consecutive Frames
             elif 0x20 <= msg.data[0] <= 0x30:
-                collected_data += msg.data[1:]  # Append the data from the consecutive frames
-                log_info_message(logger, f"[Collect Response] Consecutive frame received {[hex(byte) for byte in collected_data]}")
+                # Append the data from the consecutive frames
+                collected_data += msg.data[1:]
+                log_info_message(
+                    logger,
+                    f"[Collect Response] Consecutive frame received {[hex(byte) for byte in collected_data]}")
 
                 # If we have collected the total expected length, stop
                 if len(collected_data) >= total_data_length:
@@ -132,7 +145,8 @@ class Action(GF):
 
             # Single-frame response or other types
             else:
-                log_info_message(logger, f"[Collect Response] Simple frame or other frame received: {msg}")
+                log_info_message(
+                    logger, f"[Collect Response] Simple frame or other frame received: {msg}")
                 break
 
             msg = self.bus.recv(Config.BUS_RECEIVE_TIMEOUT)
@@ -140,24 +154,35 @@ class Action(GF):
 
         # Verify the assembled response, if multi-frame was used
         if total_data_length > 0 and len(collected_data) >= total_data_length:
-            msg_ext = can.Message(arbitration_id=msg.arbitration_id, data=collected_data)
-            log_info_message(logger, f"[Collect Response] Final assembled multi-frame message: {[hex(byte) for byte in msg_ext.data]}")
+            msg_ext = can.Message(
+                arbitration_id=msg.arbitration_id,
+                data=collected_data)
+            log_info_message(
+                logger,
+                f"[Collect Response] Final assembled multi-frame message: {[hex(byte) for byte in msg_ext.data]}")
             msg = msg_ext
 
         if msg is not None and self.__verify_frame(msg, sid):
-            log_info_message(logger, f"[Collect Response] Valid message collected for SID {sid:02X}: {msg}")
+            log_info_message(
+                logger, f"[Collect Response] Valid message collected for SID {sid:02X}: {msg}")
             self.response_collected = True
             return msg
 
-        log_error_message(logger, f"[Collect Response] Invalid or no message collected for SID {hex(sid)}")
+        log_error_message(
+            logger,
+            f"[Collect Response] Invalid or no message collected for SID {hex(sid)}")
         return None
 
     def __verify_frame(self, msg: can.Message, sid: int):
-        log_info_message(logger, f"[Verify Frame] Verifying frame with SID: {hex(sid)}, message data: {[hex(byte) for byte in msg.data]}")
+        log_info_message(
+            logger,
+            f"[Verify Frame] Verifying frame with SID: {hex(sid)}, message data: {[hex(byte) for byte in msg.data]}")
 
         # Check if the arbitration ID matches the expected device ID
         if msg.arbitration_id % 0x100 != self.my_id:
-            log_error_message(logger, f"[Verify Frame] Arbitration ID mismatch. Expected ID: {self.my_id}, got: {msg.arbitration_id % 0x100}")
+            log_error_message(
+                logger,
+                f"[Verify Frame] Arbitration ID mismatch. Expected ID: {self.my_id}, got: {msg.arbitration_id % 0x100}")
             return False
 
         # Multi-frame handling: Check first and consecutive frames
@@ -165,23 +190,28 @@ class Action(GF):
             return True
 
         elif msg.data[0] == 0x21:
-            # Consecutive frame, should simply continue to verify as part of the sequence
+            # Consecutive frame, should simply continue to verify as part of the
+            # sequence
             return True
 
         # Check for negative response (0x7F response pending or another type)
         if msg.data[1] == 0x7F:
             if msg.data[3] == 0x78:
-                log_info_message(logger, f"[Verify Frame] Response pending. Waiting for SID: {sid}.")
+                log_info_message(
+                    logger, f"[Verify Frame] Response pending. Waiting for SID: {sid}.")
                 return True  # Valid response with pending status
             else:
-                log_error_message(logger, f"[Verify Frame] Negative response with NRC: {msg.data[3]}")
+                log_error_message(
+                    logger, f"[Verify Frame] Negative response with NRC: {msg.data[3]}")
                 return False  # Negative response received
 
         # Final validation for single frame responses or multi-frame assembled messages
         if len(msg.data) >= 2 and msg.data[1] == sid + 0x40:
             return True
 
-        log_error_message(logger, "[Verify Frame] Message does not match any valid response structure.")
+        log_error_message(
+            logger,
+            "[Verify Frame] Message does not match any valid response structure.")
         return False
 
     def _passive_response(self, sid, error_str="Error service"):
@@ -199,7 +229,8 @@ class Action(GF):
         response = self.__collect_response(sid)
 
         if response:
-            log_info_message(logger, f"[Passive Reponse] Collected response: {response}")
+            log_info_message(
+                logger, f"[Passive Reponse] Collected response: {response}")
         else:
             log_error_message(logger, error_str)
 
@@ -208,7 +239,7 @@ class Action(GF):
             response_json = self._to_json_error("Response was interrupted", 1)
             raise CustomError(response_json)
         return response
-    
+
     def _collect_response_raw(self, id, sid: int):
         """
         Collects the response message from the CAN bus.
@@ -223,18 +254,23 @@ class Action(GF):
         self.last_msg = msg
 
         if msg is None:
-            log_error_message(logger, f"[Collect Response RAW] No message collected for SID {hex(sid)}")
+            log_error_message(
+                logger, f"[Collect Response RAW] No message collected for SID {hex(sid)}")
             return None
         else:
-            log_info_message(logger, f"[Collect Response RAW] Initial message received: {msg}")
+            log_info_message(
+                logger, f"[Collect Response RAW] Initial message received: {msg}")
             if (msg.data[1] == (sid + 0x40)):
-                log_info_message(logger, f"[Collect Response RAW] Valid message collected for SID {sid:02X}: {msg}")
+                log_info_message(
+                    logger, f"[Collect Response RAW] Valid message collected for SID {sid:02X}: {msg}")
 
             hex_data = [byte for byte in msg.data]
             return hex_data
 
-
-    def get_message_with_id_from_can(self, target_id, timeout=Config.BUS_RECEIVE_TIMEOUT):
+    def get_message_with_id_from_can(
+            self,
+            target_id,
+            timeout=Config.BUS_RECEIVE_TIMEOUT):
         """
         Receives a message from the CAN with a specific arbitrary ID.
 
@@ -246,8 +282,8 @@ class Action(GF):
             Message: The CAN message received with the specified ID, or None if not found.
         """
 
-        byte_1 = (target_id >> 8) & 0xFF 
-        byte_2 = target_id & 0xFF 
+        byte_1 = (target_id >> 8) & 0xFF
+        byte_2 = target_id & 0xFF
         can_id_invert = (byte_2 << 8) | byte_1
 
         while True:
@@ -255,8 +291,7 @@ class Action(GF):
             if msg is None:
                 return None
             if msg.arbitration_id == can_id_invert:
-                return msg 
-            
+                return msg
 
     def _data_from_frame(self, msg: can.Message):
         """
@@ -288,11 +323,15 @@ class Action(GF):
         Returns:
         - Data as a string.
         """
-        log_info_message(logger, f"[Read by Identifier] Read from identifier {identifier}")
+        log_info_message(
+            logger,
+            f"[Read by Identifier] Read from identifier {identifier}")
         self.read_data_by_identifier(id, identifier)
-        frame_response = self._passive_response(READ_BY_IDENTIFIER,
-                                                f"[Read by Identifier] Error reading data from identifier {identifier}")
-        log_info_message(logger, f"[Read by Identifier] Frame response: {frame_response}")
+        frame_response = self._passive_response(
+            READ_BY_IDENTIFIER,
+            f"[Read by Identifier] Error reading data from identifier {identifier}")
+        log_info_message(
+            logger, f"[Read by Identifier] Frame response: {frame_response}")
         data = self._data_from_frame(frame_response)
         data_str = self._list_to_number(data)
         return data_str
@@ -309,7 +348,9 @@ class Action(GF):
         Returns:
         - True if the operation is triggered.
         """
-        log_info_message(logger, f"[Write by Identifier] Write by identifier {identifier}")
+        log_info_message(
+            logger,
+            f"[Write by Identifier] Write by identifier {identifier}")
 
         value_list = self._number_to_list(value)
 
@@ -318,7 +359,9 @@ class Action(GF):
         else:
             self.write_data_by_identifier(id, identifier, value_list)
 
-        self._passive_response(WRITE_BY_IDENTIFIER, f"[Write by Identifier] Operation complete for identifier {identifier}")
+        self._passive_response(
+            WRITE_BY_IDENTIFIER,
+            f"[Write by Identifier] Operation complete for identifier {identifier}")
 
         return True
 
@@ -441,7 +484,8 @@ class Action(GF):
         error_message = negative_responses.get(nrc, "Unknown error")
         service_description = service_error_mapping.get(service_id, "Unknown service")
 
-        logger.error(f"Negative response received: Service={service_description}, NRC={hex(nrc)}, Error={error_message}")
+        logger.error(
+            f"Negative response received: Service={service_description}, NRC={hex(nrc)}, Error={error_message}")
 
         response = {
             "service_id": hex(service_id),
@@ -491,7 +535,7 @@ class Action(GF):
         list = []
         while number:
             list.append(number % 0x100)
-            number = number//0x100
+            number = number // 0x100
         return list[::-1]
 
     def _number_to_byte_list(self, number: int):

@@ -9,6 +9,7 @@ class ReadAccessTiming(Action):
         "sub_funct": "timing"
     }'
     """
+
     def _read_timing_info(self, ecu_id, sub_funct=1):
         """
         Reads timing parameters of the ECUs.
@@ -24,13 +25,13 @@ class ReadAccessTiming(Action):
 
             log_info_message(logger, "Changing session to programming")
             self.access_timing_parameters(id, sub_funct)
-            frame_response = self._passive_response(ACCESS_TIMING_PARAMETERS, "Error reading timing parameters")
+            frame_response = self._passive_response(
+                ACCESS_TIMING_PARAMETERS, "Error reading timing parameters")
 
             if len(frame_response.data) < 4:
                 return {
                     "status": "error",
-                    "message": "Unexpected or insufficient response length while reading timing parameters"
-                }
+                    "message": "Unexpected or insufficient response length while reading timing parameters"}
 
             if frame_response.data[1] == 0x7F:
                 nrc_msg = frame_response.data[3]
@@ -39,8 +40,7 @@ class ReadAccessTiming(Action):
                 return {
                     "status": "error",
                     "message": "Negative response received while reading timing parameters",
-                    "negative_response": negative_response
-                }
+                    "negative_response": negative_response}
 
             if frame_response.data[1] == 0xC3:
                 log_info_message(logger, "Timing parameters read successfully")
@@ -91,6 +91,7 @@ class WriteAccessTiming(Action):
         "p2_star_max": "100"
     }'
     """
+
     def _write_timing_info(self, sub_function, ecu_id, timing_values={}):
         """
         Writes timing parameters to the ECU.
@@ -111,7 +112,8 @@ class WriteAccessTiming(Action):
                 p2_star_max = timing_values.get("p2_star_max", 0)
                 self.write_timming_parameters(id, sub_function, p2_max, p2_star_max)
 
-            frame_response = self._passive_response(ACCESS_TIMING_PARAMETERS, "Error writing timing parameters")
+            frame_response = self._passive_response(
+                ACCESS_TIMING_PARAMETERS, "Error writing timing parameters")
 
             if frame_response.data[1] == 0xC3:
                 log_info_message(logger, "Timing parameters written successfully")

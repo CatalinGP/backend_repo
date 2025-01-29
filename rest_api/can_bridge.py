@@ -28,7 +28,8 @@ class CanBridge:
         """Initialize the CAN bus based on the configuration."""
         if self.bus is None:
             try:
-                self.bus = can.interface.Bus(channel=self.CAN_INTERFACE, bustype='socketcan')
+                self.bus = can.interface.Bus(
+                    channel=self.CAN_INTERFACE, bustype='socketcan')
             except Exception as e:
                 logger.error(f"Failed to initialize CAN bus: {e}")
                 raise RuntimeError(f"Failed to initialize CAN bus: {e}")
@@ -93,7 +94,8 @@ class CanBridge:
     def get_bus(self):
         """Expose the bus instance for external use."""
         if self.bus is None:
-            self.bus = can.interface.Bus(channel=self.CAN_INTERFACE, bustype='socketcan')
+            self.bus = can.interface.Bus(
+                channel=self.CAN_INTERFACE, bustype='socketcan')
         return self.bus
 
     def run(self):

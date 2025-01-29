@@ -28,6 +28,7 @@ class IDsToJson():
 
 class RequestIdAction(Action):
     """ curl -X GET http://127.0.0.1:5000/api/request_ids """
+
     def __init__(self):
         super().__init__()
 
@@ -65,8 +66,7 @@ class RequestIdAction(Action):
                     negative_response = self.handle_negative_response(nrc_msg, sid_msg)
                     return {
                         "message": f"Negative response received while resetting device {id}",
-                        "negative_response": negative_response
-                    }
+                        "negative_response": negative_response}
 
                 if data[1] == 0xD9:
                     # Positive response
@@ -122,16 +122,19 @@ class RequestIdAction(Action):
             id_ecu_int = int(ecu_id, 16)
             ID_ECU = (0x00 << 16) + (self.my_id << 8) + id_ecu_int
             log_info_message(logger, f"Reading IDss: {ID_ECU}")
-            version = self._read_by_identifier(ID_ECU, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
+            version = self._read_by_identifier(
+                ID_ECU, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
 
             if version:
-                log_info_message(logger, f"Version found for ECU ID {hex(id_ecu_int)}: {version}")
+                log_info_message(
+                    logger, f"Version found for ECU ID {hex(id_ecu_int)}: {version}")
                 return version
 
         except CustomError as e:
-            log_error_message(logger, f"Error reading version for ECU ID {id_ecu_int}: {str(e)}")
+            log_error_message(
+                logger, f"Error reading version for ECU ID {id_ecu_int}: {str(e)}")
             return None
-            
+
     def check_ecu_up(self, ecu_id: int):
         response_req_json = self.read_ids()
         ecu_values = response_req_json.get("ecus", [])

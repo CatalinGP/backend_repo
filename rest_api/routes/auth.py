@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models import User, db, TokenList
-from flask_jwt_extended import create_access_token, get_jwt_identity , jwt_required
-from utils.decorators import role_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 import uuid
 
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -17,10 +17,10 @@ def login():
         token_identifier = str(uuid.uuid4())
         access_token = create_access_token(
             identity={
-            'id': user.id,
-            'role': user.role,
-            'token_identifier': token_identifier
-        })
+                'id': user.id,
+                'role': user.role,
+                'token_identifier': token_identifier
+            })
         new_token = TokenList(user_id=user.id, token_identifier=token_identifier)
         db.session.add(new_token)
         db.session.commit()
@@ -29,12 +29,13 @@ def login():
 
     return jsonify({'message': 'Invalid credentials'}), 401
 
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    role = data.get('role', 'member') 
+    role = data.get('role', 'member')
 
     if not username or not password:
         return jsonify({'message': 'Username and password are required'}), 400
@@ -51,14 +52,15 @@ def register():
 
     return jsonify({'message': f'User {username} registered successfully'}), 201
 
+
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     identity = get_jwt_identity()
     token_identifier = identity.get('token_identifier')
-    
+
     token_entry = TokenList.query.filter_by(token_identifier=token_identifier).first()
-    
+
     if token_entry:
         db.session.delete(token_entry)
         db.session.commit()
