@@ -120,10 +120,10 @@ void ECU::stopProcess(std::string process_name)
     /* Read the output of the command and check if it is valid */
     if (fscanf(fp, "%d", &count) != 1) {
         std::cerr << "Failed to read process count" << std::endl;
-        fclose(fp);
+        pclose(fp);
         return;
     }
-    fclose(fp);
+    pclose(fp);
 
     /* Loop while there are more than 2 processes running */
     while (count > 2) {
@@ -145,9 +145,9 @@ void ECU::stopProcess(std::string process_name)
         }
         if (fscanf(fp, "%d", &count) != 1) {
             std::cerr << "Failed to read process count" << std::endl;
-            fclose(fp);
+            pclose(fp);
             return;
         }
-        fclose(fp);
+        pclose(fp);
     }
 }
