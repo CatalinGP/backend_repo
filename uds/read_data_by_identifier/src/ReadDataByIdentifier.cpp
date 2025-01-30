@@ -88,6 +88,10 @@ std::vector<uint8_t> ReadDataByIdentifier::readDataByIdentifier(canid_t frame_id
     }
     else if (lowerbits == 0x11)
     {
+        if (battery)
+        {
+            battery->fetchBatteryData("r");
+        }
         file_name += "/backend/ecu_simulation/BatteryModule/battery_data.txt";
     }
     else if (lowerbits == 0x12)
