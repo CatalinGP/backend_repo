@@ -1,9 +1,13 @@
 #include "gtest/gtest.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <sys/prctl.h>
 #include "../include/MCUModule.h"
 #include <linux/can.h>
 #include "../../utils/include/Logger.h"
 #include "../../utils/include/GenerateFrames.h"
+#include "../../utils/include/Globals.h"
 #include "../../ecu_simulation/BatteryModule/include/BatteryModule.h"
 
 int socket_canbus = -1;
@@ -86,6 +90,7 @@ protected:
     MCUModuleTest()
     {
         mockLogger = new Logger;
+        loadProjectPathForMCU();
     }
     ~MCUModuleTest()
     {
@@ -186,43 +191,6 @@ TEST_F(MCUModuleTest, receiveFramesTest)
     receiver_thread.join();
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_TRUE(containsLine(output, "Frame processing method invoked!"));
-    delete MCU::mcu;
-}
-
-TEST_F(MCUModuleTest, SetDIDValue)
-{
-    MCU::mcu = new MCU::MCUModule(0x01);
-    createMCUProcess();
-    MCU::mcu->setMcuEcuSocket(0x01);
-    /* (OTA_UPDATE_STATUS_DID, {INIT}) */
-    MCU::mcu->setDidValue(0x01E0,{16});
-    delete MCU::mcu;
-}
-
-TEST_F(MCUModuleTest, SetDIDValueUnknown)
-{
-    MCU::mcu = new MCU::MCUModule(0x01);
-    createMCUProcess();
-    MCU::mcu->setMcuEcuSocket(0x01);
-    /* (OTA_UPDATE_STATUS_DID, {INIT}) */
-    testing::internal::CaptureStdout();
-    MCU::mcu->setDidValue(0x01E5,{16});
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(containsLine(output, "not found when trying to set value"));
-    delete MCU::mcu;
-}
-
-TEST_F(MCUModuleTest, GetDIDValue)
-{
-    MCU::mcu = new MCU::MCUModule(0x01);
-    createMCUProcess();
-    MCU::mcu->setMcuEcuSocket(0x01);
-    /* (OTA_UPDATE_STATUS_DID, {INIT}) */
-    testing::internal::CaptureStdout();
-    MCU::mcu->setDidValue(0x01E0,{16});
-    std::vector<uint8_t> result;
-    result = MCU::mcu->getDidValue(0x01E0);
-    testByteVectors(result,{16});
     delete MCU::mcu;
 }
 

@@ -17,6 +17,7 @@
 #include "../include/ReadDtcInformation.h"
 
 #include <cstring>
+#include <linux/can.h>
 #include <string>
 #include <thread>
 

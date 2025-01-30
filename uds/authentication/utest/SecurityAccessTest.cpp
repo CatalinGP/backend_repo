@@ -6,6 +6,7 @@
  * @date 2024-07-16
  */
 #include "../include/SecurityAccess.h"
+#include "../../../utils/include/NegativeResponse.h"
 
 #include <cstring>
 #include <string>

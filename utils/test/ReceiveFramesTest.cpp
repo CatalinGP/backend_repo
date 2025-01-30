@@ -253,7 +253,7 @@ TEST_F(ReceiveFramesTest, StopEngine)
 {
     std::cerr << "Running StopEngine" << std::endl;
     testing::internal::CaptureStdout();
-    r->startTimer(0x12, 0x10);
+    r->startTimer(0x12, 0x10, 10);
     sleep(3);
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Service with SID 10 sent the response pending frame."), std::string::npos);
@@ -264,7 +264,7 @@ TEST_F(ReceiveFramesTest, StopDoors)
 {
     std::cerr << "Running StopDoors" << std::endl;
     testing::internal::CaptureStdout();
-    r->startTimer(0x13, 0x10);
+    r->startTimer(0x13, 0x10, 10);
     sleep(3);
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Service with SID 10 sent the response pending frame."), std::string::npos);
@@ -275,7 +275,7 @@ TEST_F(ReceiveFramesTest, StopHVAC)
 {
     std::cerr << "Running StopHVAC" << std::endl;
     testing::internal::CaptureStdout();
-    r->startTimer(0x14, 0x10);
+    r->startTimer(0x14, 0x10, 10);
     sleep(3);
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Service with SID 10 sent the response pending frame."), std::string::npos);
@@ -286,7 +286,7 @@ TEST_F(ReceiveFramesTest, StopTimerDefaultCase)
 {
     std::cerr << "Running StopTimerDefaultCase" << std::endl;
     testing::internal::CaptureStdout();
-    r->stopTimer(0x15, 0x10);
+    r->stopTimer(0x15, 0x10, 10);
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("stopTimer function called with an ecu id unknown 15."), std::string::npos);
     std::cerr << "Finished StopTimerDefaultCase" << std::endl;

@@ -5,9 +5,17 @@
  * @version 0.1
  * @date 2024-10-11
  */
+#include <cstddef>
+#include <fcntl.h>
+#include <memory>
 #include <gtest/gtest.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <sys/socket.h>
 #include "../include/EcuReset.h"
+#include "../../authentication/include/SecurityAccess.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "../../../utils/include/NegativeResponse.h"
 
 int socket1;
 int socket2;
@@ -119,12 +127,11 @@ struct EcuResetTest : testing::Test
 
 TEST_F(EcuResetTest, ConstructorInitializesFieldsCorrectly)
 {
-    EcuReset *ecuReset;
+    std::unique_ptr<EcuReset> ecuReset;
     EXPECT_NO_THROW(
     {
-        ecuReset = new EcuReset(0xFA10, 0x01, socket2, *logger);
+        ecuReset = std::make_unique<EcuReset>(0xFA10, 0x01, socket2, *logger);
     });
-    delete ecuReset;
 }
 
 TEST_F(EcuResetTest, IncorrectMessageLength)

@@ -7,6 +7,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <fstream>
 #include "../include/DoorsModule.h"
 
 bool containsLine(const std::string& output, const std::string& line)

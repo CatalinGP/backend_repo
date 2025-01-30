@@ -11,6 +11,7 @@
 #include "../include/MemoryManager.h"
 
 #include <gtest/gtest.h>
+#include <fstream>
 
 off_t address = 100000 * 512;
 Logger* logger = new Logger("test","test_memory.log");

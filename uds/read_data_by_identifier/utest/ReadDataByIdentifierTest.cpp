@@ -5,9 +5,16 @@
  * @version 0.1
  * @date 2024-10-9
  */
+#include <fcntl.h>
+#include <fstream>
 #include <gtest/gtest.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <net/if.h>
 #include "../include/ReadDataByIdentifier.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "../../../utils/include/NegativeResponse.h"
+#include "../../../uds/authentication/include/SecurityAccess.h"
 #include "Globals.h"
 
 int socket1;
