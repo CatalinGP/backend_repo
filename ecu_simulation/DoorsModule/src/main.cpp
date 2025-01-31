@@ -13,6 +13,7 @@ int main() {
     doorsModuleLogger = new Logger("doorsModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/DoorsModule/logs/doorsModuleLogger.log");
     #endif /* UNIT_TESTING_MODE */
     doors = new DoorsModule();
+    doors->_ecu->stopProcess("main_doors");
     std::thread receiveFrThread([]()
                                { doors->_ecu->startFrames(); });
     sleep(200);

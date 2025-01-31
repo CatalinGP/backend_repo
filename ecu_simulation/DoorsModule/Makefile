@@ -13,7 +13,7 @@ PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -l
 # override PYTHON_LDFLAGS = -L/usr/local/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -lcrypt -ldl -lutil -lm -lpthread
 # Compiler flags
 CXX = g++
-CFLAGS = -std=c++17 -O3 -Wall -Werror -pthread \
+CFLAGS = -std=c++17 -g -Wall -Werror -pthread \
          -I./include \
          -I../../utils/include \
          -I../../mcu/include \
