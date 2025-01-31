@@ -113,11 +113,6 @@ namespace MCU
          * 
          */
         void fetchMCUData();
-        /**
-         * @brief This function stops all the processes that running ./main_mcu, except the current one.
-         * 
-         */
-        void stopProcess();
  
     private:
         bool is_running;

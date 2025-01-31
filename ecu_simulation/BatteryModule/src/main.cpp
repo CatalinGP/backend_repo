@@ -13,7 +13,7 @@ int main() {
     batteryModuleLogger = new Logger("batteryModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/logs/batteryModuleLogger.log");
     #endif /* UNIT_TESTING_MODE */
     battery = new BatteryModule();
-    battery->_ecu->stopProcess("main_battery");
+    stopProcess("main_battery");
     std::thread receiveFrThread([]()
                                { battery->_ecu->startFrames(); });
     sleep(200);

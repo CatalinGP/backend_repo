@@ -77,8 +77,6 @@ public:
      * 
      */
     ~ECU();
-
-    void stopProcess(std::string process_name);
 };
 
 #endif
