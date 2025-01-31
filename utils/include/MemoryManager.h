@@ -101,14 +101,6 @@ class MemoryManager
         static bool dev_loop_path_configured;
 
         /**
-         * @brief Method to transform a string number to type integer
-         * 
-         * @param number 
-         * @return int 
-         */
-        int to_int(std::string number);
-
-        /**
          * @brief Method to run a command in the bash terminal
          * 
          * @param command 
