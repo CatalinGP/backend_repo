@@ -20,6 +20,7 @@
 #include <iostream>
 #include <vector>
 
+#include "Globals.h"
 #include "Logger.h"
 
 /* Enumeration for frame types */
@@ -366,13 +367,6 @@ class GenerateFrames
          * @return struct can_frame 
          */
         struct can_frame createFrame(int& id, std::vector<uint8_t>& data, FrameType frameType = DATA_FRAME);
-        /**
-         * @brief Count the number of digits in a number
-         * 
-         * @param number The integer whose digits are to be counted.
-         * @return The number of digits for a given integer.
-         */
-        int countDigits(int number);
         /**
          * @brief Insert in a std::vector a number but separated in bytes
          * 
