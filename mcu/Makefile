@@ -65,6 +65,10 @@ OTA_DIR = ../ota
 OBJ_DIR = obj
 HVAC_DIR_TEST = ../ecu_simulation/HVACModule/test
 
+# Build config
+all:
+	$(MAKE) -C ../config init
+
 #----------------------------------------------------MCU MODULE-----------------------------------------------------
 
 # Object files

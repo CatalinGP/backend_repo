@@ -58,6 +58,10 @@ HVAC_DIR = ../HVACModule/src
 OTA_DIR = ../../ota
 OBJ_DIR = obj
 
+# Build config
+all:
+	$(MAKE) -C ../../config init
+
 #----------------------------------------------------MCU MODULE-----------------------------------------------------
 
 # Object files
