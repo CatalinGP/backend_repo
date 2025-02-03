@@ -14,7 +14,7 @@ int main() {
     MCULogger = new Logger;
     #endif /* UNIT_TESTING_MODE */
     MCU::mcu = new MCU::MCUModule(0x01);
-    MCU::mcu->stopProcess();
+    stopProcess("main_mcu");
     MCU::mcu->StartModule();
     std::thread receiveFrThread([]()
     { 

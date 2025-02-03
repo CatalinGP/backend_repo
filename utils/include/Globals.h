@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 #include <string>
+#include <iostream>
 
 extern std::string PROJECT_PATH;
 
@@ -20,4 +21,10 @@ std::string to_lowercase(const std::string& str);
  * @return The number of digits for a given integer.
  */
 int countDigits(int number);
+/**
+ * @brief Method to stop all the processes with the given name, the current one.
+ * 
+ * @param process_name Process name to be stopped.
+ */
+void stopProcess(std::string process_name);
 #endif
