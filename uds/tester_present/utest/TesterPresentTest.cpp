@@ -8,6 +8,7 @@
  */
 
 #include "../include/TesterPresent.h"
+#include "../../../utils/include/NegativeResponse.h"
 #include <cstring>
 #include <string>
 #include <thread>

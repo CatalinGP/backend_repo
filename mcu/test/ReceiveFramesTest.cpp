@@ -1,11 +1,16 @@
+#include <fcntl.h>
 #include <gtest/gtest.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <linux/can.h>
 #include <sys/socket.h>
+#include <net/if.h>
 #include <thread>
 #include <sstream>
 #include "../include/ReceiveFrames.h"
 #include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
+#include "../../uds/authentication/include/SecurityAccess.h"
+#include "../../utils/include/Globals.h"
 #include <vector>
 #include <map>
 #include <chrono>
@@ -62,6 +67,7 @@ protected:
     /* Setup method to initialize test environment */
     virtual void SetUp()
     {
+        loadProjectPathForMCU();
         /* Create mock socket pairs for testing */
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_canbus);
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_api);
@@ -876,7 +882,7 @@ TEST_F(ReceiveFramesTest, TestStopTimer)
     std::thread processor_thread([this] {
         receive_frames->processQueue();
     });
-    receive_frames->stopTimer(0x22);
+    receive_frames->stopTimer(0x22, 0); //mock value given for sender_id until one that makes sense is found
     receive_frames->stopListenCANBus();
     processor_thread.join();
 
@@ -940,7 +946,7 @@ TEST_F(ReceiveFramesTest, StopTimer)
     std::cerr << "Running StopTimer" << std::endl;
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->startTimer(0x10);
+        receive_frames->startTimer(0x10, 0); //mock value given for sender_id until one that makes sense is found
     });
     processor_thread.join();
     std::this_thread::sleep_for(std::chrono::milliseconds(2100));
@@ -949,44 +955,44 @@ TEST_F(ReceiveFramesTest, StopTimer)
     std::cerr << "Finished StopTimer" << std::endl;
 }
 
-// TEST_F(ReceiveFramesTest, CANBusConnectionClose)
-// {
-//     std::cerr << "Running CANBusConnectionClose" << std::endl;
-//     receive_frames_2->startListenCANBus(); 
+TEST_F(ReceiveFramesTest, CANBusConnectionClose)
+{
+    std::cerr << "Running CANBusConnectionClose" << std::endl;
+    receive_frames_2->startListenCANBus(); 
 
-//     testing::internal::CaptureStdout();
-//     std::thread processor_thread([this] {
-//         receive_frames_2->receiveFramesFromCANBus();
-//     });
-//     close(socket2);
-//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//     receive_frames_2->stopListenCANBus();
-//     processor_thread.join();
+    testing::internal::CaptureStdout();
+    std::thread processor_thread([this] {
+        receive_frames_2->receiveFramesFromCANBus();
+    });
+    close(socket2);
+     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    receive_frames_2->stopListenCANBus();
+    processor_thread.join();
 
-//     std::string output = testing::internal::GetCapturedStdout();
-//     EXPECT_NE(output.find("CANBus connection closed."), std::string::npos);
-//     std::cerr << "Finished CANBusConnectionClose" << std::endl;
-// }
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("CANBus connection closed."), std::string::npos);
+    std::cerr << "Finished CANBusConnectionClose" << std::endl;
+}
 
-// TEST_F(ReceiveFramesTest, APIConnectionClose)
-// {
-//     std::cerr << "Running APIConnectionClose" << std::endl;
-//     receive_frames_2->startListenAPI(); 
+TEST_F(ReceiveFramesTest, APIConnectionClose)
+{
+    std::cerr << "Running APIConnectionClose" << std::endl;
+    receive_frames_2->startListenAPI(); 
 
-//     testing::internal::CaptureStdout();
-//     std::thread processor_thread([this] {
-//         receive_frames_2->receiveFramesFromAPI();
-//     });
-//     close(socket1);
-//      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//     receive_frames_2->stopListenAPI();
-//     processor_thread.join();
+    testing::internal::CaptureStdout();
+    std::thread processor_thread([this] {
+        receive_frames_2->receiveFramesFromAPI();
+    });
+    close(socket1);
+     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    receive_frames_2->stopListenAPI();
+    processor_thread.join();
 
-//     std::string output = testing::internal::GetCapturedStdout();
-//     EXPECT_NE(output.find("API connection closed."), std::string::npos);
-//     std::cerr << "Finished APIConnectionClose" << std::endl;
-// }
-  
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("API connection closed."), std::string::npos);
+    std::cerr << "Finished APIConnectionClose" << std::endl;
+}
+
 /* Main function to run all tests */
 int main(int argc, char **argv)
 {

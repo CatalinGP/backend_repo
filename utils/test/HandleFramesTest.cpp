@@ -3,6 +3,7 @@
 #include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
 #include <linux/can.h>
 #include "../include/MCULogger.h"
+#include "../../uds/tester_present/include/TesterPresent.h"
 
 Logger logger;
 int skt = 1;
@@ -546,7 +547,7 @@ TEST_F(HandleFramesTest, WrongConsecutiveFrames)
 
 TEST_F(HandleFramesTest, ConsecutiveFrames)
 {
-    struct can_frame testFrame = createFrame({0x21, 0x08,0x05,0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x10,0x11});
+    struct can_frame testFrame = createFrame({0x21, 0x08,0x05,0x11,0x11,0x11});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();

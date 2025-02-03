@@ -1,6 +1,7 @@
 #include "../include/GenerateFrames.h"
 
 #include <gtest/gtest.h>
+#include <linux/can.h>
 #include <net/if.h>
 #include <cstring>
 #include <string>

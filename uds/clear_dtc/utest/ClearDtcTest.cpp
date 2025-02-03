@@ -26,6 +26,8 @@
 
 #include "../include/ClearDtc.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "../../../utils/include/NegativeResponse.h"
+#include "../../../uds/authentication/include/SecurityAccess.h"
 #include "Globals.h"
 
 int socket1;

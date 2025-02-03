@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <fstream>
 #include "../include/EngineModule.h"
 #include "Globals.h"
 

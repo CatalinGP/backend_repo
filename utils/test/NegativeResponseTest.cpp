@@ -8,6 +8,7 @@
 #include "../include/NegativeResponse.h"
 
 #include <cstring>
+#include <linux/can.h>
 #include <string>
 #include <thread>
 

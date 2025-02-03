@@ -2,12 +2,15 @@
 #include <string>
 #include <thread>
 #include <fcntl.h>
+#include <fstream>
 #include <sys/ioctl.h>
 #include <gtest/gtest.h>
 #include <net/if.h>
 
 #include "../include/WriteDataByIdentifier.h"
+#include "../../../uds/authentication/include/SecurityAccess.h"
 #include "../../../utils/include/ReceiveFrames.h"
+#include "../../../utils/include/NegativeResponse.h"
 #include "Globals.h"
 
 int socket1;
