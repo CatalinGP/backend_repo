@@ -77,57 +77,47 @@ void EcuReset::hardReset()
     {
         case 0x10:
         {   
-            #ifndef UNIT_TESTING_MODE
             const char *args[] = {"/bin/bash", "../autoscripts/reset_hard.sh", "main_mcu", NULL};
             execvp(args[0], const_cast<char *const *>(args));
 
             perror("execvp failed");
             exit(EXIT_FAILURE);
-            #endif
             break;
         }
         case 0x11:
         {
-            #ifndef UNIT_TESTING_MODE
             const char *args[] = {"/bin/bash", "../../autoscripts/reset_hard.sh", "main_battery", NULL};
             execvp(args[0], const_cast<char *const *>(args));
 
             perror("execvp failed");
             exit(EXIT_FAILURE);
-            #endif
             break;
         }
         case 0x12:
         {
-            #ifndef UNIT_TESTING_MODE
             const char *args[] = {"/bin/bash", "../../autoscripts/reset_hard.sh", "main_engine", NULL};
             execvp(args[0], const_cast<char *const *>(args));
 
             perror("execvp failed");
             exit(EXIT_FAILURE);
-            #endif
             break;
         }
         case 0x13:
         {
-            #ifndef UNIT_TESTING_MODE
             const char *args[] = {"/bin/bash", "../../autoscripts/reset_hard.sh", "main_doors", NULL};
             execvp(args[0], const_cast<char *const *>(args));
 
             perror("execvp failed");
             exit(EXIT_FAILURE);
-            #endif
             break;
         }
         case 0x14:
         {
-            #ifndef UNIT_TESTING_MODE
             const char *args[] = {"/bin/bash", "../../autoscripts/reset_hard.sh", "main_hvac", NULL};
             execvp(args[0], const_cast<char *const *>(args));
 
             perror("execvp failed");
             exit(EXIT_FAILURE);
-            #endif
             break;
         }
         default:

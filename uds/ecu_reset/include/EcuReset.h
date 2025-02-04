@@ -15,7 +15,7 @@
 
 class EcuReset
 {
-private:
+protected:
     uint32_t can_id;
     uint8_t sub_function;
     int socket = -1;
@@ -36,7 +36,7 @@ public:
      * @brief Destroy the Ecu Reset object
      * 
      */
-    ~EcuReset();
+    virtual ~EcuReset();
     /**
      * @brief Method that checks the subfunction and calls either hardReset() or keyOffReset().
      * data A vector containing the data bytes to be processed.
@@ -47,7 +47,7 @@ public:
      * @brief Method that does the Hard Reset.
      * 
      */
-    void hardReset();
+    virtual void hardReset();
 
     /**
      * @brief Method that does the Key Off Reset.
