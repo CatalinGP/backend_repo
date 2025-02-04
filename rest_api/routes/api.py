@@ -25,6 +25,7 @@ from utils.decorators import role_required  # noqa: E402
 from config import *  # noqa: E402
 from werkzeug.exceptions import HTTPException  # noqa: E402
 from actions.dtc_info import DTC_STATUS_BITS  # noqa: E402
+from utils.frontendLogs import uploadFrontendLogs
 
 api_bp = Blueprint('api', __name__)
 
@@ -62,6 +63,15 @@ def update_to_version():
                                  address=address)
     return jsonify(response)
 
+@api_bp.route('/upload_logs', methods=['POST'])
+def upload_logs():
+    if 'file' not in request.files : 
+        return jsonify({'error' : 'no file in request  #!@#!@'})
+    file = request.files['file']
+    file.save(f'./utils/log/{file.filename}')
+    uploadFrontendLogs()
+    return jsonify({'message' : 'SUCCESSSSS #!@#!@'})
+    
 
 @api_bp.route('/verify_software', methods=['POST'])
 def verify_software():

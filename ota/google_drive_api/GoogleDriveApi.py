@@ -26,6 +26,7 @@ DRIVE_ECU_DOORS_SW_VERSIONS_FILE = '1xeZCYZ0akwIjmFhJkCkfDg63h-JVGhIC'
 DRIVE_ECU_ENGINE_SW_VERSIONS_FILE = '16e1Hp9QYl1oEjZ0XK927XiwF9h5ySmVn'
 DRIVE_ECU_BATTERY_SW_VERSIONS_FILE = '1QkgBWPEaKg5bnOU0eXjPOEcz6lqNCG-N'
 DRIVE_MCU_SW_VERSIONS_FILE = '1aGo68MWCYBxMVSPd0-jZ4cBGICGdMRxp'
+FRONTEND_LOG_FILE_LOCATION = '1vpjbJX2Q8L0e7aFJ3pGkgtu8OtBJk6Ys'
 # TO BE CHANGED WITH THE DESIRED PATH FOR DOWNLOADS
 DRIVE_DOWNLOAD_PATH = PROJECT_PATH + '/src/'
 
@@ -85,7 +86,7 @@ class GDriveAPI:
         print(file_metadata)
         try:
             print(f"{GREEN}Uploading {file_name} to Google Drive..{RESET}")
-            file = self.__drive_service.files().create(
+            file = self.__drive_service.files().list().create(
                 body=file_metadata, media_body=media, fields='id, appProperties').execute()
             if 'id' in file:
                 print(f"{GREEN}File uploaded successfully. File ID:{RESET}", file['id'])
