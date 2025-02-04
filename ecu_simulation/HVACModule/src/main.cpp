@@ -8,11 +8,7 @@
 int main()
 {
     loadProjectPathForECU();
-    #ifdef UNIT_TESTING_MODE
-    hvacModuleLogger = new Logger;
-    #else
     hvacModuleLogger = new Logger("hvacModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/HVACModule/logs/hvacModuleLogger.log");
-    #endif
 
     hvac = new HVACModule();
     stopProcess("main_hvac");

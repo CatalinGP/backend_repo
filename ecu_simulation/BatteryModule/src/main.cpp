@@ -7,11 +7,7 @@
 
 int main() {
     loadProjectPathForECU();
-    #ifdef UNIT_TESTING_MODE
-    batteryModuleLogger = new Logger;
-    #else
     batteryModuleLogger = new Logger("batteryModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/logs/batteryModuleLogger.log");
-    #endif /* UNIT_TESTING_MODE */
     battery = new BatteryModule();
     stopProcess("main_battery");
     std::thread receiveFrThread([]()
