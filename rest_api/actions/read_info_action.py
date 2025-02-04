@@ -68,6 +68,56 @@ class ReadInfo(Action):
 
         return modes
 
+    def read_from_mcu(self, item=None):
+        """
+        Method to read information from the mcu module.
+
+        Args:
+        - item: Optional identifier for a specific data item to read.
+
+        Returns:
+        - JSON response.
+
+        Endpoint test (external flow):
+
+        curl -X GET "http://127.0.0.1:5000/api/read_info_mcu?is_manual_flow=false" -H "Content-Type: application/json"
+
+        """
+        try:
+            log_info_message(logger, "Reading data from mcu")
+            id = self.my_id * 0x100 + self.id_ecu[MCU]
+
+            identifiers = data_identifiers["MCU_Identifiers"]
+            results = {}
+            for key, identifier in identifiers.items():
+                result_value = self._read_by_identifier(id, int(identifier, 16))
+                results[key] = result_value if result_value else "No data"
+
+            response_json = {
+                "software_version": results.get("software_version"),
+                "vin": results.get("vin"),
+                "ecu_serial_number": results.get("ecu_serial_number"),
+                "ecu_hardware_number": results.get("ecu_hardware_number"),
+                "ecu_software_number": results.get("ecu_software_number"),
+                "engine_type": results.get("engine_type"),
+                "ecu_software_version_number": results.get("ecu_software_version_number"),
+                "ecu_hardware_version_number": results.get("ecu_hardware_version_number"),
+                "ecu_manufacturing_date": results.get("ecu_manufacturing_date"),
+                "ecu_part_number": results.get("ecu_part_number"),
+            }
+
+            log_info_message(logger, "Sending JSON response")
+            return response_json
+
+        except CustomError:
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            negative_response = self.handle_negative_response(nrc_msg, sid_msg)
+            return {
+                "message": "ssue encountered during Read by ID",
+                "negative_response": negative_response
+            }
+
     def read_from_battery(self, item=None):
         """
         Method to read information from the battery module.

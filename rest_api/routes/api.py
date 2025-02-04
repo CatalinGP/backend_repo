@@ -83,6 +83,15 @@ def erase_memory():
     return jsonify(response)
 
 
+@api_bp.route('/read_info_mcu', methods=['GET'])
+@requires_auth
+def read_info_mcu():
+    reader = ReadInfo()
+    item = request.args.get('item', default=None, type=str)
+    response = reader.read_from_mcu(item)
+    return jsonify(response)
+
+
 @api_bp.route('/read_info_battery', methods=['GET'])
 @requires_auth
 def read_info_bat():
