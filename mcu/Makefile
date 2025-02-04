@@ -262,7 +262,8 @@ UTILS_OBJS_TEST = $(OBJ_DIR)/MemoryManager_test.o \
                   $(OBJ_DIR)/FileManager_test.o
 
 OBJS_GENERATE_TEST = $(OBJ_DIR)/Logger_test.o \
-                  	 $(OBJ_DIR)/GenerateFrames_test.o
+                  	 $(OBJ_DIR)/GenerateFrames_test.o \
+					 $(OBJ_DIR)/Globals_test.o
 
 OBJS_MEMORY_TEST =   $(OBJ_DIR)/Logger_test.o \
                   	 $(OBJ_DIR)/MemoryManager_test.o
@@ -293,7 +294,8 @@ OBJS_DIAGNOSTICSESSIONCONTROL_TEST = $(OBJ_DIR)/Logger_test.o \
 OBJS_SECURITYACCESS_TEST = $(OBJ_DIR)/Logger_test.o \
 						   $(OBJ_DIR)/GenerateFrames_test.o \
 			   			   $(OBJ_DIR)/SecurityAccess_test.o \
-			   			   $(OBJ_DIR)/NegativeResponse_test.o
+			   			   $(OBJ_DIR)/NegativeResponse_test.o \
+						   $(OBJ_DIR)/Globals_test.o
 
 OBJS_TESTERPRESENT_TEST = $(OBJ_DIR)/Logger_test.o \
 						  $(OBJ_DIR)/GenerateFrames_test.o \
@@ -352,6 +354,7 @@ OBJS_TRANSFERDATA_TEST = $(OBJ_DIR)/Logger_test.o \
 OBJS_NEGATIVERESPONSE_TEST = $(OBJ_DIR)/Logger_test.o \
                              $(OBJ_DIR)/GenerateFrames_test.o \
                              $(OBJ_DIR)/NegativeResponse_test.o \
+							 $(OBJ_DIR)/Globals_test.o
 
 OBJS_TEST = $(MCU_OBJS_TEST) \
             $(ECU_OBJS_TEST) \
