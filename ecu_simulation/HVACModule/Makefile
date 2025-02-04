@@ -233,3 +233,9 @@ clean:
 	@echo "Cleaning up..."
 	rm -f $(FINAL)
 	rm -rf $(OBJ_DIR)
+	find ./test -name '*.gcno' -delete
+	find ./test -name '*.gcda' -delete
+	find ./test -name '*.gcov' -delete
+	find ./test -name '*.info' -delete
+	find ./test -name '*.out' -delete
+	find ./test -name '*.o' -delete

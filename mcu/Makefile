@@ -456,7 +456,7 @@ $(OBJ_DIR)/NegativeResponse_test.o: $(UTILS_DIR)/NegativeResponse.cpp
 	
 # Compile all unit tests
 
-allTests: mcuModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest
+allTests: mcuModuleTest batteryModuleTest engineModuleTest doorsModuleTest hvacModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest
 
 
 # HandleFrames Unit tests
@@ -1302,10 +1302,10 @@ clean:
 			find $$dir -name '*.info' -delete; \
 		fi \
 	done
-	find . -name '*.gcno' -delete
-	find . -name '*.gcda' -delete
-	find . -name '*.gcov' -delete
-	find . -name '*.info' -delete
-	find ./test -name '*.out' -delete
-	find ./test -name '*.o' -delete
+	find .. -name '*.gcno' -delete
+	find .. -name '*.gcda' -delete
+	find .. -name '*.gcov' -delete
+	find .. -name '*.info' -delete
+	find .. -name '*.out' -delete
+	find .. -name '*.o' -delete
 	if [ -d "./coverage" ]; then find ./coverage -name '*' -delete; fi
