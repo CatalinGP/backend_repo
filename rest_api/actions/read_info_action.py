@@ -114,7 +114,7 @@ class ReadInfo(Action):
             sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
-                "message": "ssue encountered during Read by ID",
+                "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
 
@@ -191,7 +191,7 @@ class ReadInfo(Action):
                 self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
-                "message": "ssue encountered during Read by ID",
+                "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
 
@@ -271,7 +271,7 @@ class ReadInfo(Action):
                 self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
-                "message": "ssue encountered during Read by ID",
+                "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
         except Exception as e:
