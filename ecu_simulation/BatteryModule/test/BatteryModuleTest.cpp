@@ -1,14 +1,9 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include "../include/BatteryModule.h"
+#include "../../../utils/include/TestUtils.h"
 #include "../../../utils/include/FileManager.h"
 #include "Globals.h"
-
-bool containsLine(const std::string& output, const std::string& line)
-{
-    return output.find(line) != std::string::npos;
-}
-
 
 struct BatteryModuleTest : testing::Test
 {

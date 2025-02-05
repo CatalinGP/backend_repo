@@ -10,7 +10,9 @@
 #include "../include/ReceiveFrames.h"
 #include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
 #include "../../uds/authentication/include/SecurityAccess.h"
+#include "../../utils/include/CaptureFrame.h"
 #include "../../utils/include/Globals.h"
+#include "../../utils/include/TestUtils.h"
 #include <vector>
 #include <map>
 #include <chrono>
@@ -36,16 +38,6 @@ public:
     using ReceiveFrames::ecu_timers;
     using ReceiveFrames::timeout_duration;
     using ReceiveFrames::running;
-};
-
-class CaptureFrame
-{
-    public:
-        struct can_frame frame;
-        void capture()
-        {
-            read(socket_api, &frame, sizeof(struct can_frame));
-        }
 };
 /* Test fixture class for ReceiveFrames tests */
 class ReceiveFramesTest : public ::testing::Test
@@ -73,14 +65,14 @@ protected:
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_api);
         mock_socket_canbus = mock_socket_pair_canbus[0];
         mock_socket_api = mock_socket_pair_api[0];
-        socket1 = createSocket("vcan1");
-        socket2 = createSocket("vcan0");
-        socket3 = createSocket("vcan0");
-        socket4 = createSocket("vcan1");
+        socket1 = createSocket(1);
+        socket2 = createSocket(0);
+        socket3 = createSocket(0);
+        socket4 = createSocket(1);
         receive_frames = new MockReceiveFrames(mock_socket_canbus, mock_socket_api);
         receive_frames_2 = new MockReceiveFrames(socket2, socket1);
         r = new SecurityAccess(socket4, *logger);
-        c1 = new CaptureFrame();
+        c1 = new CaptureFrame(socket_api);
     }
     /* Teardown method to clean up after each test */
     virtual void TearDown()
@@ -94,52 +86,7 @@ protected:
         close(mock_socket_pair_api[0]);
         close(mock_socket_pair_api[1]);
     }
-
-public:
-    static int createSocket(std::string name_interface)
-    {
-        struct sockaddr_can addr;
-        struct ifreq ifr;
-        int s;
-
-        s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-        if (s < 0)
-        {
-            std::cout<<"Error trying to create the socket\n";
-            return 1;
-        }
-        /* Giving name and index to the interface created */
-        strcpy(ifr.ifr_name, name_interface.c_str() );
-        ioctl(s, SIOCGIFINDEX, &ifr);
-        /* Set addr structure with info. of the CAN interface */
-        addr.can_family = AF_CAN;
-        addr.can_ifindex = ifr.ifr_ifindex;
-        /* Bind the socket to the CAN interface */
-        int b = bind(s, (struct sockaddr*)&addr, sizeof(addr));
-        if( b < 0 )
-        {
-            std::cout<<"Error binding\n";
-            return 1;
-        }
-        int flags = fcntl(s, F_GETFL, 0);
-        if (flags == -1)
-        {
-            return 1;
-        }
-        /* Set the O_NONBLOCK flag to make the socket non-blocking */
-        flags |= O_NONBLOCK;
-        if (fcntl(s, F_SETFL, flags) == -1)
-        {
-            return -1;
-        }
-        return s;
-    }  
 };
-
-uint8_t computeKey(uint8_t& seed)
-{
-    return ~seed + 1;
-}
 
 TEST_F(ReceiveFramesTest, TestProcessQueue_SecurityLocked)
 {
@@ -996,7 +943,7 @@ TEST_F(ReceiveFramesTest, APIConnectionClose)
 /* Main function to run all tests */
 int main(int argc, char **argv)
 {
-    socket_api = ReceiveFramesTest::createSocket("vcan1");
+    socket_api = createSocket(1);
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

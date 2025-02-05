@@ -8,50 +8,10 @@
 
 #include "../include/ReceiveFrames.h"
 #include "../include/GenerateFrames.h"
+#include "../include/TestUtils.h"
 
 int socket1;
 int socket2;
-
-int createSocket()
-{
-    /* Create socket */
-    std::string name_interface = "vcan1";
-    struct sockaddr_can addr;
-    struct ifreq ifr;
-    int s;
-
-    s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (s < 0)
-    {
-        std::cout<<"Error trying to create the socket\n";
-        return 1;
-    }
-    /* Giving name and index to the interface created */
-    strcpy(ifr.ifr_name, name_interface.c_str() );
-    ioctl(s, SIOCGIFINDEX, &ifr);
-    /* Set addr structure with info. of the CAN interface */
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
-    /* Bind the socket to the CAN interface */
-    int b = bind(s, (struct sockaddr*)&addr, sizeof(addr));
-    if( b < 0 )
-    {
-        std::cout<<"Error binding\n";
-        return 1;
-    }
-    int flags = fcntl(s, F_GETFL, 0);
-    if (flags == -1)
-    {
-        return 1;
-    }
-    /* Set the O_NONBLOCK flag to make the socket non-blocking */
-    flags |= O_NONBLOCK;
-    if (fcntl(s, F_SETFL, flags) == -1)
-    {
-        return -1;
-    }
-    return s;
-}
 
 struct ReceiveFramesTest : testing::Test
 {
@@ -294,8 +254,8 @@ TEST_F(ReceiveFramesTest, StopTimerDefaultCase)
 
 int main(int argc, char* argv[])
 {
-    socket1 = createSocket();
-    socket2 = createSocket();
+    socket1 = createSocket(1);
+    socket2 = createSocket(1);
     testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();
     if (socket1 > 0)

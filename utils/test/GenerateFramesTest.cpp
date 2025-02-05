@@ -1,4 +1,6 @@
 #include "../include/GenerateFrames.h"
+#include "../../utils/include/CaptureFrame.h"
+#include "../../utils/include/TestUtils.h"
 
 #include <gtest/gtest.h>
 #include <linux/can.h>
@@ -16,78 +18,6 @@ int s2;
 /* Const */
 const int id = 0xFA10;
 
-/* Class to capture the frame sin the can-bus */
-class CaptureFrame
-{
-    public:
-        struct can_frame frame;
-        void capture()
-        {
-            int nbytes = read(s2, &frame, sizeof(frame));
-            if(nbytes < 0)
-            {
-                std::cerr << "Error reading frame\n";
-            }
-        }
-};
-int createSocket()
-{
-    /* Create socket */
-    std::string name_interface = "vcan0";
-    struct sockaddr_can addr;
-    struct ifreq ifr;
-    int s;
-
-    s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if( s<0)
-    {
-        std::cout<<"Error trying to create the socket\n";
-        return 1;
-    }
-    /* Giving name and index to the interface created */
-    strcpy(ifr.ifr_name, name_interface.c_str() );
-    ioctl(s, SIOCGIFINDEX, &ifr);
-    /* Set addr structure with info. of the CAN interface */
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
-    /* Bind the socket to the CAN interface */
-    int b = bind( s, (struct sockaddr*)&addr, sizeof(addr));
-    if( b < 0 )
-    {
-        std::cout<<"Error binding\n";
-        return 1;
-    }
-    return s;
-}
-struct can_frame createFrame(std::vector<uint8_t> test_data)
-{
-    struct can_frame result_frame;
-    result_frame.can_id = (id & CAN_EFF_MASK) | CAN_EFF_FLAG;
-    int i=0;
-    for (auto d : test_data)
-        result_frame.data[i++] = d;
-    result_frame.can_dlc = test_data.size();
-    return result_frame;
-}
-
-struct can_frame createFrame(uint16_t can_id ,std::vector<uint8_t> test_data)
-{
-    struct can_frame result_frame;
-    result_frame.can_id = (can_id & CAN_EFF_MASK) | CAN_EFF_FLAG;
-    int i=0;
-    for (auto d : test_data)
-        result_frame.data[i++] = d;
-    result_frame.can_dlc = test_data.size();
-    return result_frame;
-}
-void testFrames(struct can_frame expected_frame, CaptureFrame &c1 )
-{
-    EXPECT_EQ(expected_frame.can_id, c1.frame.can_id);
-    EXPECT_EQ(expected_frame.can_dlc, c1.frame.can_dlc);
-    for (int i = 0; i < expected_frame.can_dlc; ++i) {
-        EXPECT_EQ(expected_frame.data[i], c1.frame.data[i]);
-    }
-}
 Logger logger;
 /* Create object for all tests */
 struct GenerateFramesTest : testing::Test
@@ -99,7 +29,7 @@ struct GenerateFramesTest : testing::Test
     {
         g1 = new GenerateFrames(s1, logger);
         g2 = new GenerateFrames(logger);
-        c1 = new CaptureFrame();
+        c1 = new CaptureFrame(s2);
     }
     ~GenerateFramesTest()
     {
@@ -201,7 +131,7 @@ TEST_F(GenerateFramesTest, InvalidSocket2)
 TEST_F(GenerateFramesTest, SessionControlTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x10,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x10,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -216,7 +146,7 @@ TEST_F(GenerateFramesTest, SessionControlTest)
 TEST_F(GenerateFramesTest, SessionControlTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x50,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x50,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -231,7 +161,7 @@ TEST_F(GenerateFramesTest, SessionControlTest2)
 TEST_F(GenerateFramesTest, EcuResetTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x11,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x11,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -246,7 +176,7 @@ TEST_F(GenerateFramesTest, EcuResetTest)
 TEST_F(GenerateFramesTest, EcuResetTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x51,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x51,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -262,7 +192,7 @@ TEST_F(GenerateFramesTest, EcuResetTest2)
 TEST_F(GenerateFramesTest, EcuResetSocket) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x11,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x11,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -278,7 +208,7 @@ TEST_F(GenerateFramesTest, EcuResetSocket)
 TEST_F(GenerateFramesTest, EcuResetSocket2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x51,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0x51,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -293,7 +223,7 @@ TEST_F(GenerateFramesTest, EcuResetSocket2)
 TEST_F(GenerateFramesTest, SecuritySeedTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x67,0x1,0x23,0x34,0x35});
+    struct can_frame result_frame = createFrame(id, {0x05,0x67,0x1,0x23,0x34,0x35});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -308,7 +238,7 @@ TEST_F(GenerateFramesTest, SecuritySeedTest)
 TEST_F(GenerateFramesTest, SecuritySeedTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x27,0x1});
+    struct can_frame result_frame = createFrame(id, {0x02,0x27,0x1});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -323,7 +253,7 @@ TEST_F(GenerateFramesTest, SecuritySeedTest2)
 TEST_F(GenerateFramesTest, SecurityKeyTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x27,0x2,0x23,0x34,0x35});
+    struct can_frame result_frame = createFrame(id, {0x05,0x27,0x2,0x23,0x34,0x35});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -338,7 +268,7 @@ TEST_F(GenerateFramesTest, SecurityKeyTest)
 TEST_F(GenerateFramesTest, SecurityKeyResponseTest) 
 {
     /* Create expected frame */
-    struct can_frame expected_frame = createFrame({0x2,0x67,0x02});
+    struct can_frame expected_frame = createFrame(id, {0x2,0x67,0x02});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -354,7 +284,7 @@ TEST_F(GenerateFramesTest, RoutinControlFrame)
 {
     std::vector<uint8_t> vct = {};
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x31,0x02,0x34,0x1A});
+    struct can_frame result_frame = createFrame(id, {0x04,0x31,0x02,0x34,0x1A});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -370,7 +300,7 @@ TEST_F(GenerateFramesTest, RoutinControlFrame2)
 {
     std::vector<uint8_t> vct = {};
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x71,0x02,0x34,0x1A});
+    struct can_frame result_frame = createFrame(id, {0x04,0x71,0x02,0x34,0x1A});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -385,7 +315,7 @@ TEST_F(GenerateFramesTest, RoutinControlFrame2)
 TEST_F(GenerateFramesTest, testerPresent) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x3E,0x00});
+    struct can_frame result_frame = createFrame(id, {0x02,0x3E,0x00});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -400,7 +330,7 @@ TEST_F(GenerateFramesTest, testerPresent)
 TEST_F(GenerateFramesTest, testerPresent2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x7E,0x00});
+    struct can_frame result_frame = createFrame(id, {0x02,0x7E,0x00});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -415,7 +345,7 @@ TEST_F(GenerateFramesTest, testerPresent2)
 TEST_F(GenerateFramesTest, ReadByIdentRespTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x62,0x33,0x22,0x32,0x11});
+    struct can_frame result_frame = createFrame(id, {0x05,0x62,0x33,0x22,0x32,0x11});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -430,7 +360,7 @@ TEST_F(GenerateFramesTest, ReadByIdentRespTest)
 TEST_F(GenerateFramesTest, ReadByIdentRespTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x03,0x22,0x33,0x22});
+    struct can_frame result_frame = createFrame(id, {0x03,0x22,0x33,0x22});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -445,7 +375,7 @@ TEST_F(GenerateFramesTest, ReadByIdentRespTest2)
 TEST_F(GenerateFramesTest, ReadByIdentLongRespTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x10,12,0x62,0x12,0x34,1,2,3});
+    struct can_frame result_frame = createFrame(id, {0x10,12,0x62,0x12,0x34,1,2,3});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -461,7 +391,7 @@ TEST_F(GenerateFramesTest, ReadByIdentLongRespTest)
 TEST_F(GenerateFramesTest, ReadByAddressRespTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x07,0x63,0x12,0x23,0x45,0x01, 0x01,0x2});
+    struct can_frame result_frame = createFrame(id, {0x07,0x63,0x12,0x23,0x45,0x01, 0x01,0x2});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -476,7 +406,7 @@ TEST_F(GenerateFramesTest, ReadByAddressRespTest)
 TEST_F(GenerateFramesTest, ReadByAddressRespTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x23,0x12,0x23,0x45,0x01});
+    struct can_frame result_frame = createFrame(id, {0x05,0x23,0x12,0x23,0x45,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -492,7 +422,7 @@ TEST_F(GenerateFramesTest, ReadByAddressRespTest2)
 TEST_F(GenerateFramesTest, ReadMemoryByAddressLong) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x21,0x02,0x03,0x04,0x05,0x06});
+    struct can_frame result_frame = createFrame(id, {0x21,0x02,0x03,0x04,0x05,0x06});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -508,7 +438,7 @@ TEST_F(GenerateFramesTest, ReadMemoryByAddressLong)
 TEST_F(GenerateFramesTest, writeDataByIdentifier) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x03,0x6E,0x23,0x45});
+    struct can_frame result_frame = createFrame(id, {0x03,0x6E,0x23,0x45});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -523,7 +453,7 @@ TEST_F(GenerateFramesTest, writeDataByIdentifier)
 TEST_F(GenerateFramesTest, writeDataByIdentifier2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x2E,0x23,0x45,0x1,0x2});
+    struct can_frame result_frame = createFrame(id, {0x05,0x2E,0x23,0x45,0x1,0x2});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -539,7 +469,7 @@ TEST_F(GenerateFramesTest, writeDataByIdentifier2)
 TEST_F(GenerateFramesTest, writeDataByIdentifierLong) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x21, 0x04, 0x05, 0x06});
+    struct can_frame result_frame = createFrame(id, {0x21, 0x04, 0x05, 0x06});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -556,7 +486,7 @@ TEST_F(GenerateFramesTest, writeDataByIdentifierLong)
 TEST_F(GenerateFramesTest, flowControll) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x30,0x0,0x0,0x0});
+    struct can_frame result_frame = createFrame(id, {0x30,0x0,0x0,0x0});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -571,7 +501,7 @@ TEST_F(GenerateFramesTest, flowControll)
 TEST_F(GenerateFramesTest, readDTC) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x3,0x19,0x01,0x12});
+    struct can_frame result_frame = createFrame(id, {0x3,0x19,0x01,0x12});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -586,7 +516,7 @@ TEST_F(GenerateFramesTest, readDTC)
 TEST_F(GenerateFramesTest, readDTC2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x6,0x59,0x01,0x2,0x3,0x0,0x4});
+    struct can_frame result_frame = createFrame(id, {0x6,0x59,0x01,0x2,0x3,0x0,0x4});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -602,7 +532,7 @@ TEST_F(GenerateFramesTest, readDTC2)
 TEST_F(GenerateFramesTest, readDTC3) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x59,0x02,0xff,0x44,0x44});
+    struct can_frame result_frame = createFrame(id, {0x04,0x59,0x02,0xff,0x44,0x44});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -618,7 +548,7 @@ TEST_F(GenerateFramesTest, readDTC3)
 TEST_F(GenerateFramesTest, readDTC4) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x22,0x15});
+    struct can_frame result_frame = createFrame(id, {0x22,0x15});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -635,7 +565,7 @@ TEST_F(GenerateFramesTest, readDTC4)
 TEST_F(GenerateFramesTest, readDTC5) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x22, 0x14, 0x15});
+    struct can_frame result_frame = createFrame(id, {0x22, 0x14, 0x15});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -652,7 +582,7 @@ TEST_F(GenerateFramesTest, readDTC5)
 TEST_F(GenerateFramesTest, ClearDTCTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x14,0xFF,0xFF,0xFF});
+    struct can_frame result_frame = createFrame(id, {0x04,0x14,0xFF,0xFF,0xFF});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -667,7 +597,7 @@ TEST_F(GenerateFramesTest, ClearDTCTest)
 TEST_F(GenerateFramesTest, ClearDTCTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x01,0x54});
+    struct can_frame result_frame = createFrame(id, {0x01,0x54});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -682,7 +612,7 @@ TEST_F(GenerateFramesTest, ClearDTCTest2)
 TEST_F(GenerateFramesTest, AccessTimeParamTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0xc3,0x1});
+    struct can_frame result_frame = createFrame(id, {0x02,0xc3,0x1});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -697,7 +627,7 @@ TEST_F(GenerateFramesTest, AccessTimeParamTest)
 TEST_F(GenerateFramesTest, AccessTimeParamTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0xc3,0x01});
+    struct can_frame result_frame = createFrame(id, {0x02,0xc3,0x01});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -713,7 +643,7 @@ TEST_F(GenerateFramesTest, AccessTimeParamTest2)
 TEST_F(GenerateFramesTest, AccessTimeParamTest3) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x83,0x1});
+    struct can_frame result_frame = createFrame(id, {0x02,0x83,0x1});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -728,7 +658,7 @@ TEST_F(GenerateFramesTest, AccessTimeParamTest3)
 TEST_F(GenerateFramesTest, NegativeResponse) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x03,0x7F,0x10,0x12});
+    struct can_frame result_frame = createFrame(id, {0x03,0x7F,0x10,0x12});
     /* Start listening for frame in the CAN-BUS */
     std::thread receive_thread([this]() {
         c1->capture();
@@ -744,7 +674,7 @@ TEST_F(GenerateFramesTest, NegativeResponse)
 TEST_F(GenerateFramesTest, RequestDownloadTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x74, 0x20,0x22, 0x34});
+    struct can_frame result_frame = createFrame(id, {0x04,0x74, 0x20,0x22, 0x34});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -759,7 +689,7 @@ TEST_F(GenerateFramesTest, RequestDownloadTest2)
 TEST_F(GenerateFramesTest, RequestDownloadTest3) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x04,0x34, 0x00, 0x10, 0x10, 0x05});
+    struct can_frame result_frame = createFrame(id, {0x04,0x34, 0x00, 0x10, 0x10, 0x05});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -775,7 +705,7 @@ TEST_F(GenerateFramesTest, RequestDownloadTest3)
 TEST_F(GenerateFramesTest, requestDownloadLong) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x21,0x10, 0x05});
+    struct can_frame result_frame = createFrame(id, {0x21,0x10, 0x05});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -791,7 +721,7 @@ TEST_F(GenerateFramesTest, requestDownloadLong)
 TEST_F(GenerateFramesTest, TransferDataTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x07,0x36, 0x20, 1,2,3,4,5});
+    struct can_frame result_frame = createFrame(id, {0x07,0x36, 0x20, 1,2,3,4,5});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -806,7 +736,7 @@ TEST_F(GenerateFramesTest, TransferDataTest)
 TEST_F(GenerateFramesTest, TransferDataTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x02,0x76, 0x20});
+    struct can_frame result_frame = createFrame(id, {0x02,0x76, 0x20});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -821,7 +751,7 @@ TEST_F(GenerateFramesTest, TransferDataTest2)
 TEST_F(GenerateFramesTest, TransferDataLongTest) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x21,0x05,0x06,0x07});
+    struct can_frame result_frame = createFrame(id, {0x21,0x05,0x06,0x07});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -837,7 +767,7 @@ TEST_F(GenerateFramesTest, TransferDataLongTest)
 TEST_F(GenerateFramesTest, TransferDataLongTest2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x05,0x36,0x20,1,2,3});
+    struct can_frame result_frame = createFrame(id, {0x05,0x36,0x20,1,2,3});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -859,7 +789,7 @@ TEST_F(GenerateFramesTest, TransferDataLongTest2)
 TEST_F(GenerateFramesTest, ReqTransferExit) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x01,0x37});
+    struct can_frame result_frame = createFrame(id, {0x01,0x37});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -874,7 +804,7 @@ TEST_F(GenerateFramesTest, ReqTransferExit)
 TEST_F(GenerateFramesTest, ReqTransferExit2) 
 {
     /* Create expected frame */
-    struct can_frame result_frame = createFrame({0x01,0x77});
+    struct can_frame result_frame = createFrame(id, {0x01,0x77});
     /* Start listening for frame in the CAN-BUS */ 
     std::thread receive_thread([this]() {
         c1->capture();
@@ -972,8 +902,8 @@ TEST_F(GenerateFramesTest, ReqStatus2)
 
 int main(int argc, char* argv[])
 {
-    s1 = createSocket();
-    s2 = createSocket();
+    s1 = createSocket(0);
+    s2 = createSocket(0);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

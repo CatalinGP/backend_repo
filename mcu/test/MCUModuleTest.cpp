@@ -8,6 +8,7 @@
 #include "../../utils/include/Logger.h"
 #include "../../utils/include/GenerateFrames.h"
 #include "../../utils/include/Globals.h"
+#include "../../utils/include/TestUtils.h"
 #include "../../ecu_simulation/BatteryModule/include/BatteryModule.h"
 
 int socket_canbus = -1;
@@ -30,11 +31,6 @@ void createMCUProcess()
     }
 }
 
-bool containsLine(const std::string& output, const std::string& line)
-{
-    return output.find(line) != std::string::npos;
-}
-
 void testByteVectors(const std::vector<uint8_t>& expected, const std::vector<uint8_t>& actual)
 {
     EXPECT_EQ(expected.size(), actual.size()) << "Vectors have different sizes";
@@ -43,45 +39,6 @@ void testByteVectors(const std::vector<uint8_t>& expected, const std::vector<uin
     for (size_t i = 0; i < expected.size(); ++i) {
         EXPECT_EQ(expected[i], actual[i]) << "Vectors differ at index " << i;
     }
-}
-
-int createSocket()
-{
-    /* Create socket */
-    std::string name_interface = "vcan1";
-    struct sockaddr_can addr;
-    struct ifreq ifr;
-    int s;
-
-    s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if( s<0)
-    {
-        std::cout<<"Error trying to create the socket\n";
-        return 1;
-    }
-    /* Giving name and index to the interface created */
-    strcpy(ifr.ifr_name, name_interface.c_str() );
-    ioctl(s, SIOCGIFINDEX, &ifr);
-    /* Set addr structure with info. of the CAN interface */
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
-    /* Bind the socket to the CAN interface */
-    int b = bind( s, (struct sockaddr*)&addr, sizeof(addr));
-    if( b < 0 )
-    {
-        std::cout<<"Error binding\n";
-        return 1;
-    }
-    int flags = fcntl(s, F_GETFL, 0);
-    if (flags == -1) {
-        return 1;
-    }
-    /* Set the O_NONBLOCK flag to make the socket non-blocking */
-    flags |= O_NONBLOCK;
-    if (fcntl(s, F_SETFL, flags) == -1) {
-        return -1;
-    }
-    return s;
 }
 
 class MCUModuleTest : public ::testing::Test {
@@ -226,7 +183,7 @@ TEST_F(MCUModuleTest, WriteExceptionThrown)
 
 int main(int argc, char* argv[])
 {
-    socket_canbus = createSocket();
+    socket_canbus = createSocket(1);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
