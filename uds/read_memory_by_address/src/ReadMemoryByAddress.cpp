@@ -1,10 +1,11 @@
 #include <vector>
 
+#include "../../../utils/include/IMemoryManager.h"
 #include "ReadMemoryByAddress.h"
 #include "SecurityAccess.h"
 #include "NegativeResponse.h"
 
-ReadMemoryByAddress::ReadMemoryByAddress(MemoryManager* memManager, GenerateFrames& frameGen, int socket, Logger& log)
+ReadMemoryByAddress::ReadMemoryByAddress(IMemoryManager* memManager, GenerateFrames& frameGen, int socket, Logger& log)
     : memoryManager(memManager), frameGenerator(frameGen), socket(socket), logger(log) {}
 
 void ReadMemoryByAddress::handleRequest(int can_id, off_t memory_address, off_t memory_size) {
@@ -32,7 +33,7 @@ void ReadMemoryByAddress::handleRequest(int can_id, off_t memory_address, off_t 
     }
 
     /* Read data from memory */
-    std::vector<uint8_t> data = MemoryManager::readFromAddress(memoryManager->getPath(), memory_address, memory_size, logger);
+    std::vector<uint8_t> data = memoryManager->readFromAddress(memoryManager->getPath(), memory_address, memory_size, logger);
     
     if (data.empty()) {
         LOG_ERROR(logger.GET_LOGGER(), "Failed to read memory");

@@ -286,7 +286,7 @@ namespace MCU
         memory_manager_instance->setPath(DEV_LOOP);
         memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1);
 
-        uint8_t current_sw_version_from_memory = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
+        uint8_t current_sw_version_from_memory = memory_manager_instance->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
         LOG_INFO(MCULogger->GET_LOGGER(), "Current software version from memory: {:x}", current_sw_version_from_memory);
         uint8_t current_sw_version_from_program = static_cast<uint8_t>(SOFTWARE_VERSION);
         LOG_INFO(MCULogger->GET_LOGGER(), "Current software_version {:x}", current_sw_version_from_program);
@@ -307,7 +307,7 @@ namespace MCU
         uint8_t previous_sw_version = 0;
         try
         {
-            previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
+            previous_sw_version = memory_manager_instance->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
             LOG_INFO(MCULogger->GET_LOGGER(), "Previous software version: {:x}", previous_sw_version);
         }
         catch(const std::runtime_error& e)

@@ -185,8 +185,8 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                     memory_manager->setAddress(rds_data.address);
                     memory_manager->setPath(DEV_LOOP);
                 }
-                uint8_t file_size_format = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
-                auto file_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, file_size_format, rc_logger);
+                uint8_t file_size_format = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
+                auto file_size_bytes = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, file_size_format, rc_logger);
                 uint8_t binary_offset = sizeof(file_size_format) + file_size_format;
 
                 size_t file_size = 0;
@@ -196,7 +196,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                 }
 
                 /* Read the binary data from memory */
-                auto binary_data = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, file_size, rc_logger);
+                auto binary_data = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, file_size, rc_logger);
 
                 std::string ecu_path;
                 if(FileManager::getEcuPath(receiver_id, ecu_path, 1, rc_logger) == 0)
@@ -412,8 +412,8 @@ bool RoutineControl::verifySoftware(uint8_t receiver_id)
             memory_manager->setAddress(rds_data.address);
             memory_manager->setPath(DEV_LOOP);
         }
-        uint8_t binary_size_format = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
-        auto binary_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, binary_size_format, rc_logger);
+        uint8_t binary_size_format = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress(), 1, rc_logger)[0];
+        auto binary_size_bytes = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1, binary_size_format, rc_logger);
         uint8_t binary_offset = sizeof(binary_size_format) + binary_size_format;
 
         size_t binary_size = 0;
@@ -422,9 +422,9 @@ bool RoutineControl::verifySoftware(uint8_t receiver_id)
             binary_size |= (binary_size_bytes[i] << ((binary_size_format - i - 1) * 8));
         }
         /* Read the binary data from memory */
-        binary_data = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, binary_size, rc_logger);
+        binary_data = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress() + binary_offset, binary_size, rc_logger);
 
-        uint8_t checksum = MemoryManager::readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1 + binary_size_format + binary_size, 1, rc_logger)[0];
+        uint8_t checksum = memory_manager->readFromAddress(DEV_LOOP, memory_manager->getAddress() + 1 + binary_size_format + binary_size, 1, rc_logger)[0];
         uint8_t recomputed_checksum = TransferData::computeChecksum(binary_data.data(), binary_data.size());
         if(checksum != recomputed_checksum)
         {
@@ -513,14 +513,15 @@ bool RoutineControl::getCurrentProcessInfo(pid_t& pid, std::string& pname, std::
 
 bool RoutineControl::rollbackSoftware()
 {
+    auto memory_manager = MemoryManager::getInstance(rc_logger);
     LOG_INFO(rc_logger.GET_LOGGER(), "Rollback routine called.");
     /* Get the size of the stored binary.
         First byte represents the size in bytes of the binary size. 03 means the following 3 bytes are used for representing the size
         Following n bytes are used to represent the size.
         The following bytes after this are the binary data.
     */
-    uint8_t binary_size_format = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START, 1, rc_logger)[0];
-    auto binary_size_bytes = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START + 1, binary_size_format, rc_logger);
+    uint8_t binary_size_format = memory_manager->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START, 1, rc_logger)[0];
+    auto binary_size_bytes = memory_manager->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START + 1, binary_size_format, rc_logger);
     uint8_t binary_offset = sizeof(binary_size_format) + binary_size_format;
 
     size_t binary_size = 0;
@@ -530,7 +531,7 @@ bool RoutineControl::rollbackSoftware()
         binary_size |= (binary_size_bytes[i] << ((binary_size_format - i - 1) * 8));
     }
 
-    auto binary_data = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START + binary_offset, binary_size, rc_logger);
+    auto binary_data = memory_manager->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_START + binary_offset, binary_size, rc_logger);
 
     /* Check is software is saved in the memory by checking the .elf extension */
     if( (binary_data[1] != 'E') ||

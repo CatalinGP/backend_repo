@@ -12,12 +12,12 @@
 #define READ_MEMORY_BY_ADDRESS_H
 
 #include "Logger.h"
-#include "MemoryManager.h"
+#include "IMemoryManager.h"
 #include "GenerateFrames.h"
 
 class ReadMemoryByAddress {
 private:
-    MemoryManager* memoryManager;
+    IMemoryManager* memoryManager;
     GenerateFrames& frameGenerator;
     int socket;
     Logger& logger;
@@ -31,7 +31,7 @@ public:
      * @param socket Socket to send frames
      * @param log Instance of Logger
      */
-    ReadMemoryByAddress(MemoryManager* memManager, GenerateFrames& frameGen, int socket,  Logger& log);
+    ReadMemoryByAddress(IMemoryManager* memManager, GenerateFrames& frameGen, int socket,  Logger& log);
 
     /**
      * @brief Method to handle a Read Memory By Address request
