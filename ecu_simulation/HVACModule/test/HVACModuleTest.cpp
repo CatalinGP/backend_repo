@@ -10,11 +10,6 @@
 #include <fstream>
 #include "../include/HVACModule.h"
 
-bool containsLine(const std::string& output, const std::string& line)
-{
-    return output.find(line) != std::string::npos;
-}
-
 struct HVACModuleTest : testing::Test
 {
     HVACModule* hvac;

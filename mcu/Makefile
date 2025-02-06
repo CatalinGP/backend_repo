@@ -243,7 +243,8 @@ $(OBJ_DIR)/Globals.o: $(UTILS_DIR)/Globals.cpp
 #----------------------------------------------------UNIT TESTS-----------------------------------------------------
 
 MCU_OBJS_TEST = $(OBJ_DIR)/MCUModule_test.o \
-                $(OBJ_DIR)/ReceiveFrames_test.o
+                $(OBJ_DIR)/ReceiveFrames_test.o \
+				$(OBJ_DIR)/TestUtils_test.o
 
 ECU_OBJS_TEST = $(OBJ_DIR)/BatteryModule_test.o \
                 $(OBJ_DIR)/EngineModule_test.o \
@@ -259,11 +260,14 @@ UTILS_OBJS_TEST = $(OBJ_DIR)/MemoryManager_test.o \
                   $(OBJ_DIR)/HandleFrames_test.o \
 				  $(OBJ_DIR)/ReceiveFrames_test_utils.o \
 				  $(OBJ_DIR)/ECU_test.o \
-                  $(OBJ_DIR)/FileManager_test.o
+                  $(OBJ_DIR)/FileManager_test.o \
+				  $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_GENERATE_TEST = $(OBJ_DIR)/Logger_test.o \
                   	 $(OBJ_DIR)/GenerateFrames_test.o \
-					 $(OBJ_DIR)/Globals_test.o
+					 $(OBJ_DIR)/Globals_test.o \
+					 $(OBJ_DIR)/TestUtils_test.o \
+					 $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_MEMORY_TEST =   $(OBJ_DIR)/Logger_test.o \
                   	 $(OBJ_DIR)/MemoryManager_test.o
@@ -295,7 +299,9 @@ OBJS_SECURITYACCESS_TEST = $(OBJ_DIR)/Logger_test.o \
 						   $(OBJ_DIR)/GenerateFrames_test.o \
 			   			   $(OBJ_DIR)/SecurityAccess_test.o \
 			   			   $(OBJ_DIR)/NegativeResponse_test.o \
-						   $(OBJ_DIR)/Globals_test.o
+						   $(OBJ_DIR)/Globals_test.o \
+						   $(OBJ_DIR)/TestUtils_test.o \
+						   $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_TESTERPRESENT_TEST = $(OBJ_DIR)/Logger_test.o \
 						  $(OBJ_DIR)/GenerateFrames_test.o \
@@ -354,7 +360,9 @@ OBJS_TRANSFERDATA_TEST = $(OBJ_DIR)/Logger_test.o \
 OBJS_NEGATIVERESPONSE_TEST = $(OBJ_DIR)/Logger_test.o \
                              $(OBJ_DIR)/GenerateFrames_test.o \
                              $(OBJ_DIR)/NegativeResponse_test.o \
-							 $(OBJ_DIR)/Globals_test.o
+							 $(OBJ_DIR)/Globals_test.o \
+							 $(OBJ_DIR)/TestUtils_test.o \
+							 $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_TEST = $(MCU_OBJS_TEST) \
             $(ECU_OBJS_TEST) \
@@ -386,6 +394,12 @@ $(OBJ_DIR)/GenerateFrames_test.o: $(UTILS_DIR)/GenerateFrames.cpp
 
 $(OBJ_DIR)/Globals_test.o: $(UTILS_DIR)/Globals.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/Globals.cpp -o $(OBJ_DIR)/Globals_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/TestUtils_test.o: $(UTILS_DIR)/TestUtils.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/TestUtils.cpp -o $(OBJ_DIR)/TestUtils_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/CaptureFrame_test.o: $(UTILS_DIR)/CaptureFrame.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/CaptureFrame.cpp -o $(OBJ_DIR)/CaptureFrame_test.o $(CFLAGSTST2) $(LDFLAGS)
 
 $(OBJ_DIR)/HandleFrames_test.o: $(UTILS_DIR)/HandleFrames.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/HandleFrames.cpp -o $(OBJ_DIR)/HandleFrames_test.o $(CFLAGSTST2) $(LDFLAGS)

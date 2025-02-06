@@ -23,14 +23,6 @@
 #include "Globals.h"
 #include "Logger.h"
 
-/* Enumeration for frame types */
-enum FrameType {
-    DATA_FRAME,
-    REMOTE_FRAME,
-    ERROR_FRAME,
-    OVERLOAD_FRAME
-};
-
 class GenerateFrames
 {
     private:

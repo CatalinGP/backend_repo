@@ -1,13 +1,8 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include "../include/EngineModule.h"
+#include "../../../utils/include/TestUtils.h"
 #include "Globals.h"
-
-bool containsLine(const std::string& output, const std::string& line)
-{
-    return output.find(line) != std::string::npos;
-}
-
 
 struct EngineModuleTest : testing::Test
 {

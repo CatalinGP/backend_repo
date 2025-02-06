@@ -14,6 +14,7 @@ void loadProjectPathForECU();
  * 
  */
 std::string to_lowercase(const std::string& str);
+
 /**
  * @brief Count the number of digits in a number
  * 
@@ -27,4 +28,13 @@ int countDigits(int number);
  * @param process_name Process name to be stopped.
  */
 void stopProcess(std::string process_name);
+
+/* Enumeration for frame types */
+enum FrameType {
+    DATA_FRAME,
+    REMOTE_FRAME,
+    ERROR_FRAME,
+    OVERLOAD_FRAME
+};
+
 #endif
