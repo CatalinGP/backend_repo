@@ -24,6 +24,7 @@ from utils.input_validation import validate_update_request  # noqa: E402
 from config import *  # noqa: E402
 from werkzeug.exceptions import HTTPException  # noqa: E402
 from actions.dtc_info import DTC_STATUS_BITS  # noqa: E402
+from utils.frontendLogs import uploadFrontendLogs  # noqa: E402
 
 api_bp = Blueprint('api', __name__)
 
@@ -60,6 +61,16 @@ def update_to_version():
                                  id=ecu_id,
                                  address=address)
     return jsonify(response)
+
+
+@api_bp.route('/upload_logs', methods=['POST'])
+def upload_logs():
+    if 'file' not in request.files:
+        return jsonify({'error': 'no file in request  #!@#!@'})
+    file = request.files['file']
+    file.save(f'./utils/log/{file.filename}')
+    uploadFrontendLogs()
+    return jsonify({'message': 'SUCCESSSSS #!@#!@'})
 
 
 @api_bp.route('/verify_software', methods=['POST'])
@@ -222,13 +233,13 @@ def read_dtc_info():
         subfunc = request.args.get('subfunc', default=1, type=int)
         if subfunc not in [1, 2]:
             errors.append({"error": "Invalid sub-function",
-                          "details": f"Sub-function {subfunc} is not supported"})
+                           "details": f"Sub-function {subfunc} is not supported"})
         dtc_mask_bits = request.args.getlist('dtc_mask_bits')
         invalid_bits = [bit for bit in dtc_mask_bits if bit not in DTC_STATUS_BITS]
 
         if invalid_bits:
             errors.append({"error": "Invalid DTC mask bits",
-                          "details": f"The following bits are not supported: {invalid_bits}"})
+                           "details": f"The following bits are not supported: {invalid_bits}"})
 
         if errors:
             return jsonify({"errors": errors})
@@ -239,11 +250,11 @@ def read_dtc_info():
     except HTTPException as http_err:
         log_info_message(logger, f"HTTP Exception occurred: {http_err}")
         return jsonify({"error": "HTTP Exception occurred",
-                       "details": str(http_err)}), http_err.code
+                        "details": str(http_err)}), http_err.code
     except Exception as err:
         log_info_message(logger, f"An unexpected error occurred: {err}")
         return jsonify({"error": "An unexpected error occurred",
-                       "details": str(err)}), 500
+                        "details": str(err)}), 500
 
 
 @api_bp.route('/clear_dtc_info', methods=['POST'])
