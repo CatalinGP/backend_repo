@@ -38,6 +38,12 @@ class GenerateFrames
          * @param logger A logger instance used to record information and errors during the execution.
          */
         GenerateFrames(int socket, Logger& logger);
+
+        /**
+         * @brief Default destructor
+         */
+        virtual ~GenerateFrames() = default;
+
         /**
          * @brief Method to get the socket
          * 
@@ -191,7 +197,7 @@ class GenerateFrames
          * @param response variable for request or response frame
          * Response&Request
          */
-        void readMemoryByAddress(int id, int memory_address, int memory_size, std::vector<uint8_t> response = {});
+        virtual void readMemoryByAddress(int id, int memory_address, int memory_size, std::vector<uint8_t> response = {});
         /**
          * @brief Frame for Read data by Address. Check the commentary from the readDataByIdentifier() method
          * 
@@ -201,7 +207,7 @@ class GenerateFrames
          * @param response variable for request or response frame
          * @param first_frame set as true if it is the first frame (default) or false for the rest of the frames.
          */
-        void readMemoryByAddressLongResponse(int id, int memory_address, int memory_size, std::vector<uint8_t> response, bool first_frame = true);
+        virtual void readMemoryByAddressLongResponse(int id, int memory_address, int memory_size, std::vector<uint8_t> response, bool first_frame = true);
         /**
          * @brief Frame for Write data by Identifier. Check the commentary from the readDataByIdentifier() method
          * 
