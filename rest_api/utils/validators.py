@@ -26,12 +26,14 @@ def validate_hex_binary(value):
     hex_pattern = re.compile(r'^0x[0-9A-Fa-f]+$')
     binary_pattern = re.compile(r'^0b[01]+$')
     if not (hex_pattern.match(value) or binary_pattern.match(value)):
-        raise ValueError(f"Value '{value}' is not in a valid hexadecimal or binary format.")
+        raise ValueError(
+            f"Value '{value}' is not in a valid hexadecimal or binary format.")
 
 
 def validate_context(context):
     if context not in ALLOWED_CONTEXTS:
-        raise ValueError(f"Unsupported context '{context}'. Allowed contexts: {ALLOWED_CONTEXTS}")
+        raise ValueError(
+            f"Unsupported context '{context}'. Allowed contexts: {ALLOWED_CONTEXTS}")
 
 
 def validate_data_types(expected_types):
@@ -43,7 +45,8 @@ def validate_data_types(expected_types):
                 if param not in data:
                     return jsonify({"error": f"Missing parameter '{param}'"}), 400
                 if not isinstance(data[param], param_type):
-                    return jsonify({"error": f"Parameter '{param}' must be of type {param_type.__name__}."}), 400
+                    return jsonify(
+                        {"error": f"Parameter '{param}' must be of type {param_type.__name__}."}), 400
             return f(*args, **kwargs)
         return wrapper
     return decorator
@@ -55,7 +58,8 @@ def validate_interpreted_values(mapping_dict):
         def wrapper(*args, **kwargs):
             value = kwargs.get('value') or request.args.get('value') or request.json.get('value')  # noqa: F821
             if value not in mapping_dict:
-                return jsonify({"error": f"Unsupported value '{value}' for interpretation."}), 400
+                return jsonify(
+                    {"error": f"Unsupported value '{value}' for interpretation."}), 400
             return f(*args, **kwargs)
         return wrapper
     return decorator

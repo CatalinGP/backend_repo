@@ -35,11 +35,6 @@ MemoryManager::MemoryManager(off_t address, std::string path, Logger& logger) : 
     setAddress(address);
 } 
 
-int MemoryManager::to_int(std::string number)
-{
-    return std::stoi(number);
-}
-
 void MemoryManager::setAddress(off_t address)
 {
     if(availableAddress(address) == 0)
@@ -170,7 +165,7 @@ bool MemoryManager::availableMemory(off_t size_of_data)
         LOG_WARN(logger.GET_LOGGER(), "No partition found");
         return false;
     }
-    off_t last_memory_address = to_int(result) * SECTOR_SIZE;
+    off_t last_memory_address = std::stoi(result) * SECTOR_SIZE;
     if ( address + size_of_data >= last_memory_address)
     {
         LOG_ERROR(logger.GET_LOGGER(), "Error: Not enough memory.");

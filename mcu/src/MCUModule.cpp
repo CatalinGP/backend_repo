@@ -28,7 +28,7 @@ namespace MCU
 #ifdef SOFTWARE_VERSION
             {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}},
 #else
-            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}},
+            {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x10}},
 #endif
             /** System Supplier ECU Software Number */
             {0xF1A0, {0x53, 0x57, 0x45, 0x43, 0x55, 0x34, 0x35, 0x36, 0x37}},
@@ -282,19 +282,33 @@ namespace MCU
         LOG_ERROR(MCULogger->GET_LOGGER(), "{}", e.what());
         return;
     }
-        /* Check if a software update has been started, if not, don't check for updates */
-        if(ota_state != ACTIVATE)
-        {
-            return;
-        }
-
         auto memory_manager_instance = MemoryManager::getInstance(*MCULogger);
         memory_manager_instance->setPath(DEV_LOOP);
         memory_manager_instance->setAddress(DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1);
+
+        uint8_t current_sw_version_from_memory = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
+        LOG_INFO(MCULogger->GET_LOGGER(), "Current software version from memory: {:x}", current_sw_version_from_memory);
+        uint8_t current_sw_version_from_program = static_cast<uint8_t>(SOFTWARE_VERSION);
+        LOG_INFO(MCULogger->GET_LOGGER(), "Current software_version {:x}", current_sw_version_from_program);
+
+        /* Check if a software update has been started, if not, don't check for updates */
+        if(ota_state != ACTIVATE)
+        {
+            if(current_sw_version_from_memory != current_sw_version_from_program)
+                {
+                    /* Sync the version write in memory with version from program */
+                    std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
+                    memory_manager_instance->writeToAddress(temp_vector);
+                    LOG_INFO(MCULogger->GET_LOGGER(), "Version from memory and program are different. Syncing...");
+                }
+            return;
+        }
+
         uint8_t previous_sw_version = 0;
         try
         {
             previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (MCU_ID % 0x10) - 1 , 1, *MCULogger)[0];
+            LOG_INFO(MCULogger->GET_LOGGER(), "Previous software version: {:x}", previous_sw_version);
         }
         catch(const std::runtime_error& e)
         {
@@ -315,5 +329,4 @@ namespace MCU
         std::vector<uint8_t> temp_vector = {static_cast<uint8_t>(SOFTWARE_VERSION)};
         memory_manager_instance->writeToAddress(temp_vector);
     }
-
 }

@@ -1,7 +1,8 @@
 ######### Makefile for EngineModule
 
 #POC Project root path
-SOFTWARE_VERSION = 0
+# 16 is 1.0 in hex
+SOFTWARE_VERSION = 16
 PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION}
 #Python flags
 PYTHON_INCL_DIR=-I/usr/include/python3.8
@@ -53,6 +54,10 @@ DOORS_DIR = ../DoorsModule/src
 HVAC_DIR = ../HVACModule/src
 OTA_DIR = ../../ota
 OBJ_DIR = obj
+
+# Build config
+all:
+	$(MAKE) -C ../../config init
 
 #----------------------------------------------------ENGINE MODULE-----------------------------------------------------
 
@@ -232,3 +237,9 @@ clean:
 	@echo "Cleaning up..."
 	rm -f $(FINAL)
 	rm -rf $(OBJ_DIR)
+	find ./test -name '*.gcno' -delete
+	find ./test -name '*.gcda' -delete
+	find ./test -name '*.gcov' -delete
+	find ./test -name '*.info' -delete
+	find ./test -name '*.out' -delete
+	find ./test -name '*.o' -delete

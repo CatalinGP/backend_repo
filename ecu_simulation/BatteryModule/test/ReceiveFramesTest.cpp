@@ -1,6 +1,7 @@
 #include "../include/ReceiveFrames.h"
 #include "../include/HandleFrames.h"
 #include "../include/GenerateFrames.h"
+#include "../../../utils/include/TestUtils.h"
 #include <gtest/gtest.h>
 #include <unistd.h>
 #include <linux/can.h>
@@ -50,74 +51,6 @@ protected:
     }
 };
 
-struct can_frame createFrame(std::vector<uint8_t> test_data)
-{
-    struct can_frame resultFrame = {};
-
-    resultFrame.can_id = MODULE_ID;
-    uint8_t index = 0;
-    for (auto data : test_data)
-        resultFrame.data[index++] = data;
-    resultFrame.can_dlc = test_data.size();
-    return resultFrame;
-}
-
-void testFrames(struct can_frame sent_frame, struct can_frame received_frame )
-{
-    EXPECT_EQ(sent_frame.can_id, received_frame.can_id);
-    EXPECT_EQ(sent_frame.can_dlc, received_frame.can_dlc);
-    for (int i = 0; i < sent_frame.can_dlc; ++i) {
-        EXPECT_EQ(sent_frame.data[i], received_frame.data[i]);
-    }
-}
-
-bool containsLine(const std::string& output, const std::string& line)
-{
-    return output.find(line) != std::string::npos;
-}
-
-int createSocket()
-{
-    /*Create socket*/
-    std::string nameInterface = "vcan0";
-    struct sockaddr_can addr = {};
-    struct ifreq ifr = {};
-    int s;
-
-    s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (s < 0)
-    {
-        std::cout<<"Error trying to create the socket\n";
-        return 1;
-    }
-    /*Giving name and index to the interface created*/
-    strcpy(ifr.ifr_name, nameInterface.c_str() );
-    ioctl(s, SIOCGIFINDEX, &ifr);
-    /*Set addr structure with info. of the CAN interface*/
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
-    /*Bind the socket to the CAN interface*/
-    int b = bind(s, (struct sockaddr*)&addr, sizeof(addr));
-    if (b < 0)
-    {
-        std::cout<<"Error binding\n";
-        return 1;
-    }
-    int flags = fcntl(s, F_GETFL, 0);
-    if (flags == -1)
-    {
-        std::cerr << "Error getting socket flags: " << strerror(errno) << std::endl;
-        return 1;
-    }
-    // Set the O_NONBLOCK flag to make the socket non-blocking
-    flags |= O_NONBLOCK;
-    if (fcntl(s, F_SETFL, flags) == -1)
-    {
-        std::cerr << "Error setting flags: " << strerror(errno) << std::endl;
-        return -1;
-    }
-    return s;
-}
 canid_t extractCANID(const std::string& input)
 {
     std::istringstream iss(input);
@@ -222,7 +155,7 @@ TEST_F(ReceiveFramesTest, EmptyFrameTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     }); 
-    struct can_frame sent_frame = createFrame({});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
     
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -242,7 +175,7 @@ TEST_F(ReceiveFramesTest, ReceivedFrameNotForThisModuleTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x10,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x10,0x01});
     sent_frame.can_id = 0;
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
     
@@ -266,7 +199,7 @@ TEST_F(ReceiveFramesTest, CanIDRightBitsZero)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x99,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x99,0x01});
     sent_frame.can_id = 0x1;
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
@@ -291,7 +224,7 @@ TEST_F(ReceiveFramesTest, SessionControlRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x10,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x10,0x01});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -313,7 +246,7 @@ TEST_F(ReceiveFramesTest, RequestUpdateStatusTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x32,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x32,0x01});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -335,7 +268,7 @@ TEST_F(ReceiveFramesTest, SessionControlResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x50,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x50,0x01});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -357,7 +290,7 @@ TEST_F(ReceiveFramesTest, EcuResetRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x11,0x03});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x11,0x03});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -379,7 +312,7 @@ TEST_F(ReceiveFramesTest, EcuResetResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x51,0x03});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x51,0x03});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -401,7 +334,7 @@ TEST_F(ReceiveFramesTest, AuthRequestSeedResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x69,0x1,0x23,0x34,0x35});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x69,0x1,0x23,0x34,0x35});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -423,7 +356,7 @@ TEST_F(ReceiveFramesTest, AuthRequestSeedRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03,0x29,0x1});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03,0x29,0x1});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -445,7 +378,7 @@ TEST_F(ReceiveFramesTest, AuthSendKeyRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x29,0x2,0x23,0x34,0x35});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x29,0x2,0x23,0x34,0x35});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -467,7 +400,7 @@ TEST_F(ReceiveFramesTest, AuthSendKeyResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x2,0x69,0x02});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x2,0x69,0x02});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -489,7 +422,7 @@ TEST_F(ReceiveFramesTest, RoutineControlFrameRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x04,0x31,0x02,0x34,0x1A});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x04,0x31,0x02,0x34,0x1A});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -511,7 +444,7 @@ TEST_F(ReceiveFramesTest, RoutineControlFrameResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x04,0x71,0x02,0x34,0x1A});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x04,0x71,0x02,0x34,0x1A});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -533,7 +466,7 @@ TEST_F(ReceiveFramesTest, TesterPresentTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x3E,0x00});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x3E,0x00});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -555,7 +488,7 @@ TEST_F(ReceiveFramesTest, TesterPresentResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x7E,0x00});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x7E,0x00});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -577,7 +510,7 @@ TEST_F(ReceiveFramesTest, ReadByIdentResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x62,0x33,0x22,0x32,0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x62,0x33,0x22,0x32,0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -599,7 +532,7 @@ TEST_F(ReceiveFramesTest, ReadByIdentRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03,0x22,0x33,0x22});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03,0x22,0x33,0x22});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -646,7 +579,7 @@ TEST_F(ReceiveFramesTest, ReadMemByAddressResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x07,0x63,0x21,0x01,0x23,0x45,1,2});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x07,0x63,0x21,0x01,0x23,0x45,1,2});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -668,7 +601,7 @@ TEST_F(ReceiveFramesTest, ReadMemByAddressRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x23,0x21,0x01,0x23,0x45});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x23,0x21,0x01,0x23,0x45});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -714,7 +647,7 @@ TEST_F(ReceiveFramesTest, WriteDataByIdentifierResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03,0x6E,0x23,0x45});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03,0x6E,0x23,0x45});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -736,7 +669,7 @@ TEST_F(ReceiveFramesTest, WriteDataByIdentifierRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x2E,0x23,0x45,0x1,0x2});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x2E,0x23,0x45,0x1,0x2});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -782,7 +715,7 @@ TEST_F(ReceiveFramesTest, FlowControlTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x30,0x0,0x0,0x0});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x30,0x0,0x0,0x0});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -804,7 +737,7 @@ TEST_F(ReceiveFramesTest, ReadDTCRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x3,0x19,0x01,0x12});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x3,0x19,0x01,0x12});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -826,7 +759,7 @@ TEST_F(ReceiveFramesTest, ReadDTCResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x3,0x59,0x01,0x2,0x3,0x4});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x3,0x59,0x01,0x2,0x3,0x4});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -848,7 +781,7 @@ TEST_F(ReceiveFramesTest, ClearDTCRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x04,0x14,0xFF,0xFF,0xFF});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x04,0x14,0xFF,0xFF,0xFF});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -870,7 +803,7 @@ TEST_F(ReceiveFramesTest, ClearDTCResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x01,0x54});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x01,0x54});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -892,7 +825,7 @@ TEST_F(ReceiveFramesTest, AccessTimeParamRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x83,0x1});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x83,0x1});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -914,7 +847,7 @@ TEST_F(ReceiveFramesTest, AccessTimeParamResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0xC3,0x1});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0xC3,0x1});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -936,7 +869,7 @@ TEST_F(ReceiveFramesTest, NegativeResponseUnknownResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03,0x7F,0x10,0x12});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03,0x7F,0x10,0x12});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -958,7 +891,7 @@ TEST_F(ReceiveFramesTest, RequestDownloadRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x06,0x34, 0x00, 0x12, 0x34,0x45, 0x10});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x06,0x34, 0x00, 0x12, 0x34,0x45, 0x10});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -980,7 +913,7 @@ TEST_F(ReceiveFramesTest, RequestDownloadResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x04,0x74, 0x20,0x22, 0x34});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x04,0x74, 0x20,0x22, 0x34});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1002,7 +935,7 @@ TEST_F(ReceiveFramesTest, TransferDataRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x07,0x36, 0x20, 1,2,3,4,5});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x07,0x36, 0x20, 1,2,3,4,5});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1024,7 +957,7 @@ TEST_F(ReceiveFramesTest, TransferDataResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x76, 0x20});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x76, 0x20});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1071,7 +1004,7 @@ TEST_F(ReceiveFramesTest, TransferDataRequest1Test)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x05,0x36,0x20,1,2,3});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x05,0x36,0x20,1,2,3});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1093,7 +1026,7 @@ TEST_F(ReceiveFramesTest, ReqTransferExitRequestTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x01,0x37});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x01,0x37});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1115,7 +1048,7 @@ TEST_F(ReceiveFramesTest, ReqTransferExitResponseTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x01,0x77});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x01,0x77});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1137,7 +1070,7 @@ TEST_F(ReceiveFramesTest, UnknownServiceTest)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0x99,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x99,0x01});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1160,7 +1093,7 @@ TEST_F(ReceiveFramesTest, MCUNotifyUp)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x01,0x01,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x01,0x01,0x01});
     sent_frame.can_id = 0x12211;
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
@@ -1185,7 +1118,7 @@ TEST_F(ReceiveFramesTest, MCUNotifyUpAA)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x02,0xAA,0x01});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0xAA,0x01});
     sent_frame.can_id = 0x12211;
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
@@ -1208,7 +1141,7 @@ TEST_F(HandleFramesTest, CheckReceivedFrame)
 {
     HandleFrames handleFrames;
     std::string output = "";
-    struct can_frame sent_frame = createFrame({0x02,0x51,0x03});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x02,0x51,0x03});
     errno = EWOULDBLOCK;
     EXPECT_FALSE(handleFrames.checkReceivedFrame(-1,sent_frame));
     
@@ -1221,7 +1154,7 @@ TEST_F(HandleFramesTest, CheckReceivedFrame)
     
     errno = 0;
     testing::internal::CaptureStdout();
-    sent_frame = createFrame({0x02,0x51,0x03});
+    sent_frame = createFrame(MODULE_ID, {0x02,0x51,0x03});
     handleFrames.checkReceivedFrame(1,sent_frame);
     output = testing::internal::GetCapturedStdout();
     expected_out = "Incomplete frame read\n";
@@ -1238,24 +1171,24 @@ TEST_F(ReceiveFramesTest, SessionControlRequestNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x10, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
     
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x13});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x13});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x14});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x14});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x25});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x25});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x34});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x34});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x94});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x94});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x70});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x70});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x71});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x71});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
-    sent_frame = createFrame({0x03, 0X7F, 0x10, 0x72});
+    sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x10, 0x72});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1275,7 +1208,7 @@ TEST_F(ReceiveFramesTest, EcuResetNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x11, 0x25});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x11, 0x25});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1295,7 +1228,7 @@ TEST_F(ReceiveFramesTest, ReadDataByIdentNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x22, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x22, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1315,7 +1248,7 @@ TEST_F(ReceiveFramesTest, AuthRequestSeeNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x29, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x29, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1335,7 +1268,7 @@ TEST_F(ReceiveFramesTest, RoutineControlNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x31, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x31, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1355,7 +1288,7 @@ TEST_F(ReceiveFramesTest, TesterPresentNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x3E, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x3E, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1375,7 +1308,7 @@ TEST_F(ReceiveFramesTest, ReadMemByAddressNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x23, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x23, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1395,7 +1328,7 @@ TEST_F(ReceiveFramesTest, WriteDataByIdentifierNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x2E, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x2E, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1415,7 +1348,7 @@ TEST_F(ReceiveFramesTest, ReadDtcInformationNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x19, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x19, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1435,7 +1368,7 @@ TEST_F(ReceiveFramesTest, ClearDiagnosticInformationNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x14, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x14, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1455,7 +1388,7 @@ TEST_F(ReceiveFramesTest, AccessTimingParametersNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x83, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x83, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1475,7 +1408,7 @@ TEST_F(ReceiveFramesTest, RequestDownloadNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x34, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x34, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1495,7 +1428,7 @@ TEST_F(ReceiveFramesTest, TransferDataNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x36, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x36, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1515,7 +1448,7 @@ TEST_F(ReceiveFramesTest, RequestTransferExitNegative)
         testing::internal::CaptureStdout();
         receiveFrames->receive(handleFrames);
     });
-    struct can_frame sent_frame = createFrame({0x03, 0X7F, 0x37, 0x11});
+    struct can_frame sent_frame = createFrame(MODULE_ID, {0x03, 0X7F, 0x37, 0x11});
     ASSERT_EQ(write(s2, &sent_frame, sizeof(sent_frame)), sizeof(sent_frame));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -1526,8 +1459,8 @@ TEST_F(ReceiveFramesTest, RequestTransferExitNegative)
 }
 
 int main(int argc, char **argv) {
-    s1 = createSocket();
-    s2 = createSocket();
+    s1 = createSocket(0);
+    s2 = createSocket(0);
     system("sudo modprobe vcan");
     system("sudo ip link add type vcan name vcan0");
     system("sudo ip link set vcan0 up");

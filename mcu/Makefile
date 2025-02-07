@@ -1,7 +1,8 @@
 ######### Makefile for MCU module
 ######### Author: Theodor Stoica (contact theodor.stoica@randstaddigital.com for any help)
 
-SOFTWARE_VERSION = 0
+# 16 is 1.0 in hex
+SOFTWARE_VERSION = 16
 PYTHON_ENABLED = 1
 PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION} -DPYTHON_ENABLED=${PYTHON_ENABLED}
 
@@ -15,7 +16,7 @@ PYTHON_LDFLAGS = -L/usr/lib/python3.8/config-3.8-x86_64-linux-gnu -lpython3.8 -l
 
 # Compiler flags
 CXX = g++
-CFLAGS = -std=c++17 -O3 -Wall -Werror -pthread \
+CFLAGS = -std=c++17 -O3 -Wall -Wno-unused-result -Werror -pthread \
          -I../include \
          -I./include \
          -I../utils/include \
@@ -63,6 +64,10 @@ ENGINE_DIR_TEST = ../ecu_simulation/EngineModule/test
 OTA_DIR = ../ota
 OBJ_DIR = obj
 HVAC_DIR_TEST = ../ecu_simulation/HVACModule/test
+
+# Build config
+all:
+	$(MAKE) -C ../config init
 
 #----------------------------------------------------MCU MODULE-----------------------------------------------------
 
@@ -238,7 +243,8 @@ $(OBJ_DIR)/Globals.o: $(UTILS_DIR)/Globals.cpp
 #----------------------------------------------------UNIT TESTS-----------------------------------------------------
 
 MCU_OBJS_TEST = $(OBJ_DIR)/MCUModule_test.o \
-                $(OBJ_DIR)/ReceiveFrames_test.o
+                $(OBJ_DIR)/ReceiveFrames_test.o \
+				$(OBJ_DIR)/TestUtils_test.o
 
 ECU_OBJS_TEST = $(OBJ_DIR)/BatteryModule_test.o \
                 $(OBJ_DIR)/EngineModule_test.o \
@@ -249,14 +255,19 @@ UTILS_OBJS_TEST = $(OBJ_DIR)/MemoryManager_test.o \
                   $(OBJ_DIR)/Logger_test.o \
                   $(OBJ_DIR)/CreateInterface_test.o \
                   $(OBJ_DIR)/GenerateFrames_test.o \
+				  $(OBJ_DIR)/Globals_test.o \
                   $(OBJ_DIR)/NegativeResponse_test.o \
                   $(OBJ_DIR)/HandleFrames_test.o \
 				  $(OBJ_DIR)/ReceiveFrames_test_utils.o \
 				  $(OBJ_DIR)/ECU_test.o \
-                  $(OBJ_DIR)/FileManager_test.o
+                  $(OBJ_DIR)/FileManager_test.o \
+				  $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_GENERATE_TEST = $(OBJ_DIR)/Logger_test.o \
-                  	 $(OBJ_DIR)/GenerateFrames_test.o
+                  	 $(OBJ_DIR)/GenerateFrames_test.o \
+					 $(OBJ_DIR)/Globals_test.o \
+					 $(OBJ_DIR)/TestUtils_test.o \
+					 $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_MEMORY_TEST =   $(OBJ_DIR)/Logger_test.o \
                   	 $(OBJ_DIR)/MemoryManager_test.o
@@ -287,7 +298,10 @@ OBJS_DIAGNOSTICSESSIONCONTROL_TEST = $(OBJ_DIR)/Logger_test.o \
 OBJS_SECURITYACCESS_TEST = $(OBJ_DIR)/Logger_test.o \
 						   $(OBJ_DIR)/GenerateFrames_test.o \
 			   			   $(OBJ_DIR)/SecurityAccess_test.o \
-			   			   $(OBJ_DIR)/NegativeResponse_test.o
+			   			   $(OBJ_DIR)/NegativeResponse_test.o \
+						   $(OBJ_DIR)/Globals_test.o \
+						   $(OBJ_DIR)/TestUtils_test.o \
+						   $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_TESTERPRESENT_TEST = $(OBJ_DIR)/Logger_test.o \
 						  $(OBJ_DIR)/GenerateFrames_test.o \
@@ -346,6 +360,9 @@ OBJS_TRANSFERDATA_TEST = $(OBJ_DIR)/Logger_test.o \
 OBJS_NEGATIVERESPONSE_TEST = $(OBJ_DIR)/Logger_test.o \
                              $(OBJ_DIR)/GenerateFrames_test.o \
                              $(OBJ_DIR)/NegativeResponse_test.o \
+							 $(OBJ_DIR)/Globals_test.o \
+							 $(OBJ_DIR)/TestUtils_test.o \
+							 $(OBJ_DIR)/CaptureFrame_test.o
 
 OBJS_TEST = $(MCU_OBJS_TEST) \
             $(ECU_OBJS_TEST) \
@@ -374,6 +391,15 @@ $(OBJ_DIR)/ECU_test.o: $(UTILS_DIR)/ECU.cpp
 
 $(OBJ_DIR)/GenerateFrames_test.o: $(UTILS_DIR)/GenerateFrames.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/GenerateFrames.cpp -o $(OBJ_DIR)/GenerateFrames_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/Globals_test.o: $(UTILS_DIR)/Globals.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/Globals.cpp -o $(OBJ_DIR)/Globals_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/TestUtils_test.o: $(UTILS_DIR)/TestUtils.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/TestUtils.cpp -o $(OBJ_DIR)/TestUtils_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/CaptureFrame_test.o: $(UTILS_DIR)/CaptureFrame.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/CaptureFrame.cpp -o $(OBJ_DIR)/CaptureFrame_test.o $(CFLAGSTST2) $(LDFLAGS)
 
 $(OBJ_DIR)/HandleFrames_test.o: $(UTILS_DIR)/HandleFrames.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UTILS_DIR)/HandleFrames.cpp -o $(OBJ_DIR)/HandleFrames_test.o $(CFLAGSTST2) $(LDFLAGS)
@@ -447,7 +473,7 @@ $(OBJ_DIR)/NegativeResponse_test.o: $(UTILS_DIR)/NegativeResponse.cpp
 	
 # Compile all unit tests
 
-allTests: mcuModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest
+allTests: mcuModuleTest batteryModuleTest engineModuleTest doorsModuleTest hvacModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest
 
 
 # HandleFrames Unit tests
@@ -588,8 +614,8 @@ $(UDS_DIR)/read_data_by_identifier/utest/ReadDataByIdentifier_test.o: $(UDS_DIR)
 # RequestTransferExit Unit tests
 requestTransferExitTest: $(OBJ_DIR) $(OTA_DIR)/request_transfer_exit/utest/requestTransferExitTest.out
 
-$(OTA_DIR)/request_transfer_exit/utest/requestTransferExitTest.out: $(OBJ_DIR) $(OBJS_REQUESTTRANSFEREXIT_TEST) $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o
-	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_transfer_exit/utest/requestTransferExitTest.out $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o $(OBJS_REQUESTTRANSFEREXIT_TEST) $(CFLAGSTST2) $(LDFLAGS)
+$(OTA_DIR)/request_transfer_exit/utest/requestTransferExitTest.out: $(OBJ_DIR) $(OBJS_TEST) $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o
+	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_transfer_exit/utest/requestTransferExitTest.out $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o $(OBJS_TEST) $(CFLAGSTST2) $(LDFLAGS)
 
 $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o: $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExitTest.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExitTest.cpp -o $(OTA_DIR)/request_transfer_exit/utest/RequestTransferExit_test.o $(CFLAGSTST2) $(LDFLAGS)
@@ -621,8 +647,8 @@ $(UDS_DIR)/clear_dtc/utest/ClearDtc_test.o: $(UDS_DIR)/clear_dtc/utest/ClearDtcT
 # RequestUpdateStatus Unit tests
 requestUpdateStatusTest: $(OBJ_DIR) $(OTA_DIR)/request_update_status/utest/requestUpdateStatusTest.out
 
-$(OTA_DIR)/request_update_status/utest/requestUpdateStatusTest.out: $(OBJ_DIR) $(OBJS_REQUESTUPDATESTATUS_TEST) $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o
-	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_update_status/utest/requestUpdateStatusTest.out $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o $(OBJS_REQUESTUPDATESTATUS_TEST) $(CFLAGSTST2) $(LDFLAGS)
+$(OTA_DIR)/request_update_status/utest/requestUpdateStatusTest.out: $(OBJ_DIR) $(OBJS_TEST) $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o
+	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_update_status/utest/requestUpdateStatusTest.out $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o $(OBJS_TEST) $(CFLAGSTST2) $(LDFLAGS)
 
 $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o: $(OTA_DIR)/request_update_status/utest/RequestUpdateStatusTest.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(OTA_DIR)/request_update_status/utest/RequestUpdateStatusTest.cpp -o $(OTA_DIR)/request_update_status/utest/RequestUpdateStatus_test.o $(CFLAGSTST2) $(LDFLAGS)
@@ -687,8 +713,8 @@ $(DOORS_DIR_TEST)/doorsModule_test.o: $(DOORS_DIR_TEST)/DoorsModuleTest.cpp
 # RequestDownload Unit tests
 requestDownloadTest: $(OBJ_DIR) $(OTA_DIR)/request_download/utest/requestDownloadTest.out
 
-$(OTA_DIR)/request_download/utest/requestDownloadTest.out: $(OBJ_DIR) $(OBJS_REQUESTDOWNLOAD_TEST) $(OTA_DIR)/request_download/utest/RequestDownload_test.o
-	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_download/utest/requestDownloadTest.out $(OTA_DIR)/request_download/utest/RequestDownload_test.o $(OBJS_REQUESTDOWNLOAD_TEST) $(CFLAGSTST2) $(LDFLAGS)
+$(OTA_DIR)/request_download/utest/requestDownloadTest.out: $(OBJ_DIR) $(OBJS_TEST) $(OTA_DIR)/request_download/utest/RequestDownload_test.o
+	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/request_download/utest/requestDownloadTest.out $(OTA_DIR)/request_download/utest/RequestDownload_test.o $(OBJS_TEST) $(CFLAGSTST2) $(LDFLAGS)
 
 $(OTA_DIR)/request_download/utest/RequestDownload_test.o: $(OTA_DIR)/request_download/utest/RequestDownloadTest.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(OTA_DIR)/request_download/utest/RequestDownloadTest.cpp -o $(OTA_DIR)/request_download/utest/RequestDownload_test.o $(CFLAGSTST2) $(LDFLAGS)
@@ -698,8 +724,8 @@ $(OTA_DIR)/request_download/utest/RequestDownload_test.o: $(OTA_DIR)/request_dow
 # TransferData Unit tests
 transferDataTest: $(OBJ_DIR) $(OTA_DIR)/transfer_data/utest/transferDataTest.out
 
-$(OTA_DIR)/transfer_data/utest/transferDataTest.out: $(OBJ_DIR) $(OBJS_TRANSFERDATA_TEST) $(OTA_DIR)/transfer_data/utest/TransferData_test.o
-	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/transfer_data/utest/transferDataTest.out $(OTA_DIR)/transfer_data/utest/TransferData_test.o $(OBJS_TRANSFERDATA_TEST) $(CFLAGSTST2) $(LDFLAGS)
+$(OTA_DIR)/transfer_data/utest/transferDataTest.out: $(OBJ_DIR) $(OBJS_TEST) $(OTA_DIR)/transfer_data/utest/TransferData_test.o
+	$(CXX) $(CFLAGSTST) -o $(OTA_DIR)/transfer_data/utest/transferDataTest.out $(OTA_DIR)/transfer_data/utest/TransferData_test.o $(OBJS_TEST) $(CFLAGSTST2) $(LDFLAGS)
 
 $(OTA_DIR)/transfer_data/utest/TransferData_test.o: $(OTA_DIR)/transfer_data/utest/TransferDataTest.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(OTA_DIR)/transfer_data/utest/TransferDataTest.cpp -o $(OTA_DIR)/transfer_data/utest/TransferData_test.o $(CFLAGSTST2) $(LDFLAGS)
@@ -1293,10 +1319,10 @@ clean:
 			find $$dir -name '*.info' -delete; \
 		fi \
 	done
-	find . -name '*.gcno' -delete
-	find . -name '*.gcda' -delete
-	find . -name '*.gcov' -delete
-	find . -name '*.info' -delete
-	find ./test -name '*.out' -delete
-	find ./test -name '*.o' -delete
+	find .. -name '*.gcno' -delete
+	find .. -name '*.gcda' -delete
+	find .. -name '*.gcov' -delete
+	find .. -name '*.info' -delete
+	find .. -name '*.out' -delete
+	find .. -name '*.o' -delete
 	if [ -d "./coverage" ]; then find ./coverage -name '*' -delete; fi

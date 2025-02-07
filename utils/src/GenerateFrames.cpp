@@ -635,18 +635,6 @@ bool GenerateFrames::requestUpdateStatusResponse(int id, std::vector<uint8_t> re
 }
 
 /* Private */
-int GenerateFrames::countDigits(int number)
-{
-    int digits = 0;
-    if (number < 0) 
-        return 0;
-    while (number) {
-        number /= 10;
-        digits++;
-    }
-    return digits;
-}
-
 void GenerateFrames::insertBytes(std::vector<uint8_t>& byteVector, unsigned int num, int numBytes) {
     for (int i = numBytes - 1; i >= 0; --i) {
         byteVector.push_back((num >> (i * 8)) & 0xFF);

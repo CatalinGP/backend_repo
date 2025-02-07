@@ -15,6 +15,7 @@ int main()
     #endif
 
     hvac = new HVACModule();
+    stopProcess("main_hvac");
     hvac->printHvacInfo();
     std::thread receiveFrThread([]()
                                { hvac->_ecu->startFrames(); });

@@ -25,6 +25,7 @@
 #include <vector> 
 
 #include "ECU.h"
+#include "Globals.h"
 
 class HVACModule
 {
@@ -86,12 +87,6 @@ public:
      * @return int 
      */
     int getSocket();
-
-    /**
-     * @brief Convert all the letters to lowercase
-     * 
-     */
-    std::string to_lowercase(const std::string& str);
 };
 
 extern HVACModule *hvac;

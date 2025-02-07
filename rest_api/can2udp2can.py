@@ -79,7 +79,7 @@ def main():
             t2.join()
         else:
             CAN_INTERFACE1 = output[0:new_line]
-            CAN_INTERFACE2 = output[new_line+1:-1]
+            CAN_INTERFACE2 = output[new_line + 1:-1]
 
             bus0 = can.interface.Bus(channel=CAN_INTERFACE1, interface='socketcan')
             bus1 = can.interface.Bus(channel=CAN_INTERFACE2, interface='socketcan')

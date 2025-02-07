@@ -1,7 +1,8 @@
 ######### Makefile for BatteryModule
 ######### Author: Theodor Stoica (contact theodor.stoica@randstaddigital.com for any help)
 
-SOFTWARE_VERSION = 0
+# 16 is 1.0 in hex
+SOFTWARE_VERSION = 16
 PROJECT_DEFINES = -DSOFTWARE_VERSION=${SOFTWARE_VERSION}
 
 #Python flags
@@ -57,6 +58,10 @@ DOORS_DIR = ../DoorsModule/src
 HVAC_DIR = ../HVACModule/src
 OTA_DIR = ../../ota
 OBJ_DIR = obj
+
+# Build config
+all:
+	$(MAKE) -C ../../config init
 
 #----------------------------------------------------MCU MODULE-----------------------------------------------------
 
@@ -232,3 +237,9 @@ clean:
 	@echo "Cleaning up..."
 	rm -f $(FINAL)
 	rm -rf $(OBJ_DIR)
+	find ./test -name '*.gcno' -delete
+	find ./test -name '*.gcda' -delete
+	find ./test -name '*.gcov' -delete
+	find ./test -name '*.info' -delete
+	find ./test -name '*.out' -delete
+	find ./test -name '*.o' -delete
