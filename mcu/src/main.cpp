@@ -15,14 +15,14 @@ int main() {
     #endif /* UNIT_TESTING_MODE */
     MCU::mcu = new MCU::MCUModule(0x01);
     stopProcess("main_mcu");
-    MCU::mcu->StartModule();
-    std::thread receiveFrThread([]()
+    MCU::mcu->vStartModule();
+    std::thread thReceiveFr([]()
     { 
-        MCU::mcu->recvFrames();
+        MCU::mcu->vRecvFrames();
     });
     sleep(3);
     /* commented this as we don't want it to stop, it was for test purposes */
     /* MCU::mcu->StopModule(); */
-    receiveFrThread.join();
+    thReceiveFr.join();
     return 0;
 }

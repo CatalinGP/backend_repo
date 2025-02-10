@@ -157,12 +157,12 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
             LOG_INFO(rc_logger.GET_LOGGER(), "Initialise OTA update routine called.");
             if(initialiseOta(target_id, request, routine_result) == false)
             {
-                FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ERROR}, aux_can_id, rc_logger, MCU::mcu->getMcuEcuSocket());
+                FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {ERROR}, aux_can_id, rc_logger, MCU::mcu->iGetMcuEcuSocket());
                 nrc.sendNRC(can_id, ROUTINE_CONTROL_SID, NegativeResponse::IMLOIF);
             }
             else
             {
-                FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {INIT}, aux_can_id, rc_logger, MCU::mcu->getMcuEcuSocket());
+                FileManager::setDidValue(OTA_UPDATE_STATUS_DID, {INIT}, aux_can_id, rc_logger, MCU::mcu->iGetMcuEcuSocket());
                 routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
             }
 

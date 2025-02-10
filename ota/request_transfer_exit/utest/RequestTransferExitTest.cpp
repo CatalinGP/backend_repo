@@ -129,7 +129,7 @@ TEST_F(RequestTransferExitTest, PositiveResponse)
 /* Test for Request Sequence Error */
 TEST_F(RequestTransferExitTest, RequestSequenceError) 
 {       
-    MCU::mcu->default_DID_MCU[0x01E0] = {0x01, 0x02, 0x03, 0x04};
+    MCU::mcu->umapU16V8_DefaultDIDMCU[0x01E0] = {0x01, 0x02, 0x03, 0x04};
     std::vector<uint8_t> request = {0x03, 0x37, 0x01};
     std::vector<uint8_t> expected_response = {0x02, 0x7F, 0x37, 0x24};
 
@@ -143,7 +143,7 @@ TEST_F(RequestTransferExitTest, RequestSequenceError)
 /* Test for OTA_UPDATE_STATUS_DID */
 TEST_F(RequestTransferExitTest, OTAUpStDIDNotFound) 
 {       
-    MCU::mcu->default_DID_MCU.clear();
+    MCU::mcu->umapU16V8_DefaultDIDMCU.clear();
     std::vector<uint8_t> request = {0x03, 0x37, 0x01};
     
     /* redirect stdout to capture the output */

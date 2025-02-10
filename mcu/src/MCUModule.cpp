@@ -13,10 +13,10 @@ Logger* MCULogger = nullptr;
 namespace MCU
 {
     MCUModule* mcu = nullptr;
-    std::map<uint8_t, double> MCUModule::timing_parameters;
-    std::map<uint8_t, std::future<void>> MCUModule::active_timers;
-    std::map<uint8_t, std::atomic<bool>> MCUModule::stop_flags;
-    std::unordered_map<uint16_t, std::vector<uint8_t>> MCUModule::default_DID_MCU = 
+    std::map<uint8_t, double> MCUModule::mapU8F_TimingParameters;
+    std::map<uint8_t, std::future<void>> MCUModule::mapU8F_ActiveTimers;
+    std::map<uint8_t, std::atomic<bool>> MCUModule::mapU8AB_StopFlags;
+    std::unordered_map<uint16_t, std::vector<uint8_t>> MCUModule::umapU16V8_DefaultDIDMCU = 
         {
             /** Vehicle Identification Number (VIN) */
             {0xF190, {0x31, 0x48, 0x47, 0x43, 0x4D, 0x38, 0x32, 0x36, 0x33, 0x3A, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36}},
@@ -53,7 +53,7 @@ namespace MCU
             /** System ECU Flash Software Version Number */
             {0xF1AD, {0x46, 0x4C, 0x41, 0x53, 0x48, 0x32, 0x2E, 0x33, 0x2E, 0x34}}
         };
-    const std::vector<uint16_t> MCUModule::writable_MCU_DID =
+    const std::vector<uint16_t> MCUModule::vecU16_WritableMCUDID =
     {
         /* System Supplier ECU Software Number */
         0xF1A0,
@@ -68,32 +68,33 @@ namespace MCU
         OTA_UPDATE_STATUS_DID,
         SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
     };
+
     /* Constructor */
-    MCUModule::MCUModule(uint8_t interfaces_number) : 
-                    is_running(false),
-                    create_interface(CreateInterface::getInstance(interfaces_number, *MCULogger)),
-                    receive_frames(nullptr),
-                    mcu_api_socket(create_interface->createSocket(interfaces_number)),
-                    mcu_ecu_socket(create_interface->createSocket(interfaces_number >> 4))
+    MCUModule::MCUModule(uint8_t u8InterfaceNumber) : 
+                    bIsRunning(false),
+                    createInterface(CreateInterface::getInstance(u8InterfaceNumber, *MCULogger)),
+                    receiveFrames(nullptr),
+                    iMcuApiSocket(createInterface->createSocket(u8InterfaceNumber)),
+                    iMcuEcuSocket(createInterface->createSocket(u8InterfaceNumber >> 4))
                     {
-        checkSwVersion();
-        writeDataToFile();
-        receive_frames = new ReceiveFrames(mcu_ecu_socket, mcu_api_socket);
+        vCheckSwVersion();
+        vWriteDataToFile();
+        receiveFrames = new ReceiveFrames(iMcuEcuSocket, iMcuApiSocket);
     }
 
     /* Default constructor */
-    MCUModule::MCUModule() : is_running(false),
-                         create_interface(CreateInterface::getInstance(0x01, *MCULogger)),
-                         receive_frames(nullptr)
+    MCUModule::MCUModule() : bIsRunning(false),
+                         createInterface(CreateInterface::getInstance(0x01, *MCULogger)),
+                         receiveFrames(nullptr)
     {
-        writeDataToFile();
+        vWriteDataToFile();
     }
 
     /* Destructor */
     MCUModule::~MCUModule() 
     {
-        create_interface->stopInterface();
-        delete receive_frames;
+        createInterface->stopInterface();
+        delete receiveFrames;
         if(system("pkill main_mcu") != 0)
         {
             LOG_ERROR(MCULogger->GET_LOGGER(), "Error when trying to kill main_mcu process");
@@ -101,67 +102,68 @@ namespace MCU
     }
 
     /* Start the module */
-    void MCUModule::StartModule() 
+    void MCUModule::vStartModule() 
     { 
-        is_running = true;
-        create_interface->setSocketBlocking(mcu_api_socket);
-        create_interface->setSocketBlocking(mcu_ecu_socket);
+        bIsRunning = true;
+        createInterface->setSocketBlocking(iMcuApiSocket);
+        createInterface->setSocketBlocking(iMcuEcuSocket);
     }
 
-    int MCUModule::getMcuApiSocket() const 
+    int MCUModule::iGetMcuApiSocket() const 
     {
-        return mcu_api_socket;
-    }
-    int MCUModule::getMcuEcuSocket() const 
-    {
-        return mcu_ecu_socket;
-    }
-
-    void MCUModule::setMcuApiSocket(uint8_t interface_number)
-    {
-        this->mcu_api_socket = this->create_interface->createSocket(interface_number);
+        return iMcuApiSocket;
     }
     
-    void MCUModule::setMcuEcuSocket(uint8_t interface_number)
+    int MCUModule::iGetMcuEcuSocket() const 
     {
-        this->mcu_ecu_socket = this->create_interface->createSocket(interface_number >> 4);
+        return iMcuEcuSocket;
+    }
+
+    void MCUModule::vSetMcuApiSocket(uint8_t u8InterfaceNumber)
+    {
+        this->iMcuApiSocket = this->createInterface->createSocket(u8InterfaceNumber);
+    }
+    
+    void MCUModule::vSetMcuEcuSocket(uint8_t u8InterfaceNumber)
+    {
+        this->iMcuEcuSocket = this->createInterface->createSocket(u8InterfaceNumber >> 4);
     }
 
     /* Stop the module */
-    void MCUModule::StopModule() 
+    void MCUModule::vStopModule() 
     { 
-        is_running = false;
-        receive_frames->stopProcessingQueue();            
-        receive_frames->stopListenAPI();
-        receive_frames->stopListenCANBus(); 
+        bIsRunning = false;
+        receiveFrames->vStopProcessingQueue();            
+        receiveFrames->vStopListenAPI();
+        receiveFrames->vStopListenCANBus(); 
     }
 
     /* Receive frames */
-    void MCUModule::recvFrames() 
+    void MCUModule::vRecvFrames() 
     {
-        while (is_running)
+        while (bIsRunning)
         {
-            receive_frames->startListenAPI();
-            receive_frames->startListenCANBus();
+            receiveFrames->vStartListenAPI();
+            receiveFrames->vStartListenCANBus();
             /* Start a thread to process the queue */
-            std::thread queue_thread_process(&ReceiveFrames::processQueue, receive_frames);
+            std::thread thProcessQueue(&ReceiveFrames::vProcessQueue, receiveFrames);
 
             /* Start a thread to listen on API socket */
-            std::thread queue_thread_listen(&ReceiveFrames::receiveFramesFromAPI, receive_frames);
+            std::thread thListenQueue(&ReceiveFrames::bReceiveFramesFromAPI, receiveFrames);
 
             /* Receive frames from the CAN bus */
-            receive_frames->receiveFramesFromCANBus();
+            receiveFrames->receiveFramesFromCANBus();
 
-            receive_frames->stopListenAPI();
-            receive_frames->stopListenCANBus();
+            receiveFrames->vStopListenAPI();
+            receiveFrames->vStopListenCANBus();
 
             /* Wait for the threads to finish */
-            queue_thread_process.join();
-            queue_thread_listen.join();
+            thProcessQueue.join();
+            thListenQueue.join();
         }
     }
 
-    void MCUModule::fetchMCUData()
+    void MCUModule::vFetchMcuData()
     {
         /* Path to mcu data file */
         std::string file_path = "mcu_data.txt";
@@ -172,7 +174,7 @@ namespace MCU
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dist(0, 255);
 
-        for (auto& [did, data] : default_DID_MCU)
+        for (auto& [did, data] : umapU16V8_DefaultDIDMCU)
         {
             std::stringstream data_ss;
             for (auto& byte : data)
@@ -222,7 +224,7 @@ namespace MCU
     }
 
 
-    void MCUModule::writeDataToFile()
+    void MCUModule::vWriteDataToFile()
     {
         std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
         /* Insert the default DID values in the file */
@@ -256,7 +258,7 @@ namespace MCU
         else
         {
             /* Write the default DID values to mcu_data.txt */
-            for (const auto& [data_identifier, data] : default_DID_MCU)
+            for (const auto& [data_identifier, data] : umapU16V8_DefaultDIDMCU)
             {
                 outfile << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << data_identifier << " ";
                 for (uint8_t byte : data)
@@ -267,10 +269,10 @@ namespace MCU
             }
         }
         outfile.close();
-        fetchMCUData();
+        vFetchMcuData();
     }
 
-    void MCUModule::checkSwVersion()
+    void MCUModule::vCheckSwVersion()
     {
         OtaUpdateStatesEnum ota_state;
     try

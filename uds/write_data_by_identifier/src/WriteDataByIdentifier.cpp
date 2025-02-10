@@ -64,11 +64,11 @@ void WriteDataByIdentifier::WriteDataByIdentifierService(canid_t frame_id, std::
         switch (receiver_id)
         {
             case 0x10:
-                if((std::find(MCU::mcu->writable_MCU_DID.begin(), MCU::mcu->writable_MCU_DID.end(), did)) == MCU::mcu->writable_MCU_DID.end())
+                if((std::find(MCU::mcu->vecU16_WritableMCUDID.begin(), MCU::mcu->vecU16_WritableMCUDID.end(), did)) == MCU::mcu->vecU16_WritableMCUDID.end())
                 {
                     LOG_ERROR(wdbi_logger.GET_LOGGER(), "Request Out Of Range: Identifier not found in memory");
                     nrc.sendNRC(id,WDBI_SID,NegativeResponse::ROOR);
-                    MCU::mcu->stop_flags[0x2E] = false;
+                    MCU::mcu->mapU8AB_StopFlags[0x2E] = false;
                     return;
                 }
                 break;

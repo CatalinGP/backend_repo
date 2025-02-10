@@ -205,14 +205,14 @@ void AccessTimingParameter::stopTimingFlag(uint8_t receiver_id, uint8_t sid)
         {
             case 0x10:
             {
-                MCU::mcu->stop_flags[sid] = false;
-                MCU::mcu->stop_flags.erase(sid);
-                auto it = MCU::mcu->active_timers.find(sid);
-                if(it != MCU::mcu->active_timers.end())
+                MCU::mcu->mapU8AB_StopFlags[sid] = false;
+                MCU::mcu->mapU8AB_StopFlags.erase(sid);
+                auto it = MCU::mcu->mapU8F_ActiveTimers.find(sid);
+                if(it != MCU::mcu->mapU8F_ActiveTimers.end())
                 {
-                    MCU::mcu->active_timers[sid].wait();
+                    MCU::mcu->mapU8F_ActiveTimers[sid].wait();
                 }
-                MCU::mcu->active_timers.erase(sid);
+                MCU::mcu->mapU8F_ActiveTimers.erase(sid);
                 break;
             }
             case 0x11:
