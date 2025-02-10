@@ -1,6 +1,6 @@
 #include <cstdint>
+#include <cstring>
 #include <fcntl.h>
-#include <iostream>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -77,7 +77,7 @@ int createSocket(uint8_t interface_number) {
     s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (s < 0)
     {
-        std::cout<<"Error trying to create the socket\n";
+        perror("Error trying to create the socket");
         return 1;
     }
     /* Giving name and index to the interface created */
@@ -90,7 +90,7 @@ int createSocket(uint8_t interface_number) {
     int b = bind(s, (struct sockaddr*)&addr, sizeof(addr));
     if( b < 0 )
     {
-        std::cout<<"Error binding\n";
+        perror("Error binding");
         return 1;
     }
     int flags = fcntl(s, F_GETFL, 0);

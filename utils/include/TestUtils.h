@@ -60,6 +60,11 @@ struct can_frame createFrame(int id, std::vector<uint8_t> data, FrameType frameT
 /**
  * @brief Create the socket
  * 
+ * @warning Before running tests containing this function, do the following:
+ * 1) sudo modprobe vcan (loads the virtual can kernel module)
+ * 2) sudo ip link add type vcan name vcan<interface_number> (@see @param interface_number)
+ * 3) ip link show(verify interfaces, make sure that vcan<interface_number> is listed)
+ * 4) sudo ip link set vcan<interface_number> up (set up the interface before communication)
  * @param interface_number The interface indicator number.
  * @return Returns the socket file descriptor.
  */
