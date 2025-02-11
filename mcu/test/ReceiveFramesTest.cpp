@@ -33,8 +33,8 @@ public:
     using ReceiveFrames::queue_cond_var;
     using ReceiveFrames::printFrames;
     using ReceiveFrames::resetTimer;
-    using ReceiveFrames::startTimerThread;
-    using ReceiveFrames::stopTimerThread;
+    using ReceiveFrames::vStartTimerThread;
+    using ReceiveFrames::vStopTimerThread;
     using ReceiveFrames::ecu_timers;
     using ReceiveFrames::timeout_duration;
     using ReceiveFrames::running;
@@ -88,9 +88,9 @@ protected:
     }
 };
 
-TEST_F(ReceiveFramesTest, TestProcessQueue_SecurityLocked)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_SecurityLocked)
 {
-    std::cerr << "Running TestProcessQueue_SecurityLocked" << std::endl;
+    std::cerr << "Running TestvProcessQueue_SecurityLocked" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x2210;
     frame.can_dlc = 4;
@@ -99,7 +99,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_SecurityLocked)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0x34;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -108,19 +108,19 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_SecurityLocked)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Server is locked."), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_SecurityLocked" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_SecurityLocked" << std::endl;
 }
 
-TEST_F(ReceiveFramesTest, TestProcessQueue_TransferData)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_TransferData)
 {
-    std::cerr << "Running TestProcessQueue_TransferData" << std::endl;
+    std::cerr << "Running TestvProcessQueue_TransferData" << std::endl;
     struct can_frame frame;
     frame.can_id = 0xfa11;
     frame.can_dlc = 3;
@@ -129,7 +129,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_TransferData)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0x36;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -138,14 +138,14 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_TransferData)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Received frame for ECU to execute service with SID: 0x36"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_TransferData" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_TransferData" << std::endl;
 }
 
 TEST_F(ReceiveFramesTest, UnlockedSecurity)
@@ -183,7 +183,7 @@ TEST_F(ReceiveFramesTest, UnlockedSecurity)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0x22;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -193,9 +193,9 @@ TEST_F(ReceiveFramesTest, UnlockedSecurity)
     
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopProcessingQueue();
+    receive_frames->vStopProcessingQueue();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -204,16 +204,16 @@ TEST_F(ReceiveFramesTest, UnlockedSecurity)
 }
 
 /* Test to simulate read error from API */
-TEST_F(ReceiveFramesTest, TestReceiveFramesFromAPI_ReadError)
+TEST_F(ReceiveFramesTest, TestbReceiveFramesFromAPI_ReadError)
 {
-    std::cerr << "Running TestReceiveFramesFromAPI_ReadError" << std::endl;
+    std::cerr << "Running TestbReceiveFramesFromAPI_ReadError" << std::endl;
     /* Close socket to simulate read error */
     close(mock_socket_api);
-    receive_frames->startListenAPI();
-    int result = receive_frames->receiveFramesFromAPI();
-    receive_frames->stopListenAPI(); 
+    receive_frames->vStartListenAPI();
+    int result = receive_frames->bReceiveFramesFromAPI();
+    receive_frames->vStopListenAPI(); 
     EXPECT_EQ(result, false);
-    std::cerr << "Finished TestReceiveFramesFromAPI_ReadError" << std::endl;
+    std::cerr << "Finished TestbReceiveFramesFromAPI_ReadError" << std::endl;
 }
 /* Test to simulate read error from CAN Bus */
 TEST_F(ReceiveFramesTest, TestReceiveFramesFromCANBus_ReadError)
@@ -221,9 +221,9 @@ TEST_F(ReceiveFramesTest, TestReceiveFramesFromCANBus_ReadError)
     std::cerr << "Running TestReceiveFramesFromCANBus_ReadError" << std::endl;
     /* Close socket to simulate read error */
     close(mock_socket_canbus);
-    receive_frames->startListenCANBus();
+    receive_frames->vStartListenCANBus();
     int result = receive_frames->receiveFramesFromCANBus();
-    receive_frames->stopListenCANBus(); 
+    receive_frames->vStopListenCANBus(); 
     EXPECT_EQ(result, false);
     std::cerr << "Finished TestReceiveFramesFromCANBus_ReadError" << std::endl;
 }
@@ -243,21 +243,21 @@ TEST_F(ReceiveFramesTest, TestReceiveFramesFromCANBus_Success)
         /* Write frame to mock socket */
         write(mock_socket_pair_canbus[1], &frame, sizeof(frame));
     });
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     std::thread receiver_thread([this]{
         int result = receive_frames->receiveFramesFromCANBus();
         /* Expect successful read */
         EXPECT_EQ(result, true);
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     receiver_thread.join();
     reader_thread.join();
     std::cerr << "Finished TestReceiveFramesFromCANBus_Success" << std::endl;
 }
 /* Test to simulate successful read from API */
-TEST_F(ReceiveFramesTest, TestReceiveFramesFromAPI_Success)
+TEST_F(ReceiveFramesTest, TestbReceiveFramesFromAPI_Success)
 {
-    std::cerr << "Running TestReceiveFramesFromAPI_Success" << std::endl;
+    std::cerr << "Running TestbReceiveFramesFromAPI_Success" << std::endl;
     std::thread reader_thread([this] {
         /* Delay to ensure reader thread is ready */
         struct can_frame frame;
@@ -270,21 +270,21 @@ TEST_F(ReceiveFramesTest, TestReceiveFramesFromAPI_Success)
         /* Write frame to mock socket */
         write(mock_socket_pair_api[1], &frame, sizeof(frame));
     });
-    receive_frames->startListenAPI(); 
+    receive_frames->vStartListenAPI(); 
     std::thread receiver_thread([this]{
-        int result = receive_frames->receiveFramesFromAPI();
+        int result = receive_frames->bReceiveFramesFromAPI();
         /* Expect successful read */
         EXPECT_EQ(result, true);
     });
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     receiver_thread.join();
     reader_thread.join();
-    std::cerr << "Finished TestReceiveFramesFromAPI_Success" << std::endl;
+    std::cerr << "Finished TestbReceiveFramesFromAPI_Success" << std::endl;
 }
 /* Test to process queue with an MCU-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForMCU)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForMCU)
 {
-    std::cerr << "Running TestProcessQueue_ForMCU" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForMCU" << std::endl;
     struct can_frame frame;
     uint32_t mcu_id = 0x2210;
     frame.can_id = mcu_id;
@@ -294,7 +294,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForMCU)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0x22;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -303,9 +303,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForMCU)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -319,13 +319,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForMCU)
     EXPECT_NE(output.find("Received frame for MCU to execute service with SID: 0x22"), std::string::npos);
     EXPECT_NE(output.find("Calling HandleFrames module to execute the service and parse the frame."), std::string::npos);
     EXPECT_NE(output.find("Server is locked."), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForMCU" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForMCU" << std::endl;
 }
   
 /* Test to process queue with an ECU-up-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForBatteryUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForBatteryUp)
 {
-    std::cerr << "Running TestProcessQueue_ForBatteryUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForBatteryUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x1110;
     frame.can_dlc = 4;
@@ -334,7 +334,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForBatteryUp)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0xd9;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -343,9 +343,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForBatteryUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -356,12 +356,12 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForBatteryUp)
     EXPECT_NE(output.find("Data Length: 4"), std::string::npos);
     EXPECT_NE(output.find("Data: 0x0 0xd9 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received to notify MCU that ECU with ID: 0x11 is up"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForBatteryUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForBatteryUp" << std::endl;
 }
 /* Test to process queue with an ECU-up-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForEngineUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForEngineUp)
 {
-    std::cerr << "Running TestProcessQueue_ForEngineUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForEngineUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x1210;
     frame.can_dlc = 4;
@@ -370,7 +370,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForEngineUp)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0xd9;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -379,9 +379,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForEngineUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -392,13 +392,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForEngineUp)
     EXPECT_NE(output.find("Data Length: 4"), std::string::npos);
     EXPECT_NE(output.find("Data: 0x0 0xd9 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received to notify MCU that ECU with ID: 0x12 is up"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForEngineUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForEngineUp" << std::endl;
 }
 
 /* Test to process queue with an ECU-up-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForDoorsUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForDoorsUp)
 {
-    std::cerr << "Running TestProcessQueue_ForDoorsUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForDoorsUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x1310;
     frame.can_dlc = 4;
@@ -407,7 +407,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDoorsUp)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0xd9;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -416,9 +416,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDoorsUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -429,12 +429,12 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDoorsUp)
     EXPECT_NE(output.find("Data Length: 4"), std::string::npos);
     EXPECT_NE(output.find("Data: 0x0 0xd9 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received to notify MCU that ECU with ID: 0x13 is up"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForDoorsUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForDoorsUp" << std::endl;
 }
 
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForHVACUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForHVACUp)
 {
-    std::cerr << "Running TestProcessQueue_ForHVACUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForHVACUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x1410;
     frame.can_dlc = 4;
@@ -443,7 +443,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForHVACUp)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0xd9;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -452,9 +452,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForHVACUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -465,12 +465,12 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForHVACUp)
     EXPECT_NE(output.find("Data Length: 4"), std::string::npos);
     EXPECT_NE(output.find("Data: 0x0 0xd9 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received to notify MCU that ECU with ID: 0x14 is up"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForHVACUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForHVACUp" << std::endl;
 }
 
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForDefaultUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForDefaultUp)
 {
-    std::cerr << "Running TestProcessQueue_ForDefaultUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForDefaultUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0x1510;
     frame.can_dlc = 4;
@@ -479,7 +479,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDefaultUp)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0xd9;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -488,9 +488,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDefaultUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -501,13 +501,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForDefaultUp)
     EXPECT_NE(output.find("Data Length: 4"), std::string::npos);
     EXPECT_NE(output.find("Data: 0x0 0xd9 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received to notify MCU that ECU with ID: 0x15 is up"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForDefaultUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForDefaultUp" << std::endl;
 }
 
 /* Test to process queue with an ECU-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForECU)
 {
-    std::cerr << "Running TestProcessQueue_ForECU" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForECU" << std::endl;
     struct can_frame frame;
     frame.can_id = 0xfa11;
     frame.can_dlc = 4;
@@ -516,7 +516,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU)
         frame.data[i] = i;
     }
     frame.data[1] = 0x22;
-    receive_frames->startListenAPI(); 
+    receive_frames->vStartListenAPI(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -525,9 +525,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -539,13 +539,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU)
     EXPECT_NE(output.find("Data: 0x0 0x22 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Received frame for ECU to execute service with SID: 0x22"), std::string::npos);
     EXPECT_NE(output.find("Frame with ID: 0xfa11 sent on CANBus socket"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForECU" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForECU" << std::endl;
 }
 
 /* Test to process queue with an ECU-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU2)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForECU2)
 {
-    std::cerr << "Running TestProcessQueue_ForECU2" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForECU2" << std::endl;
     struct can_frame frame;
     frame.can_id = 0xfa11;
     frame.can_dlc = 4;
@@ -554,7 +554,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU2)
         frame.data[i] = i;
     }
     frame.data[1] = 0x27;
-    receive_frames->startListenAPI(); 
+    receive_frames->vStartListenAPI(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -563,9 +563,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU2)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -577,13 +577,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForECU2)
     EXPECT_NE(output.find("Data: 0x0 0x27 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Received frame for ECU to execute service with SID: 0x27"), std::string::npos);
     EXPECT_NE(output.find("Frame with ID: 0xfa11 sent on CANBus socket"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForECU" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForECU" << std::endl;
 }
 
 /* Test to process queue with an response to api with all ECUs up */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForResponseWithECUsUp)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForResponseWithECUsUp)
 {
-    std::cerr << "Running TestProcessQueue_ForResponseWithECUsUp" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForResponseWithECUsUp" << std::endl;
     struct can_frame frame;
     frame.can_id = 0xfa99;
     frame.can_dlc = 4;
@@ -592,7 +592,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForResponseWithECUsUp)
         frame.data[i] = i;
     }
     frame.data[1] = 0x99;
-    receive_frames->startListenAPI(); 
+    receive_frames->vStartListenAPI(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -601,9 +601,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForResponseWithECUsUp)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -615,13 +615,13 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForResponseWithECUsUp)
     EXPECT_NE(output.find("Data: 0x0 0x99 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Received frame to update status of ECUs still up."), std::string::npos);
     EXPECT_NE(output.find("Frame sent to API on API socket to update status of ECUs still up."), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForResponseWithECUsUp" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForResponseWithECUsUp" << std::endl;
 }
 
 /* Test to process queue with an API-specific CAN frame */
-TEST_F(ReceiveFramesTest, TestProcessQueue_ForAPI)
+TEST_F(ReceiveFramesTest, TestvProcessQueue_ForAPI)
 {
-    std::cerr << "Running TestProcessQueue_ForAPI" << std::endl;
+    std::cerr << "Running TestvProcessQueue_ForAPI" << std::endl;
     struct can_frame frame;
     uint32_t api_id = 0x11FA;
     frame.can_id = api_id;
@@ -630,7 +630,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForAPI)
     {
         frame.data[itr] = itr;
     }
-    receive_frames->startListenAPI(); 
+    receive_frames->vStartListenAPI(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -639,9 +639,9 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForAPI)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -653,7 +653,7 @@ TEST_F(ReceiveFramesTest, TestProcessQueue_ForAPI)
     EXPECT_NE(output.find("Data: 0x0 0x1 0x2 0x3"), std::string::npos);
     EXPECT_NE(output.find("Frame received from device with sender ID: 0x11 sent for API processing"), std::string::npos);
     EXPECT_NE(output.find("Frame with ID: 0x11fa sent on API socket"), std::string::npos);
-    std::cerr << "Finished TestProcessQueue_ForAPI" << std::endl;
+    std::cerr << "Finished TestvProcessQueue_ForAPI" << std::endl;
 }
   
 /* Test to verify the printFrames function */
@@ -678,48 +678,48 @@ TEST_F(ReceiveFramesTest, TestPrintFrames)
 }
   
 /* Test to verify stop_listen_api function */
-TEST_F(ReceiveFramesTest, TestStopListenAPI)
+TEST_F(ReceiveFramesTest, TestvStopListenAPI)
 {
-    std::cerr << "Running TestStopListenAPI" << std::endl;
-    receive_frames->startListenAPI();
-    receive_frames->stopListenAPI();
+    std::cerr << "Running TestvStopListenAPI" << std::endl;
+    receive_frames->vStartListenAPI();
+    receive_frames->vStopListenAPI();
     EXPECT_FALSE(receive_frames->getListenAPI());
-    std::cerr << "Finished TestStopListenAPI" << std::endl;
+    std::cerr << "Finished TestvStopListenAPI" << std::endl;
 }
 /* Test to verify stop_listen_can_bus function */
-TEST_F(ReceiveFramesTest, TestStopListenCANBus)
+TEST_F(ReceiveFramesTest, TestvStopListenCANBus)
 {
-    std::cerr << "Running TestStopListenCANBus" << std::endl;
-    receive_frames->startListenCANBus();
-    receive_frames->stopListenCANBus();
+    std::cerr << "Running TestvStopListenCANBus" << std::endl;
+    receive_frames->vStartListenCANBus();
+    receive_frames->vStopListenCANBus();
     EXPECT_FALSE(receive_frames->getListenCANBus());
-    std::cerr << "Finished TestStopListenCANBus" << std::endl;
+    std::cerr << "Finished TestvStopListenCANBus" << std::endl;
 }
 /* Test to verify start_listen_api function */
-TEST_F(ReceiveFramesTest, TestStartListenAPI)
+TEST_F(ReceiveFramesTest, TestvStartListenAPI)
 {
-    std::cerr << "Running TestStartListenAPI" << std::endl;
-    receive_frames->startListenAPI();
+    std::cerr << "Running TestvStartListenAPI" << std::endl;
+    receive_frames->vStartListenAPI();
     EXPECT_TRUE(receive_frames->getListenAPI());
-    receive_frames->stopListenAPI();
-    std::cerr << "Finished TestStartListenAPI" << std::endl;
+    receive_frames->vStopListenAPI();
+    std::cerr << "Finished TestvStartListenAPI" << std::endl;
 }
 /* Test to verify start_listen_can_bus function */
-TEST_F(ReceiveFramesTest, TestStartListenCANBus)
+TEST_F(ReceiveFramesTest, TestvStartListenCANBus)
 {
-    std::cerr << "Running TestStartListenCANBus" << std::endl;
-    receive_frames->startListenCANBus();
+    std::cerr << "Running TestvStartListenCANBus" << std::endl;
+    receive_frames->vStartListenCANBus();
     EXPECT_TRUE(receive_frames->getListenCANBus());
-    receive_frames->stopListenCANBus();
-    std::cerr << "Finished TestStartListenCANBus" << std::endl;
+    receive_frames->vStopListenCANBus();
+    std::cerr << "Finished TestvStartListenCANBus" << std::endl;
 }
 /* Test to verify get_listen_api function */
 TEST_F(ReceiveFramesTest, TestGetListenAPI)
 {
     std::cerr << "Running TestGetListenAPI" << std::endl;
-    receive_frames->startListenAPI();
+    receive_frames->vStartListenAPI();
     EXPECT_TRUE(receive_frames->getListenAPI());
-    receive_frames->stopListenAPI();
+    receive_frames->vStopListenAPI();
     EXPECT_FALSE(receive_frames->getListenAPI());
     std::cerr << "Finished TestGetListenAPI" << std::endl;
 }
@@ -727,9 +727,9 @@ TEST_F(ReceiveFramesTest, TestGetListenAPI)
 TEST_F(ReceiveFramesTest, TestGetListenCANBus)
 {
     std::cerr << "Running TestGetListenCANBus" << std::endl;
-    receive_frames->startListenCANBus();
+    receive_frames->vStartListenCANBus();
     EXPECT_TRUE(receive_frames->getListenCANBus());
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     EXPECT_FALSE(receive_frames->getListenCANBus());
     std::cerr << "Finished TestGetListenCANBus" << std::endl;
 }
@@ -756,15 +756,15 @@ TEST_F(ReceiveFramesTest, TestGetHexValueId)
     std::cerr << "Finished TestGetHexValueId" << std::endl;
 }
 
-/* Test to verify the startTimerThread function */
+/* Test to verify the vStartTimerThread function */
 TEST_F(ReceiveFramesTest, TestStartTimerThread)
 {
     std::cerr << "Running TestStartTimerThread" << std::endl;
-    receive_frames->stopTimerThread();
-    receive_frames->startTimerThread();
+    receive_frames->vStopTimerThread();
+    receive_frames->vStartTimerThread();
     EXPECT_TRUE(receive_frames->running);
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    receive_frames->stopTimerThread();
+    receive_frames->vStopTimerThread();
     EXPECT_FALSE(receive_frames->running);
     std::cerr << "Finished TestStartTimerThread" << std::endl;
 }
@@ -818,7 +818,7 @@ TEST_F(ReceiveFramesTest, TestStopTimer)
         frame.data[itr] = itr;
     }
     frame.data[1] = 0x22;
-    receive_frames->startListenCANBus(); 
+    receive_frames->vStartListenCANBus(); 
     {
         std::lock_guard<std::mutex> lock(receive_frames->queue_mutex);
         /* Push frame to queue */
@@ -827,10 +827,10 @@ TEST_F(ReceiveFramesTest, TestStopTimer)
     receive_frames->queue_cond_var.notify_one();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
     receive_frames->stopTimer(0x22, 0); //mock value given for sender_id until one that makes sense is found
-    receive_frames->stopListenCANBus();
+    receive_frames->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -842,13 +842,13 @@ TEST_F(ReceiveFramesTest, ListenOnCANSocket)
 {
     std::cerr << "Running ListenOnCANSocket" << std::endl;
     DiagnosticSessionControl* dsc = new DiagnosticSessionControl(*logger, socket3);
-    receive_frames_2->startListenCANBus();
+    receive_frames_2->vStartListenCANBus();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
         receive_frames_2->receiveFramesFromCANBus();
     });
     dsc->sessionControl(0x1011, 0x02, false);
-    receive_frames_2->stopListenCANBus();
+    receive_frames_2->vStopListenCANBus();
     processor_thread.join();
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Captured a frame on the CANBus socket"), std::string::npos);
@@ -859,13 +859,13 @@ TEST_F(ReceiveFramesTest, ListenOnAPISocket)
 {
     std::cerr << "Running ListenOnAPISocket" << std::endl;
     DiagnosticSessionControl* dsc = new DiagnosticSessionControl(*logger, socket4);
-    receive_frames_2->startListenAPI();
+    receive_frames_2->vStartListenAPI();
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames_2->receiveFramesFromAPI();
+        receive_frames_2->bReceiveFramesFromAPI();
     });
     dsc->sessionControl(0x1011, 0x02, false);
-    receive_frames_2->stopListenAPI();
+    receive_frames_2->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -878,9 +878,9 @@ TEST_F(ReceiveFramesTest, StopProccesingQueue)
     std::cerr << "Running StopProccesingQueue" << std::endl;
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames->processQueue();
+        receive_frames->vProcessQueue();
     });
-    receive_frames->stopProcessingQueue();
+    receive_frames->vStopProcessingQueue();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -905,7 +905,7 @@ TEST_F(ReceiveFramesTest, StopTimer)
 TEST_F(ReceiveFramesTest, CANBusConnectionClose)
 {
     std::cerr << "Running CANBusConnectionClose" << std::endl;
-    receive_frames_2->startListenCANBus(); 
+    receive_frames_2->vStartListenCANBus(); 
 
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
@@ -913,7 +913,7 @@ TEST_F(ReceiveFramesTest, CANBusConnectionClose)
     });
     close(socket2);
      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    receive_frames_2->stopListenCANBus();
+    receive_frames_2->vStopListenCANBus();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
@@ -924,15 +924,15 @@ TEST_F(ReceiveFramesTest, CANBusConnectionClose)
 TEST_F(ReceiveFramesTest, APIConnectionClose)
 {
     std::cerr << "Running APIConnectionClose" << std::endl;
-    receive_frames_2->startListenAPI(); 
+    receive_frames_2->vStartListenAPI(); 
 
     testing::internal::CaptureStdout();
     std::thread processor_thread([this] {
-        receive_frames_2->receiveFramesFromAPI();
+        receive_frames_2->bReceiveFramesFromAPI();
     });
     close(socket1);
      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    receive_frames_2->stopListenAPI();
+    receive_frames_2->vStopListenAPI();
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();

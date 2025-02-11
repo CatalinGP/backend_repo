@@ -58,8 +58,8 @@ protected:
 TEST_F(MCUModuleTest, ErrorKillMCUProcess)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
-    MCU::mcu->StartModule();
-    MCU::mcu->StopModule();
+    MCU::mcu->vStartModule();
+    MCU::mcu->vStopModule();
     testing::internal::CaptureStdout();
     delete MCU::mcu;
     std::string output = testing::internal::GetCapturedStdout();
@@ -77,11 +77,11 @@ TEST_F(MCUModuleTest, StartModuleTest)
     /* Cover parameterized constructor */
     testing::internal::CaptureStdout();
     MCU::mcu = new MCU::MCUModule(0x01);
-    MCU::mcu->StartModule();
+    MCU::mcu->vStartModule();
     std::string output = testing::internal::GetCapturedStdout();
     /* Expect mcu module to start */
     EXPECT_NE(output.find("Diagnostic Session Control (0x10) started."), std::string::npos);
-    MCU::mcu->StopModule();
+    MCU::mcu->vStopModule();
     delete MCU::mcu;
 }
 
@@ -90,7 +90,7 @@ TEST_F(MCUModuleTest, GetMcuApiSocketTest)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    int socket = MCU::mcu->getMcuApiSocket();
+    int socket = MCU::mcu->iGetMcuApiSocket();
     EXPECT_TRUE(socket > 0);
     delete MCU::mcu;
 }
@@ -100,7 +100,7 @@ TEST_F(MCUModuleTest, GetMcuEcuSocketTest)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    int socket = MCU::mcu->getMcuEcuSocket();
+    int socket = MCU::mcu->iGetMcuEcuSocket();
     EXPECT_TRUE(socket > 0);
     delete MCU::mcu;
 }
@@ -110,8 +110,8 @@ TEST_F(MCUModuleTest, SetMcuApiSocketTest)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    MCU::mcu->setMcuApiSocket(0x01);
-    int socket = MCU::mcu->getMcuApiSocket();
+    MCU::mcu->vSetMcuApiSocket(0x01);
+    int socket = MCU::mcu->iGetMcuApiSocket();
     EXPECT_TRUE(socket > 0);
     delete MCU::mcu;
 }
@@ -121,8 +121,8 @@ TEST_F(MCUModuleTest, SetMcuEcuSocketTest)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    MCU::mcu->setMcuEcuSocket(0x01);
-    int socket = MCU::mcu->getMcuEcuSocket();
+    MCU::mcu->vSetMcuEcuSocket(0x01);
+    int socket = MCU::mcu->iGetMcuEcuSocket();
     EXPECT_TRUE(socket > 0);
     delete MCU::mcu;
 }
@@ -133,17 +133,17 @@ TEST_F(MCUModuleTest, receiveFramesTest)
     /* Initialize the MCU module and interfaces */
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    MCU::mcu->StartModule();
+    MCU::mcu->vStartModule();
     CreateInterface* interface = CreateInterface::getInstance(0x01, *mockLogger);
     interface->startInterface();
     testing::internal::CaptureStdout();
     std::thread receiver_thread([this] {
-        MCU::mcu->recvFrames();
+        MCU::mcu->vRecvFrames();
     });
     GenerateFrames* generate_frames = new GenerateFrames(socket_canbus, *mockLogger);
     generate_frames->sendFrame(0x1110, {0x00, 0x01, 0x02}, DATA_FRAME);
     sleep(1);
-    MCU::mcu->StopModule();
+    MCU::mcu->vStopModule();
     /* Join the threads to ensure completion */
     receiver_thread.join();
     std::string output = testing::internal::GetCapturedStdout();
@@ -156,7 +156,7 @@ TEST_F(MCUModuleTest, WriteFailMCUData)
     std::ofstream outfile("old_mcu_data.txt");
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    MCU::mcu->writeDataToFile();
+    MCU::mcu->vWriteDataToFile();
     delete MCU::mcu;
     outfile.close();
 }
@@ -170,7 +170,7 @@ TEST_F(MCUModuleTest, WriteExceptionThrown)
     chmod(path.c_str(), 0);
     EXPECT_THROW(
     {
-        MCU::mcu->writeDataToFile();
+        MCU::mcu->vWriteDataToFile();
     }, std::runtime_error);
     path = "mcu_data.txt";
     chmod(path.c_str(), 0666);

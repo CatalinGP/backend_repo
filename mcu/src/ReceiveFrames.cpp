@@ -10,20 +10,20 @@
 #include "NegativeResponse.h"
 namespace MCU
 {
-    ReceiveFrames::ReceiveFrames(int socket_canbus, int socket_api)
-        : timeout_duration(120), running(true), socket_canbus(socket_canbus), 
-        socket_api(socket_api), handler(socket_api, *MCULogger),
-        generate_frames(socket_canbus, *MCULogger)
+    ReceiveFrames::ReceiveFrames(int iSocketCanBus, int iSocketApi)
+        : timeout_duration(120), running(true), iSocketCanBus(iSocketCanBus), 
+        iSocketApi(iSocketApi), handler(iSocketApi, *MCULogger),
+        generate_frames(iSocketCanBus, *MCULogger)
         
     {
-        startTimerThread();
+        vStartTimerThread();
     }
 
     ReceiveFrames::~ReceiveFrames() 
     {
-        stopListenAPI();
-        stopListenCANBus();
-        stopTimerThread();
+        vStopListenAPI();
+        vStopListenCANBus();
+        vStopTimerThread();
     }
 
     uint32_t ReceiveFrames::gethexValueId()
@@ -41,7 +41,7 @@ namespace MCU
     while (listen_canbus)
     {
         /* Read frames from the CAN socket */
-        int nbytes = read(socket_canbus, &frame, sizeof(frame));
+        int nbytes = read(iSocketCanBus, &frame, sizeof(frame));
         
         if (nbytes < 0) 
         {
@@ -84,13 +84,13 @@ namespace MCU
     return true;
 }
 
-bool ReceiveFrames::receiveFramesFromAPI()
+bool ReceiveFrames::bReceiveFramesFromAPI()
 {
     struct can_frame frame;
     while (listen_api)
     {
         /* Read frames from the CAN socket */
-        int nbytes = read(socket_api, &frame, sizeof(frame));
+        int nbytes = read(iSocketApi, &frame, sizeof(frame));
         
         if (nbytes < 0) 
         {
@@ -144,7 +144,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
     * Function to process frames from the queue.
     * This function runs in a loop and processes each frame from the queue.
     */
-    void ReceiveFrames::processQueue() 
+    void ReceiveFrames::vProcessQueue() 
     {
         LOG_DEBUG(MCULogger->GET_LOGGER(),"Frame processing method invoked!");
         while (true)
@@ -174,9 +174,9 @@ bool ReceiveFrames::receiveFramesFromAPI()
             uint8_t receiver_id = frame.can_id & 0xFF;
 
             /* Starting frame processing timing if is it a frame request for MCU */
-            auto it = std::find(service_sids.begin(), service_sids.end(), frame.data[1]);
+            auto it = std::find(vecU8_ServiceSids.begin(), vecU8_ServiceSids.end(), frame.data[1]);
 
-            if (it != service_sids.end() && receiver_id == 0x10) {
+            if (it != vecU8_ServiceSids.end() && receiver_id == 0x10) {
                 startTimer(frame.data[1], sender_id);
             }
 
@@ -229,7 +229,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
             {
                 LOG_DEBUG(MCULogger->GET_LOGGER(), fmt::format("Frame received from device with sender ID: 0x{:x} sent for API processing", sender_id));
                 std::vector<uint8_t> data(frame.data, frame.data + frame.can_dlc);
-                generate_frames.sendFrame(frame.can_id, data, socket_api, DATA_FRAME);
+                generate_frames.sendFrame(frame.can_id, data, iSocketApi, DATA_FRAME);
                 LOG_DEBUG(MCULogger->GET_LOGGER(), fmt::format("Frame with ID: 0x{:x} sent on API socket", frame.can_id));
             } 
 
@@ -243,7 +243,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
                         data: {PCI_L, SID(0xD9), MCU_id, BATTERY_id, DOORS_id, ENGINE_id, ECU4_id}
                     */
                     LOG_INFO(MCULogger->GET_LOGGER(), "Received frame to update status of ECUs still up.");
-                    generate_frames.sendFrame(0x10FA,{0x06, 0xD9, MCU_ID, ecus_up[0], ecus_up[1], ecus_up[2], ecus_up[3]}, socket_api, DATA_FRAME);
+                    generate_frames.sendFrame(0x10FA,{0x06, 0xD9, MCU_ID, ecus_up[0], ecus_up[1], ecus_up[2], ecus_up[3]}, iSocketApi, DATA_FRAME);
                     LOG_INFO(MCULogger->GET_LOGGER(), "Frame sent to API on API socket to update status of ECUs still up.");
                 }
                 else
@@ -256,7 +256,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
                     */
                     if(frame.data[1] == TRANSFER_DATA_SID && data.size() == 3)
                     {
-                        TransferData::processDataForTransfer(receiver_id, data, socket_canbus, *MCULogger);
+                        TransferData::processDataForTransfer(receiver_id, data, iSocketCanBus, *MCULogger);
                     }
                     generate_frames.sendFrame(frame.can_id, data);
                     LOG_DEBUG(MCULogger->GET_LOGGER(), fmt::format("Frame with ID: 0x{:x} sent on CANBus socket", frame.can_id));
@@ -273,7 +273,7 @@ bool ReceiveFrames::receiveFramesFromAPI()
     void ReceiveFrames::startTimer(uint8_t sid, uint8_t sender_id) {
         /* Define the correct timer value based on SID */
         uint16_t timer_value;
-        if (sids_using_p2_max_time.find(sid) != sids_using_p2_max_time.end())
+        if (setU8_SidsUsingP2MaxTime.find(sid) != setU8_SidsUsingP2MaxTime.end())
         {
             timer_value = AccessTimingParameter::p2_max_time;
         } else {
@@ -283,18 +283,18 @@ bool ReceiveFrames::receiveFramesFromAPI()
         LOG_INFO(MCULogger->GET_LOGGER(), "Started frame processing timing for frame with SID {:x} with max_time = {}.", sid, timer_value);
 
         auto start_time = std::chrono::steady_clock::now();
-        mcu->timing_parameters[sid] = start_time.time_since_epoch().count();
+        mcu->mapU8F_TimingParameters[sid] = start_time.time_since_epoch().count();
 
         /* Initialize stop flag for this SID */
-        mcu->stop_flags[sid] = true;
+        mcu->mapU8AB_StopFlags[sid] = true;
 
-        if (mcu->active_timers.find(sid) != mcu->active_timers.end()) {
-            mcu->active_timers.erase(sid);
+        if (mcu->mapU8F_ActiveTimers.find(sid) != mcu->mapU8F_ActiveTimers.end()) {
+            mcu->mapU8F_ActiveTimers.erase(sid);
         }
 
-        mcu->active_timers[sid] = std::async(std::launch::async, [sid, this, start_time, timer_value, sender_id]()
+        mcu->mapU8F_ActiveTimers[sid] = std::async(std::launch::async, [sid, this, start_time, timer_value, sender_id]()
         {
-            while (mcu->stop_flags[sid])
+            while (mcu->mapU8AB_StopFlags[sid])
             {
                 auto now = std::chrono::steady_clock::now();
                 std::chrono::duration<double> elapsed = now - start_time;
@@ -311,23 +311,23 @@ bool ReceiveFrames::receiveFramesFromAPI()
         LOG_INFO(MCULogger->GET_LOGGER(), "stopTimer function called for frame with SID {:x}.", sid);
 
         auto end_time = std::chrono::steady_clock::now();
-        auto start_time = std::chrono::steady_clock::time_point(std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds((long long)mcu->timing_parameters[sid])));
+        auto start_time = std::chrono::steady_clock::time_point(std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds((long long)mcu->mapU8F_TimingParameters[sid])));
         std::chrono::duration<double> processing_time = end_time - start_time;
 
-        mcu->timing_parameters[sid] = processing_time.count();
+        mcu->mapU8F_TimingParameters[sid] = processing_time.count();
 
-        if (mcu->active_timers.find(sid) != mcu->active_timers.end())
+        if (mcu->mapU8F_ActiveTimers.find(sid) != mcu->mapU8F_ActiveTimers.end())
         {
             /* Set stop flag to false for this SID */
-            if(mcu->stop_flags[sid])
+            if(mcu->mapU8AB_StopFlags[sid])
             {
                 int id = (0x10 << 8) | sender_id;
                 LOG_INFO(MCULogger->GET_LOGGER(), "Service with SID {:x} sent the response pending frame.", sid);
-                NegativeResponse negative_response(socket_api, *MCULogger);
+                NegativeResponse negative_response(iSocketApi, *MCULogger);
                 negative_response.sendNRC(id, sid, 0x78);
-                mcu->stop_flags[sid] = false;
+                mcu->mapU8AB_StopFlags[sid] = false;
             }
-            mcu->stop_flags.erase(sid);
+            mcu->mapU8AB_StopFlags.erase(sid);
         }
     }
 
@@ -355,25 +355,25 @@ bool ReceiveFrames::receiveFramesFromAPI()
         LOG_DEBUG(MCULogger->GET_LOGGER(), "");
     }
 
-    void ReceiveFrames::stopListenAPI()
+    void ReceiveFrames::vStopListenAPI()
     {
         listen_api = false;
         queue_cond_var.notify_all();
     }
 
-    void ReceiveFrames::stopListenCANBus()
+    void ReceiveFrames::vStopListenCANBus()
     {
         listen_canbus = false;
         queue_cond_var.notify_all();
     }
 
-    void ReceiveFrames::startListenAPI()
+    void ReceiveFrames::vStartListenAPI()
     {
         ReceiveFrames::listen_api = true;
         queue_cond_var.notify_all();
     }
 
-    void ReceiveFrames::startListenCANBus()
+    void ReceiveFrames::vStartListenCANBus()
     {
         listen_canbus = true;
         queue_cond_var.notify_all();
@@ -393,17 +393,17 @@ bool ReceiveFrames::receiveFramesFromAPI()
         return ecus_up;
     }
 
-    void ReceiveFrames::stopProcessingQueue()
+    void ReceiveFrames::vStopProcessingQueue()
     {
         process_queue = false;
     }
-    void ReceiveFrames::startTimerThread()
+    void ReceiveFrames::vStartTimerThread()
     {
         running = true;
         timer_thread = std::thread(&ReceiveFrames::timerCheck, this);
     }
 
-    void ReceiveFrames::stopTimerThread() {
+    void ReceiveFrames::vStopTimerThread() {
         running = false;
         if (timer_thread.joinable()) {
             timer_thread.join();
@@ -447,11 +447,11 @@ bool ReceiveFrames::receiveFramesFromAPI()
     {
         if(sender_id == API_ID)
         {
-            return socket_api;
+            return iSocketApi;
         }
         else
         {
-            return socket_canbus;
+            return iSocketCanBus;
         }
     }
 }
