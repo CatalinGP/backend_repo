@@ -281,6 +281,7 @@ UDS_OBJS_TEST = $(OBJ_DIR)/DiagnosticSessionControl_test.o \
                 $(OBJ_DIR)/ReadDataByIdentifier_test.o \
                 $(OBJ_DIR)/WriteDataByIdentifier_test.o \
                 $(OBJ_DIR)/EcuReset_test.o \
+				$(OBJ_DIR)/DummyEcuReset_test.o \
                 $(OBJ_DIR)/SecurityAccess_test.o \
                 $(OBJ_DIR)/TesterPresent_test.o \
                 $(OBJ_DIR)/ReadDtcInformation_test.o \
@@ -421,6 +422,9 @@ $(OBJ_DIR)/WriteDataByIdentifier_test.o: $(UDS_DIR)/write_data_by_identifier/src
 
 $(OBJ_DIR)/EcuReset_test.o: $(UDS_DIR)/ecu_reset/src/EcuReset.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UDS_DIR)/ecu_reset/src/EcuReset.cpp -o $(OBJ_DIR)/EcuReset_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+$(OBJ_DIR)/DummyEcuReset_test.o: $(UDS_DIR)/ecu_reset/src/DummyEcuReset.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UDS_DIR)/ecu_reset/src/DummyEcuReset.cpp -o $(OBJ_DIR)/DummyEcuReset_test.o $(CFLAGSTST2) $(LDFLAGS)
 
 $(OBJ_DIR)/SecurityAccess_test.o: $(UDS_DIR)/authentication/src/SecurityAccess.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UDS_DIR)/authentication/src/SecurityAccess.cpp -o $(OBJ_DIR)/SecurityAccess_test.o $(CFLAGSTST2) $(LDFLAGS)

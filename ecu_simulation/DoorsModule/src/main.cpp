@@ -7,11 +7,7 @@
 
 int main() {
     loadProjectPathForECU();
-    #ifdef UNIT_TESTING_MODE
-    doorsModuleLogger = new Logger;
-    #else
     doorsModuleLogger = new Logger("doorsModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/DoorsModule/logs/doorsModuleLogger.log");
-    #endif /* UNIT_TESTING_MODE */
     doors = new DoorsModule();
     stopProcess("main_doors");
     std::thread receiveFrThread([]()

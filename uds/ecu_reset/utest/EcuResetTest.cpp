@@ -13,6 +13,7 @@
 #include <net/if.h>
 #include <sys/socket.h>
 #include "../include/EcuReset.h"
+#include "../include/DummyEcuReset.h"
 #include "../../authentication/include/SecurityAccess.h"
 #include "../../../utils/include/CaptureFrame.h"
 #include "../../../utils/include/ReceiveFrames.h"
@@ -45,17 +46,17 @@ struct EcuResetTest : testing::Test
 
 TEST_F(EcuResetTest, ConstructorInitializesFieldsCorrectly)
 {
-    std::unique_ptr<EcuReset> ecuReset;
+    std::unique_ptr<DummyEcuReset> ecuReset;
     EXPECT_NO_THROW(
     {
-        ecuReset = std::make_unique<EcuReset>(0xFA10, 0x01, socket2, *logger);
+        ecuReset = std::make_unique<DummyEcuReset>(0xFA10, 0x01, socket2, *logger);
     });
 }
 
 TEST_F(EcuResetTest, IncorrectMessageLength)
 {
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA10, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA10, 0x01, socket2, *logger);
     struct can_frame result_frame = createFrame(0x10FA, {0x03, 0x7F, 0x11, NegativeResponse::IMLOIF});
     ecuReset->ecuResetRequest({0x01, 0x11});
     c1->capture();
@@ -66,7 +67,7 @@ TEST_F(EcuResetTest, IncorrectMessageLength)
 TEST_F(EcuResetTest, SubFunctionNotSupported)
 {
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA10, 0x03, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA10, 0x03, socket2, *logger);
     struct can_frame result_frame = createFrame(0x10FA, {0x03, 0x7F, 0x11, NegativeResponse::SFNS});
     ecuReset->ecuResetRequest({0x02, 0x11,0x03});
     c1->capture();
@@ -77,7 +78,7 @@ TEST_F(EcuResetTest, SubFunctionNotSupported)
 TEST_F(EcuResetTest, MCUSecurity)
 {
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA10, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA10, 0x01, socket2, *logger);
     struct can_frame result_frame = createFrame(0x10FA, {0x03, 0x7F, 0x11, NegativeResponse::SAD});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -89,7 +90,7 @@ TEST_F(EcuResetTest, ECUSecurity)
 {
     /* Battery */
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA11, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA11, 0x01, socket2, *logger);
     struct can_frame result_frame = createFrame(0x11FA, {0x03, 0x7F, 0x11, NegativeResponse::SAD});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -97,7 +98,7 @@ TEST_F(EcuResetTest, ECUSecurity)
     delete ecuReset;
 
     /* Engine */
-    ecuReset = new EcuReset(0xFA12, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA12, 0x01, socket2, *logger);
     result_frame = createFrame(0x12FA, {0x03, 0x7F, 0x11, NegativeResponse::SAD});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -105,7 +106,7 @@ TEST_F(EcuResetTest, ECUSecurity)
     delete ecuReset;
 
     /* Doors */
-    ecuReset = new EcuReset(0xFA13, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA13, 0x01, socket2, *logger);
     result_frame = createFrame(0x13FA, {0x03, 0x7F, 0x11, NegativeResponse::SAD});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -113,7 +114,7 @@ TEST_F(EcuResetTest, ECUSecurity)
     delete ecuReset;
 
     /* HVAC */
-    ecuReset = new EcuReset(0xFA14, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA14, 0x01, socket2, *logger);
     result_frame = createFrame(0x14FA, {0x03, 0x7F, 0x11, NegativeResponse::SAD});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -147,7 +148,7 @@ TEST_F(EcuResetTest, HardResetMCU)
     security->securityAccess(0xFA10, data_frame);
     c1->capture();
 
-    ecuReset = new EcuReset(0xFA10, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA10, 0x01, socket2, *logger);
     struct can_frame result_frame = createFrame(0x10FA, {0x02, 0x51,0x01});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -161,7 +162,7 @@ TEST_F(EcuResetTest, HardResetECU)
     EcuReset *ecuReset;
     ReceiveFrames* receiveFrames = new ReceiveFrames(socket2, 0x11, *logger);
     receiveFrames->setEcuState(true);
-    ecuReset = new EcuReset(0xFA11, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA11, 0x01, socket2, *logger);
     struct can_frame result_frame = createFrame(0x11FA, {0x02, 0x51,0x01});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -170,7 +171,7 @@ TEST_F(EcuResetTest, HardResetECU)
     delete receiveFrames;
 
     /* Engine */
-    ecuReset = new EcuReset(0xFA12, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA12, 0x01, socket2, *logger);
     result_frame = createFrame(0x12FA, {0x02, 0x51,0x01});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -178,7 +179,7 @@ TEST_F(EcuResetTest, HardResetECU)
     delete ecuReset;
 
     /* Doors */
-    ecuReset = new EcuReset(0xFA13, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA13, 0x01, socket2, *logger);
     result_frame = createFrame(0x13FA, {0x02, 0x51,0x01});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -186,7 +187,7 @@ TEST_F(EcuResetTest, HardResetECU)
     delete ecuReset;
 
     /* HVAC */
-    ecuReset = new EcuReset(0xFA14, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA14, 0x01, socket2, *logger);
     result_frame = createFrame(0x14FA, {0x02, 0x51,0x01});
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
@@ -194,7 +195,7 @@ TEST_F(EcuResetTest, HardResetECU)
     delete ecuReset;
 
     /* Other ECU */
-    ecuReset = new EcuReset(0xFA15, 0x01, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA15, 0x01, socket2, *logger);
     ecuReset->ecuResetRequest({0x02, 0x11,0x01});
     c1->capture();
     delete ecuReset;
@@ -203,7 +204,7 @@ TEST_F(EcuResetTest, HardResetECU)
 TEST_F(EcuResetTest, SoftResetMCU)
 {
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA10, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA10, 0x02, socket2, *logger);
     struct can_frame result_frame = createFrame(0x10FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();
@@ -215,7 +216,7 @@ TEST_F(EcuResetTest, SoftResetECU)
 {
     /* Battery */
     EcuReset *ecuReset;
-    ecuReset = new EcuReset(0xFA11, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA11, 0x02, socket2, *logger);
     struct can_frame result_frame = createFrame(0x11FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();
@@ -223,7 +224,7 @@ TEST_F(EcuResetTest, SoftResetECU)
     delete ecuReset;
 
     /* Engine */
-    ecuReset = new EcuReset(0xFA12, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA12, 0x02, socket2, *logger);
     result_frame = createFrame(0x12FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();
@@ -231,7 +232,7 @@ TEST_F(EcuResetTest, SoftResetECU)
     delete ecuReset;
 
     /* Doors */
-    ecuReset = new EcuReset(0xFA13, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA13, 0x02, socket2, *logger);
     result_frame = createFrame(0x13FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();
@@ -239,7 +240,7 @@ TEST_F(EcuResetTest, SoftResetECU)
     delete ecuReset;
 
     /* HVAC */
-    ecuReset = new EcuReset(0xFA14, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA14, 0x02, socket2, *logger);
     result_frame = createFrame(0x14FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();
@@ -247,7 +248,7 @@ TEST_F(EcuResetTest, SoftResetECU)
     delete ecuReset;
 
     /* Other ECU */
-    ecuReset = new EcuReset(0xFA15, 0x02, socket2, *logger);
+    ecuReset = new DummyEcuReset(0xFA15, 0x02, socket2, *logger);
     result_frame = createFrame(0x15FA, {0x02, 0x51,0x02});
     ecuReset->ecuResetRequest({0x02, 0x11, 0x02});
     c1->capture();

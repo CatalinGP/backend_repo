@@ -7,11 +7,7 @@
 
 int main() {
     loadProjectPathForECU();
-    #ifdef UNIT_TESTING_MODE
-    engineModuleLogger = new Logger;
-    #else
     engineModuleLogger = new Logger("engineModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/logs/engineModuleLogger.log");
-    #endif /* UNIT_TESTING_MODE */
     engine = new EngineModule();
     stopProcess("main_engine");
     std::thread receiveFrThread([]()

@@ -8,11 +8,7 @@
 int main() {
 
     loadProjectPathForMCU();
-    #ifndef UNIT_TESTING_MODE
     MCULogger = new Logger("MCULogger", std::string(PROJECT_PATH) + "/backend/mcu/logs/MCULogs.log");
-    #else
-    MCULogger = new Logger;
-    #endif /* UNIT_TESTING_MODE */
     MCU::mcu = new MCU::MCUModule(0x01);
     stopProcess("main_mcu");
     MCU::mcu->StartModule();
