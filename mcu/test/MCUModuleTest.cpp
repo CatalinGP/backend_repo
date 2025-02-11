@@ -41,13 +41,18 @@ void testByteVectors(const std::vector<uint8_t>& expected, const std::vector<uin
     }
 }
 
+/**
+ * @warning Running any unit test from this test suite excepting ErrorKillMCUProcess has led to the following issue:
+ * Whatever is typed in the terminal used for running the test executable is invisible
+ * After running `./mcuModuleTest`, in order to fix the issue, type `reset`
+ */
 class MCUModuleTest : public ::testing::Test {
 protected:
     Logger* mockLogger;
     MCUModuleTest()
     {
         mockLogger = new Logger;
-        loadProjectPathForMCU();
+        loadProjectPathForMCUTest();
     }
     ~MCUModuleTest()
     {
@@ -153,7 +158,7 @@ TEST_F(MCUModuleTest, receiveFramesTest)
 
 TEST_F(MCUModuleTest, WriteFailMCUData)
 {
-    std::ofstream outfile("old_mcu_data.txt");
+    std::ofstream outfile(std::string(PROJECT_PATH) + "/backend/mcu/old_mcu_data.txt");
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
     MCU::mcu->writeDataToFile();
@@ -165,14 +170,14 @@ TEST_F(MCUModuleTest, WriteExceptionThrown)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    std::string path = "mcu_data.txt";
+    std::string path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
     std::ofstream outfile(path);
     chmod(path.c_str(), 0);
     EXPECT_THROW(
     {
         MCU::mcu->writeDataToFile();
     }, std::runtime_error);
-    path = "mcu_data.txt";
+    path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
     chmod(path.c_str(), 0666);
     outfile.close();
     delete MCU::mcu;

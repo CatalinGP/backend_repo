@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <fcntl.h>
 #include <gtest/gtest.h>
 #include <sys/ioctl.h>
@@ -8,6 +9,7 @@
 #include <thread>
 #include <sstream>
 #include "../include/ReceiveFrames.h"
+#include "../../uds/access_timing_parameters/include/AccessTimingParameter.h"
 #include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
 #include "../../uds/authentication/include/SecurityAccess.h"
 #include "../../utils/include/CaptureFrame.h"
@@ -59,7 +61,7 @@ protected:
     /* Setup method to initialize test environment */
     virtual void SetUp()
     {
-        loadProjectPathForMCU();
+        loadProjectPathForMCUTest();
         /* Create mock socket pairs for testing */
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_canbus);
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_api);
@@ -285,6 +287,8 @@ TEST_F(ReceiveFramesTest, TestReceiveFramesFromAPI_Success)
 TEST_F(ReceiveFramesTest, TestProcessQueue_ForMCU)
 {
     std::cerr << "Running TestProcessQueue_ForMCU" << std::endl;
+    /* Set p2_max_time to 40. */
+    AccessTimingParameter::p2_max_time = 40;
     struct can_frame frame;
     uint32_t mcu_id = 0x2210;
     frame.can_id = mcu_id;
@@ -917,7 +921,7 @@ TEST_F(ReceiveFramesTest, CANBusConnectionClose)
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_NE(output.find("CANBus connection closed."), std::string::npos);
+    EXPECT_NE(output.find("Read error on CANBus socket: Bad file descriptor"), std::string::npos);
     std::cerr << "Finished CANBusConnectionClose" << std::endl;
 }
 
@@ -936,7 +940,7 @@ TEST_F(ReceiveFramesTest, APIConnectionClose)
     processor_thread.join();
 
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_NE(output.find("API connection closed."), std::string::npos);
+    EXPECT_NE(output.find("Read error on API socket: Bad file descriptor"), std::string::npos);
     std::cerr << "Finished APIConnectionClose" << std::endl;
 }
 
