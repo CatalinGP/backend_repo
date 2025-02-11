@@ -58,7 +58,7 @@ protected:
 TEST_F(MCUModuleTest, ErrorKillMCUProcess)
 {
     MCU::mcu = new MCU::MCUModule(0x01);
-    MCU::mcu->StartModule();
+    MCU::mcu->vStartModule();
     MCU::mcu->vStopModule();
     testing::internal::CaptureStdout();
     delete MCU::mcu;
@@ -77,7 +77,7 @@ TEST_F(MCUModuleTest, StartModuleTest)
     /* Cover parameterized constructor */
     testing::internal::CaptureStdout();
     MCU::mcu = new MCU::MCUModule(0x01);
-    MCU::mcu->StartModule();
+    MCU::mcu->vStartModule();
     std::string output = testing::internal::GetCapturedStdout();
     /* Expect mcu module to start */
     EXPECT_NE(output.find("Diagnostic Session Control (0x10) started."), std::string::npos);
@@ -133,7 +133,7 @@ TEST_F(MCUModuleTest, receiveFramesTest)
     /* Initialize the MCU module and interfaces */
     MCU::mcu = new MCU::MCUModule(0x01);
     createMCUProcess();
-    MCU::mcu->StartModule();
+    MCU::mcu->vStartModule();
     CreateInterface* interface = CreateInterface::getInstance(0x01, *mockLogger);
     interface->startInterface();
     testing::internal::CaptureStdout();

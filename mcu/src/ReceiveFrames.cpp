@@ -16,14 +16,14 @@ namespace MCU
         generate_frames(iSocketCanBus, *MCULogger)
         
     {
-        startTimerThread();
+        vStartTimerThread();
     }
 
     ReceiveFrames::~ReceiveFrames() 
     {
         vStopListenAPI();
         vStopListenCANBus();
-        stopTimerThread();
+        vStopTimerThread();
     }
 
     uint32_t ReceiveFrames::gethexValueId()
@@ -397,13 +397,13 @@ bool ReceiveFrames::bReceiveFramesFromAPI()
     {
         process_queue = false;
     }
-    void ReceiveFrames::startTimerThread()
+    void ReceiveFrames::vStartTimerThread()
     {
         running = true;
         timer_thread = std::thread(&ReceiveFrames::timerCheck, this);
     }
 
-    void ReceiveFrames::stopTimerThread() {
+    void ReceiveFrames::vStopTimerThread() {
         running = false;
         if (timer_thread.joinable()) {
             timer_thread.join();

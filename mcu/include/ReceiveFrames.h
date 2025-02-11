@@ -247,12 +247,12 @@ namespace MCU
     /**
      * @brief Starts timer_thread and sets running flag on true.
      */
-    void startTimerThread();
+    void vStartTimerThread();
 
     /**
      * @brief Stops timer_thread and sets running flag on false.
      */
-    void stopTimerThread();
+    void vStopTimerThread();
 
     /**
      * @brief Checks timer and send requests to check if the ECUs are up.

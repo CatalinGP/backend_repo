@@ -35,7 +35,7 @@ protected:
     void SetUp() override
     {
         /* Populate some test data for MCU */
-        MCU::mcu->default_DID_MCU[0x01E0] = {0x31, 0x02, 0x03, 0x04};      
+        MCU::mcu->umapU16V8_DefaultDIDMCU[0x01E0] = {0x31, 0x02, 0x03, 0x04};      
     }
 
     void TearDown() override 
