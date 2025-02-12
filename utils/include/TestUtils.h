@@ -12,11 +12,13 @@
 
 #include <cstdint>
 #include <linux/can.h>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "CaptureFrame.h"
 #include "Globals.h"
+#include "../../uds/authentication/include/SecurityAccess.h"
 
 /**
  * @brief Check if a line is inside of an output
@@ -70,4 +72,11 @@ struct can_frame createFrame(int id, std::vector<uint8_t> data, FrameType frameT
  */
 int createSocket(uint8_t interface_number);
 
+/**
+ * @brief request security access 
+ * @param securityAccess a security access object used for requesting the seed
+ * @param capturedFrame a capture frame object used to capture the security access seed
+ * @param sid the id of the service for which we request access
+ */
+void v_requestSecurityAccess(std::shared_ptr<SecurityAccess> spSecurityAccess, std::shared_ptr<CaptureFrame> spCapturedFrame, uint8_t sid);
 #endif
