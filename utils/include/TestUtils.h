@@ -11,6 +11,7 @@
 #define TEST_UTILS_H
 
 #include <cstdint>
+#include <functional>
 #include <linux/can.h>
 #include <string>
 #include <vector>
@@ -18,6 +19,8 @@
 #include "CaptureFrame.h"
 #include "Globals.h"
 
+
+const std::function<void()> loadProjectPathForMCUTest {*loadProjectPathForECU};
 /**
  * @brief Check if a line is inside of an output
  * @param output The output string to be investigated
