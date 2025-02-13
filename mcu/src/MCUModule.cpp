@@ -24,6 +24,7 @@ namespace MCU
             {0xF17F, {0x45, 0x43, 0x55, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32}},
             /** System Supplier ECU Hardware Number */
             {0xF18C, {0x48, 0x57, 0x30, 0x30, 0x31, 0x37, 0x38, 0x35, 0x32, 0x30, 0x32, 0x32}},
+            {ROLLBACK_AVAILABLE_DID, {0}}, /* Flag indicating if rollback is available */
             {OTA_UPDATE_STATUS_DID, {IDLE}},
 #ifdef SOFTWARE_VERSION
             {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}},
@@ -65,6 +66,7 @@ namespace MCU
         0xF1A8,
         /* System Calibration Verification Number (CVN) */
         0xF1A9,
+        ROLLBACK_AVAILABLE_DID,
         OTA_UPDATE_STATUS_DID,
         SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
     };
@@ -161,6 +163,27 @@ namespace MCU
         }
     }
 
+    std::unordered_map<uint16_t, std::string> MCUModule::getExistingDIDValues(const std::string& file_path) {
+        std::unordered_map<uint16_t, std::string> existing_values;
+        std::ifstream infile(file_path);
+        std::string line;
+
+        while (std::getline(infile, line)) {
+            std::istringstream iss(line);
+            uint16_t did;
+            std::string data;
+
+            if (iss >> std::hex >> did) {
+                std::getline(iss >> std::ws, data);
+                existing_values[did] = data;
+            }
+        }
+        infile.close();
+
+        return existing_values;
+    }
+
+
     void MCUModule::fetchMCUData()
     {
         /* Path to mcu data file */
@@ -172,19 +195,29 @@ namespace MCU
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dist(0, 255);
 
+        /* Retrieve existing values from the file */
+        std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+        
         for (auto& [did, data] : default_DID_MCU)
         {
-            std::stringstream data_ss;
-            for (auto& byte : data)
+            if (existing_values.find(did) != existing_values.end() && did == ROLLBACK_AVAILABLE_DID) 
             {
-                if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
-                {
-                    byte = dist(gen);  
-                }
-                /* Generate a random value between 0 and 255 */
-                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+                updated_values[did] = existing_values[did];
             }
-            updated_values[did] = data_ss.str();
+            else 
+            {
+                std::stringstream data_ss;
+                for (auto& byte : data)
+                {
+                    if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
+                    {
+                        byte = dist(gen);  
+                    }
+                    /* Generate a random value between 0 and 255 */
+                    data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+                }
+                updated_values[did] = data_ss.str();
+            }
         }
 
         /* Read the current file contents into memory */
@@ -225,6 +258,10 @@ namespace MCU
     void MCUModule::writeDataToFile()
     {
         std::string file_path = std::string(PROJECT_PATH) + "/backend/mcu/mcu_data.txt";
+        
+        /* Retrieve existing values before overwriting the file */
+        std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
         /* Insert the default DID values in the file */
         std::ofstream outfile(file_path);
         if (!outfile.is_open())
@@ -255,15 +292,23 @@ namespace MCU
         }
         else
         {
-            /* Write the default DID values to mcu_data.txt */
+            /* Write default DID values to mcu_data.txt, keeping ROLLBACK_AVAILABLE_DID */
             for (const auto& [data_identifier, data] : default_DID_MCU)
             {
                 outfile << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << data_identifier << " ";
-                for (uint8_t byte : data)
+
+                if (data_identifier == ROLLBACK_AVAILABLE_DID && existing_values.find(data_identifier) != existing_values.end())
                 {
-                    outfile << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                    outfile << existing_values[data_identifier] << "\n";
                 }
-                outfile << "\n";
+                else
+                {
+                    for (uint8_t byte : data)
+                    {
+                        outfile << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                    }
+                    outfile << "\n";
+                }
             }
         }
         outfile.close();

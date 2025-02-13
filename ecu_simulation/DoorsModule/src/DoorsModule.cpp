@@ -6,6 +6,7 @@
 #include "DoorsModule.h"
 #include "DoorsModuleLogger.h"
 #include "RequestUpdateStatus.h"
+#include "Globals.h"
 
 Logger* doorsModuleLogger = nullptr;
 DoorsModule* doors = nullptr;
@@ -17,6 +18,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> DoorsModule::default_DID_door
         {0x03D0, {0}},  /* Door Passenger Locked Status*/
         {0x03E0, {0}},   /* Ajar Warning Status */
         {OTA_UPDATE_STATUS_DID, {0}},   /* OTA Status */
+        {ROLLBACK_AVAILABLE_DID, {0}}, /* Flag indicating if rollback is available */
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
@@ -29,6 +31,7 @@ const std::vector<uint16_t> DoorsModule::writable_Doors_DID =
      0x03C0,
      /* represents Door Passenger Locked Status (0:unlocked; 1:locked) */
     0x03D0,
+    ROLLBACK_AVAILABLE_DID,
     OTA_UPDATE_STATUS_DID,
     SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
@@ -49,32 +52,62 @@ DoorsModule::~DoorsModule()
     LOG_INFO(doorsModuleLogger->GET_LOGGER(), "Dooors object out of scope");
 }
 
+std::unordered_map<uint16_t, std::string> DoorsModule::getExistingDIDValues(const std::string& file_path) {
+    std::unordered_map<uint16_t, std::string> existing_values;
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        uint16_t did;
+        std::string data;
+
+        if (iss >> std::hex >> did) {
+            std::getline(iss >> std::ws, data);
+            existing_values[did] = data;
+        }
+    }
+    infile.close();
+
+    return existing_values;
+}
+
 /* Function to fetch data with simulated door data */
 void DoorsModule::fetchDoorsData()
 {    
+    /* Path to doors data file */
+    std::string file_path = "doors_data.txt";
+
     /* Generate random values for each DID */
     std::unordered_map<uint16_t, std::string> updated_values;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, 1);
 
-    for (auto& [did, data] : default_DID_doors)
-    {
-        std::stringstream data_ss;
-        for (auto& byte : data)
-        {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
-            {
-                /* Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning */
-                byte = dist(gen);
-            }
-            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
-        }
-        updated_values[did] = data_ss.str();
-    }
+    /* Retrieve existing values from the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
 
-    /* Path to engine data file */
-    std::string file_path = "doors_data.txt";
+    for(auto& [did, data] : default_DID_doors)
+    {
+        if(existing_values.find(did) != existing_values.end() && did == ROLLBACK_AVAILABLE_DID) 
+        {
+            updated_values[did] = existing_values[did];
+        }
+        else 
+        {
+            std::stringstream data_ss;
+            for(auto& byte : data)
+            {
+                if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
+                {
+                    /* Generate a random value between 0 and 1: doors status - 0:closed; 1:open; doors lock status - 0:unlocked; 1:locked; ajar warning - 0:no warning; 1: warning */
+                    byte = dist(gen);
+                }
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
+        }
+    }
 
     /* Read the current file contents into memory */
     std::ifstream infile(file_path);
@@ -117,8 +150,13 @@ int DoorsModule::getDoorsSocket() const
 
 void DoorsModule::writeDataToFile()
 {
+    std::string file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/DoorsModule/doors_data.txt";
+
+    /* Retrieve existing values before overwriting the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
     /* Insert the default DID values in the file */
-    std::ofstream outfile("doors_data.txt");
+    std::ofstream outfile(file_path);
     if (!outfile.is_open())
     {
         throw std::runtime_error("Failed to open file: doors_data.txt");
@@ -139,25 +177,33 @@ void DoorsModule::writeDataToFile()
         /* Store the original content */
         std::string original_file_contents = buffer.str();
 
-        /* Write the content of old_mcu_data.txt into mcu_data.txt */
+        /* Write the content of old_doors_data.txt into doors_data.txt */
         outfile << original_file_contents;
 
         /* Delete the old file after reading its contents */
         std::remove(old_file_path.c_str());
-        outfile.close();
     }
     else
     {
+        /* Write default DID values to doors_data.txt, keeping ROLLBACK_AVAILABLE_DID */
         for (const auto& [data_identifier, data] : default_DID_doors)
         {
             outfile << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << data_identifier << " ";
-            for (uint8_t byte : data)
+
+            if (data_identifier == ROLLBACK_AVAILABLE_DID && existing_values.find(data_identifier) != existing_values.end())
             {
-                outfile << std::hex << std::setw(1) << std::setfill('0') << static_cast<int>(byte) << " ";
+                outfile << existing_values[data_identifier] << "\n";
             }
-            outfile << "\n";
+            else
+            {
+                for (uint8_t byte : data)
+                {
+                    outfile << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                }
+                outfile << "\n";
+            }
         }
-        outfile.close();
-        fetchDoorsData();
     }
+    outfile.close();
+    fetchDoorsData();
 }

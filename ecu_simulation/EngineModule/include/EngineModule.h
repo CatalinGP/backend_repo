@@ -31,6 +31,12 @@ public:
     virtual ~EngineModule();
 
     /**
+     * @brief Retrieves existing DID values from the data file.
+     * 
+     */
+    std::unordered_map<uint16_t, std::string> getExistingDIDValues(const std::string& file_path);
+
+    /**
      * @brief This function generates random values for all DID entries defined in the default_DID_engine map
      * 
      */

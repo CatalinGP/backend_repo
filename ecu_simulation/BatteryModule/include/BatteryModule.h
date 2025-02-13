@@ -73,6 +73,12 @@ public:
     void parseBatteryInfo(const std::string &data, float &energy, float &voltage, float &percentage, std::string &state);
 
     /**
+     * @brief Retrieves existing DID values from the data file.
+     * 
+     */
+    std::unordered_map<uint16_t, std::string> getExistingDIDValues(const std::string& file_path);
+
+    /**
      * @brief Function to fetch data from system about battery.
      * 
      * @param mode A string that specifies I/O mode for command.

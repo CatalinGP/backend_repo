@@ -20,6 +20,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
         {0x01D0, {0}},   /* State of Charge */
         {0x01E0, {0}},   /* Temperature (C) */
         {0x01F0, {0}},   /* Life cycle */
+        {ROLLBACK_AVAILABLE_DID, {0}}, /* Flag indicating if rollback is available */
         {OTA_UPDATE_STATUS_DID, {0}},   /* OTA Status */
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
@@ -29,6 +30,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
 };
 const std::vector<uint16_t> BatteryModule::writable_Battery_DID =
 {
+    ROLLBACK_AVAILABLE_DID,
     OTA_UPDATE_STATUS_DID,
     SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
@@ -228,6 +230,26 @@ void BatteryModule::parseBatteryInfo(const std::string &data, float &energy, flo
     outfile.close();
 }
 
+std::unordered_map<uint16_t, std::string> BatteryModule::getExistingDIDValues(const std::string& file_path) {
+    std::unordered_map<uint16_t, std::string> existing_values;
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        uint16_t did;
+        std::string data;
+
+        if (iss >> std::hex >> did) {
+            std::getline(iss >> std::ws, data);
+            existing_values[did] = data;
+        }
+    }
+    infile.close();
+
+    return existing_values;
+}
+
 /* Function to fetch data from system about battery */
 void BatteryModule::fetchBatteryData(const char *mode)
 {
@@ -284,8 +306,13 @@ int BatteryModule::getBatterySocket() const
 
 void BatteryModule::writeDataToFile()
 {
+    std::string file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/battery_data.txt";
+    
+    /* Retrieve existing values before overwriting the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
     /* Insert the default DID values in the file */
-    std::ofstream outfile("battery_data.txt");
+    std::ofstream outfile(file_path);
     if (!outfile.is_open())
     {
         throw std::runtime_error("Failed to open file: battery_data.txt");
@@ -306,27 +333,35 @@ void BatteryModule::writeDataToFile()
         /* Store the original content */
         std::string original_file_contents = buffer.str();
 
-        /* Write the content of old_mcu_data.txt into mcu_data.txt */
+        /* Write the content of old_battery_data.txt into battery_data.txt */
         outfile << original_file_contents;
 
         /* Delete the old file after reading its contents */
         std::remove(old_file_path.c_str());
-        outfile.close();
     }
     else
     {
+        /* Write default DID values to battery_data.txt, keeping ROLLBACK_AVAILABLE_DID */
         for (const auto& [data_identifier, data] : default_DID_battery)
         {
             outfile << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << data_identifier << " ";
-            for (uint8_t byte : data)
+
+            if (data_identifier == ROLLBACK_AVAILABLE_DID && existing_values.find(data_identifier) != existing_values.end())
             {
-                outfile << std::hex << std::setw(1) << std::setfill('0') << static_cast<int>(byte) << " ";
+                outfile << existing_values[data_identifier] << "\n";
             }
-            outfile << "\n";
+            else
+            {
+                for (uint8_t byte : data)
+                {
+                    outfile << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                }
+                outfile << "\n";
+            }
         }
-        outfile.close();
-        fetchBatteryData("r");
     }
+    outfile.close();
+    fetchBatteryData("r");
 }
 
 void BatteryModule::checkDTC()
