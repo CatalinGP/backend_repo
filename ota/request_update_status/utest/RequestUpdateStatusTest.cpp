@@ -1,14 +1,16 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "../include/RequestUpdateStatus.h"
+#include "../../../uds/access_timing_parameters/include/AccessTimingParameter.h"
 #include "../../../uds/write_data_by_identifier/include/WriteDataByIdentifier.h"
 #include "../../../mcu/include/MCUModule.h"
+#include "../../../utils/include/NegativeResponse.h"
 
 class RequestUpdateStatusTest : public ::testing::Test {
 protected:
     int socket_id = 2;
     Logger logger;
-    RequestUpdateStatus RUS = RequestUpdateStatus(socket_id);
+    RequestUpdateStatus RUS = RequestUpdateStatus(socket_id, logger);
 
     RequestUpdateStatusTest()
     {
@@ -60,7 +62,7 @@ TEST_F(RequestUpdateStatusTest, WrongSenderReceiverCheckTest)
     std::vector<uint8_t> expected_response = {PCI_L, REQUEST_UPDATE_STATUS_SID_SUCCESS, IDLE};
 
     EXPECT_EQ(response.size(), expected_response.size());
-    for(uint8_t index; index <= expected_response.size() - 1; index++)
+    for(uint8_t index = 0; index <= expected_response.size() - 1; index++)
     {
         EXPECT_EQ(response[index], expected_response[index]);
     }
@@ -80,7 +82,7 @@ TEST_F(RequestUpdateStatusTest, InitialOtaStatusTest)
     std::vector<uint8_t> expected_response = {PCI_L, REQUEST_UPDATE_STATUS_SID_SUCCESS, IDLE};
 
     EXPECT_EQ(response.size(), expected_response.size());
-    for(uint8_t index; index <= expected_response.size() - 1; index++)
+    for(uint8_t index = 0; index <= expected_response.size() - 1; index++)
     {
         EXPECT_EQ(response[index], expected_response[index]);
     }
@@ -104,7 +106,7 @@ TEST_F(RequestUpdateStatusTest, AfterStatusUpdateTest)
     std::vector<uint8_t> expected_response = {PCI_L, REQUEST_UPDATE_STATUS_SID_SUCCESS, new_status};
     
     EXPECT_EQ(response.size(), expected_response.size());
-    for(uint8_t index; index <= expected_response.size() - 1; index++)
+    for(uint8_t index = 0; index <= expected_response.size() - 1; index++)
     {
         EXPECT_EQ(response[index], expected_response[index]);
     }
@@ -128,7 +130,7 @@ TEST_F(RequestUpdateStatusTest, NegativeResponseInvalidStatusTest)
     std::vector<uint8_t> expected_response = {PCI_L, NEGATIVE_RESPONSE, REQUEST_UPDATE_STATUS_SID, REQUEST_OUT_OF_RANGE};
     
     EXPECT_EQ(response.size(), expected_response.size());
-    for(uint8_t index; index <= expected_response.size() - 1; index++)
+    for(uint8_t index = 0; index <= expected_response.size() - 1; index++)
     {
         EXPECT_EQ(response[index], expected_response[index]);
     }

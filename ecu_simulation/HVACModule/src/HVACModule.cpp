@@ -20,7 +20,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac 
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x10}}
 #endif
     };
 const std::vector<uint16_t> HVACModule::writable_HVAC_DID =
@@ -201,10 +201,4 @@ int HVACModule::getSocket()
 HVACModule::~HVACModule()
 {
     delete _ecu;
-}
-
-std::string HVACModule::to_lowercase(const std::string& str) {
-    std::string lower_str = str;
-    std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(), [](unsigned char c){ return std::tolower(c); });
-    return lower_str;
 }

@@ -264,7 +264,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                 AccessTimingParameter::stopTimingFlag(receiver_id, 0x31);
                 return;
             }
-
+            routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
             if(rollbackSoftware() == false)
             {
                 LOG_ERROR(rc_logger.GET_LOGGER(), "Rollback failed.");
@@ -291,6 +291,7 @@ void RoutineControl::routineControl(canid_t can_id, const std::vector<uint8_t>& 
                 return;
             }
             LOG_INFO(rc_logger.GET_LOGGER(), "Current software saved. Activating the new software..");
+            routineControlResponse(can_id, sub_function, routine_identifier, routine_result);
 
             if(activateSoftware() == false)
             {

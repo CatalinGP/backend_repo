@@ -37,7 +37,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x10}}
 #endif
     };
 const std::vector<uint16_t> EngineModule::writable_Engine_DID =

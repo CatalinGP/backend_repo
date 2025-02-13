@@ -4,21 +4,46 @@ import time
 
 OTA_UPDATE_STATES = {
     0x00: "IDLE",				# Initial state of the FOTA Handler after the ECU startup procedure
-    0x10: "INIT",				# The FOTA Handler is initialized, and Dcm is set into the correct state (in Dcm FOTA session and security access has been granted) */
-	0x20: "WAIT",				# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
-	0x21: "WAIT_DOWNLOAD_COMPLETED",	# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
-	0x22: "WAIT_DOWNLOAD_FAILED",		# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
-	0x30: "PROCESSING",					# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
-	0x31: "PROCESSING_TRANSFER_COMPLETE",	# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
-	0x32: "PROCESSING_TRANSFER_FAILED",		# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
-	0x40: "READY",							# All FOTA data chunks have been installed, activation procedure can be triggered */
-	0x50: "VERIFY",						# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
-	0x51: "VERIFY_COMPLETE",			# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
-	0x52: "VERIFY_FAILED",				# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
-	0x60: "ACTIVATE",					# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
-	0x61: "ACTIVATE_INSTALL_COMPLETE",	# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
-	0x62: "ACTIVATE_INSTALL_FAILED",	# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
-	0xFF: "ERROR"						# Optional and implementer specific. Reserved state for e.g., implementer specific error handling, which is not (yet) covered by the FOTA Target */
+    # The FOTA Handler is initialized, and Dcm is set into the correct state
+    # (in Dcm FOTA session and security access has been granted) */
+    0x10: "INIT",
+    0x20: "WAIT",				# The FOTA Handler has successfully processed the last received data chunk, returned the Dcm callout function, and is waiting for the next data chunk */
+    # The FOTA Handler has successfully processed the last received data
+    # chunk, returned the Dcm callout function, and is waiting for the next
+    # data chunk */
+    0x21: "WAIT_DOWNLOAD_COMPLETED",
+    # The FOTA Handler has successfully processed the last received data
+    # chunk, returned the Dcm callout function, and is waiting for the next
+    # data chunk */
+    0x22: "WAIT_DOWNLOAD_FAILED",
+    0x30: "PROCESSING",					# The FOTA Handler is triggered by the Dcm callout since a new chunk has been received and is processed in the callout context */
+    # The FOTA Handler is triggered by the Dcm callout since a new chunk has
+    # been received and is processed in the callout context */
+    0x31: "PROCESSING_TRANSFER_COMPLETE",
+    # The FOTA Handler is triggered by the Dcm callout since a new chunk has
+    # been received and is processed in the callout context */
+    0x32: "PROCESSING_TRANSFER_FAILED",
+    0x40: "READY",							# All FOTA data chunks have been installed, activation procedure can be triggered */
+    0x50: "VERIFY",						# Optional and implementer specific step, since the FOTA Target does not specify any details on the verification process */
+    # Optional and implementer specific step, since the FOTA Target does not
+    # specify any details on the verification process */
+    0x51: "VERIFY_COMPLETE",
+    # Optional and implementer specific step, since the FOTA Target does not
+    # specify any details on the verification process */
+    0x52: "VERIFY_FAILED",
+    0x60: "ACTIVATE",					# FOTA installation has finished and received a respective service job from the FOTA Master that indicates the partition switch during the next boot process */
+    # FOTA installation has finished and received a respective service job
+    # from the FOTA Master that indicates the partition switch during the next
+    # boot process */
+    0x61: "ACTIVATE_INSTALL_COMPLETE",
+    # FOTA installation has finished and received a respective service job
+    # from the FOTA Master that indicates the partition switch during the next
+    # boot process */
+    0x62: "ACTIVATE_INSTALL_FAILED",
+    # Optional and implementer specific. Reserved state for e.g., implementer
+    # specific error handling, which is not (yet) covered by the FOTA Target
+    # */
+    0xFF: "ERROR"
 }
 
 
@@ -71,22 +96,24 @@ class Updates(Action):
             self.session_control(self.id, sub_funct=0x03)
             self._passive_response(SESSION_CONTROL, "Error changing session control")
 
-            if int(id,16) != self.id_ecu[0]:
+            ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
+            if int(id, 16) != self.id_ecu[0]:
                 log_info_message(
                     logger, f"Changing ECU {int} to session to extended diagonstic mode")
-                ses_id = (0x00 << 16) + (self.my_id << 8) + int(id, 16)
                 self.session_control(ses_id, sub_funct=0x03)
-                self._passive_response(SESSION_CONTROL, "Error changing session control")
+                self._passive_response(
+                    SESSION_CONTROL, "Error changing session control")
 
             log_info_message(logger, "Authenticating...")
             # -> security only to MCU
             self._authentication(self.my_id * 0x100 + self.id_ecu[0])
-
-            log_info_message(logger, "Reading data from battery")
-            current_version = self._verify_version()
-            if current_version == version:
+            log_info_message(logger, f"Version to be updated {version}")
+            current_version = self._verify_version(ses_id)
+            log_info_message(logger, f"Curent version {current_version}")
+            if current_version == version.replace(".", ""):
                 response_json = ToJSON()._to_json(
                     f"Version {version} already installed", 0)
+                log_info_message(logger, "Version {version} already installed")
                 return response_json
 
             # Check if another OTA update is in progress ( OTA_STATE is not IDLE)
@@ -98,7 +125,8 @@ class Updates(Action):
             # Reset the ECU to apply the update
             # self.id = (self.my_id * 0x100) + int(ecu_id, 16)
             # self.ecu_reset(self.id)
-            # self._passive_response(RESET_ECU, "Error trying to reset ECU") # ToDo reactivate when using real hardware
+            # self._passive_response(RESET_ECU, "Error trying to reset ECU") # ToDo
+            # reactivate when using real hardware
 
             # Add a delay to wait until the ECU completes the reset process
             # log_info_message(logger, "Waiting until ECU is up")
@@ -166,7 +194,7 @@ class Updates(Action):
 
         api_target_id = (0x00 << 16) + (0xFA << 8) + int(id, 16)
         hex_address = ''.join(address)
-        
+
         self.request_download(api_target_id,
                               data_format_identifier=type,
                               memory_address=int(hex_address, 16),
@@ -196,11 +224,12 @@ class Updates(Action):
                 transfer_data_counter += 0x01
 
             self.request_transfer_exit(api_target_id, True)
-            frame_response = self._passive_response(REQUEST_TRANSFER_EXIT, "Error at transfer exit.")
+            frame_response = self._passive_response(
+                REQUEST_TRANSFER_EXIT, "Error at transfer exit.")
             if frame_response.data[1] != 0x77:
                 log_info_message(logger, "Update failed at transfer exit step.")
                 return
-            
+
         self.control_frame_verify_data(api_target_id)
         frame_response = self._passive_response(
             ROUTINE_CONTROL, "Error at verify data routine.")
@@ -220,7 +249,7 @@ class Updates(Action):
             log_info_message(logger, "Update failed at install step.")
             return
 
-    def _verify_version(self):
+    def _verify_version(self, ses_id):
         """
         Private method to verify if the current software version matches the desired version.
 
@@ -234,7 +263,7 @@ class Updates(Action):
         log_info_message(logger, "Reading current version")
 
         current_version = self._read_by_identifier(
-            self.id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
+            ses_id, IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
         return current_version
 
     def _check_errors(self):
@@ -281,23 +310,21 @@ class Updates(Action):
 
             time.sleep(1)
 
-
     def get_ota_status(self, ecu_id):
         try:
             # Convert the hex string (e.g., "0x10") to an integer
             hex_value = int(ecu_id, 16)
             self.request_update_status(hex_value)
-            frame_response = self._passive_response(REQUEST_UPDATE_STATUS, "Request OTA state failed.")
+            frame_response = self._passive_response(
+                REQUEST_UPDATE_STATUS, "Request OTA state failed.")
 
             return self.get_ota_update_state(frame_response.data[2])
-        
+
         except ValueError:
-            return ToJSON()._to_json(f"Request OTA state failed", 0)
+            return ToJSON()._to_json("Request OTA state failed", 0)
 
-
-            
     def change_ota_state(self, ecu_id, ota_status_value):
-    
+
         id = (0x00 << 16) + (0xFA << 8) + 0x10
         self.write_data_by_identifier(id, 0XE001, [int(ota_status_value, 16)])
         self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {ota_status_value}")
@@ -305,10 +332,12 @@ class Updates(Action):
         id = (0x00 << 16) + (0xFA << 8) + int(ecu_id, 16)
         if ecu_id != self.id_ecu[0]:
             self.write_data_by_identifier(id, 0XE001, [int(ota_status_value, 16)])
-            self._passive_response(WRITE_BY_IDENTIFIER, f"Error writing {ota_status_value}")
-        
+            self._passive_response(
+                WRITE_BY_IDENTIFIER,
+                f"Error writing {ota_status_value}")
+
         return True
-        
+
     def transfer_data_to_ecu(self, ecu_id, address, data):
         id = (0x00 << 16) + (0xFA << 8) + int(ecu_id, 16)
         hex_address = ''.join(address)
@@ -331,10 +360,11 @@ class Updates(Action):
         while data:
             max_bytes = min(5, len(data) // 2)
             current_chunk = int(data[:max_bytes * 2], 16)
-            
+
             if max_bytes < 5 or len(data) == 5:
-                if self.change_ota_state(ecu_id, '0x31') == False:
-                    log_info_message(logger, f"Transfer Data to Ecu failed at changing ota status to transfer complete")
+                if not self.change_ota_state(ecu_id, '0x31'):
+                    log_info_message(
+                        logger, "Transfer Data to Ecu failed at changing ota status to transfer complete")
                     return
                 time.sleep(1)
 

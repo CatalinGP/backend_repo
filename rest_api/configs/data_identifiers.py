@@ -7,7 +7,7 @@ ECU_DOORS = 3
 ECU_HVAC = 4
 
 # Identifiers
-IDENTIFIER_VERSION_SOFTWARE_MCU = 0x1010
+IDENTIFIER_VERSION_SOFTWARE_MCU = 0xF1A2
 IDENTIFIER_VEHICLE_IDENTIFICATION_NUMBER_VIN = 0xF190
 IDENTIFIER_ECU_SERIAL_NUMBER = 0xF17F
 IDENTIFIER_SYSTEM_SUPPLIER_ECU_HARDWARE_NUMBER = 0xF18C
@@ -65,54 +65,54 @@ IDENTIFIER_HVAC_MODES = 0x04D0
 
 
 data_identifiers = {
-        "MCU_Identifiers": {
-            "software_version": hex(IDENTIFIER_VERSION_SOFTWARE_MCU),
-            "vin": hex(IDENTIFIER_VEHICLE_IDENTIFICATION_NUMBER_VIN),
-            "ecu_serial_number": hex(IDENTIFIER_ECU_SERIAL_NUMBER),
-            "ecu_hardware_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_HARDWARE_NUMBER),
-            "ecu_software_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_NUMBER),
-            "engine_type": hex(IDENTIFIER_SYSTEM_NAME_OR_ENGINE_TYPE),
-            "ecu_software_version_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER),
-            "ecu_hardware_version_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_HARDWARE_VERSION_NUMBER),
-            "ecu_manufacturing_date": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_MANUFACTURING_DATE),
-            "ecu_part_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_CODING_CONFIGURATION_PART_NUMBER),
-        },
-        "Engine_Identifiers": {
-            "engine_rpm": hex(IDENTIFIER_ENGINE_RPM),
-            "coolant_temperature": hex(IDENTIFIER_ENGINE_COOLANT_TEMPERATURE),
-            "throttle_position": hex(IDENTIFIER_THROTTLE_POSITION),
-            "vehicle_speed": hex(IDENTIFIER_VEHICLE_SPEED),
-            "engine_load": hex(IDENTIFIER_ENGINE_LOAD),
-            "fuel_level": hex(IDENTIFIER_FUEL_LEVEL),
-            "oil_temperature": hex(IDENTIFIER_OIL_TEMPERATURE),
-            "fuel_pressure": hex(IDENTIFIER_FUEL_PRESSURE),
-            "intake_air_temperature": hex(IDENTIFIER_ENGINE_AIR_INTAKE),
-        },
-        "Battery_Identifiers": {
-            "battery_level": hex(IDENTIFIER_BATTERY_ENERGY_LEVEL),
-            "voltage": hex(IDENTIFIER_BATTERY_VOLTAGE),
-            "percentage": hex(IDENTIFIER_BATTERY_PERCENTAGE),
-            "battery_state_of_charge": hex(IDENTIFIER_BATTERY_STATE_OF_CHARGE),
-            # "temperature": IDENTIFIER_BATTERY_TEMPERATURE,
-            # "life_cycle": IDENTIFIER_BATTERY_LIFE_CYCLE,
-            # "fully_charged": IDENTIFIER_BATTERY_FULLY_CHARGED,
-            # "range": IDENTIFIER_BATTERY_RANGE,
-            # "charging_time": IDENTIFIER_BATTERY_CHARGING_TIME,
-            # "device_consumption": IDENTIFIER_DEVICE_CONSUMPTION
-        },
-        "Doors_Identifiers": {
-            "door": hex(IDENTIFIER_DOOR_STATUS),
-            "passenger": hex(IDENTIFIER_PASSENGER_DOOR_STATUS),
-            "passenger_lock": hex(IDENTIFIER_PASSENGER_DOOR_LOCKED_STATUS),
-            "driver": hex(IDENTIFIER_DRIVER_DOOR_STATUS),
-            "ajar": hex(IDENTIFIER_AJAR_STATUS)
-        },
-        "HVAC_Identifiers": {
-            "mass_air_flow": hex(IDENTIFIER_MASS_AIR_FLOW_MAF_SENSOR),
-            "ambient_air_temperature": hex(IDENTIFIER_AMBIENT_AIR_TEMPERATURE),
-            "cabin_temperature": hex(IDENTIFIER_CABIN_TEMPERATURE),
-            "cabin_temperature_driver_set": hex(IDENTIFIER_CABIN_TEMPERATURE_DRIVER_SET),
-            "fan_speed": hex(IDENTIFIER_FAN_SPEED),
-            "hvac_modes": hex(IDENTIFIER_HVAC_MODES),
-        }
+    "MCU_Identifiers": {
+        "software_version": hex(IDENTIFIER_VERSION_SOFTWARE_MCU),
+        "vin": hex(IDENTIFIER_VEHICLE_IDENTIFICATION_NUMBER_VIN),
+        "ecu_serial_number": hex(IDENTIFIER_ECU_SERIAL_NUMBER),
+        "ecu_hardware_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_HARDWARE_NUMBER),
+        "ecu_software_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_NUMBER),
+        "engine_type": hex(IDENTIFIER_SYSTEM_NAME_OR_ENGINE_TYPE),
+        "ecu_software_version_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER),
+        "ecu_hardware_version_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_HARDWARE_VERSION_NUMBER),
+        "ecu_manufacturing_date": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_MANUFACTURING_DATE),
+        "ecu_part_number": hex(IDENTIFIER_SYSTEM_SUPPLIER_ECU_CODING_CONFIGURATION_PART_NUMBER),
+    },
+    "Engine_Identifiers": {
+        "engine_rpm": hex(IDENTIFIER_ENGINE_RPM),
+        "coolant_temperature": hex(IDENTIFIER_ENGINE_COOLANT_TEMPERATURE),
+        "throttle_position": hex(IDENTIFIER_THROTTLE_POSITION),
+        "vehicle_speed": hex(IDENTIFIER_VEHICLE_SPEED),
+        "engine_load": hex(IDENTIFIER_ENGINE_LOAD),
+        "fuel_level": hex(IDENTIFIER_FUEL_LEVEL),
+        "oil_temperature": hex(IDENTIFIER_OIL_TEMPERATURE),
+        "fuel_pressure": hex(IDENTIFIER_FUEL_PRESSURE),
+        "intake_air_temperature": hex(IDENTIFIER_ENGINE_AIR_INTAKE),
+        "mass_air_flow": hex(IDENTIFIER_MASS_AIR_FLOW_MAF_SENSOR)
+    },
+    "Battery_Identifiers": {
+        "battery_level": hex(IDENTIFIER_BATTERY_ENERGY_LEVEL),
+        "voltage": hex(IDENTIFIER_BATTERY_VOLTAGE),
+        "percentage": hex(IDENTIFIER_BATTERY_PERCENTAGE),
+        "battery_state_of_charge": hex(IDENTIFIER_BATTERY_STATE_OF_CHARGE),
+        # "temperature": IDENTIFIER_BATTERY_TEMPERATURE,
+        # "life_cycle": IDENTIFIER_BATTERY_LIFE_CYCLE,
+        # "fully_charged": IDENTIFIER_BATTERY_FULLY_CHARGED,
+        # "range": IDENTIFIER_BATTERY_RANGE,
+        # "charging_time": IDENTIFIER_BATTERY_CHARGING_TIME,
+        # "device_consumption": IDENTIFIER_DEVICE_CONSUMPTION
+    },
+    "Doors_Identifiers": {
+        "door": hex(IDENTIFIER_DOOR_STATUS),
+        "passenger": hex(IDENTIFIER_PASSENGER_DOOR_STATUS),
+        "passenger_lock": hex(IDENTIFIER_PASSENGER_DOOR_LOCKED_STATUS),
+        "driver": hex(IDENTIFIER_DRIVER_DOOR_STATUS),
+        "ajar": hex(IDENTIFIER_AJAR_STATUS)
+    },
+    "HVAC_Identifiers": {
+        "ambient_air_temperature": hex(IDENTIFIER_AMBIENT_AIR_TEMPERATURE),
+        "cabin_temperature": hex(IDENTIFIER_CABIN_TEMPERATURE),
+        "cabin_temperature_driver_set": hex(IDENTIFIER_CABIN_TEMPERATURE_DRIVER_SET),
+        "fan_speed": hex(IDENTIFIER_FAN_SPEED),
+        "hvac_modes": hex(IDENTIFIER_HVAC_MODES),
     }
+}

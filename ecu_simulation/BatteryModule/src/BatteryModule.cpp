@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <sstream>
 #include <fstream>
 #include <iomanip>
@@ -23,7 +24,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> BatteryModule::default_DID_ba
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
 #else
-        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x00}}
+        {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {0x10}}
 #endif
 };
 const std::vector<uint16_t> BatteryModule::writable_Battery_DID =
@@ -124,20 +125,11 @@ void BatteryModule::parseBatteryInfo(const std::string &data, float &energy, flo
         else if (line.find("percentage:") != std::string::npos)
         {
             percentage = std::stof(line.substr(line.find(":") + 1));
-            uint8_t percentage_value = static_cast<uint8_t>(percentage);
-            std::string percentage_str = std::to_string(percentage_value);
-            if (percentage_str.size() % 2 != 0) {
-                percentage_str = "0" + percentage_str;
-            }
-            std::string percentage_grouped;
-            for (size_t i = 0; i < percentage_str.size(); i += 2) {
-                percentage_grouped += percentage_str.substr(i, 2) + " ";
-            }
-            int decimal_value = std::stoi(percentage_grouped);
+            uint16_t percentage_value = static_cast<uint16_t>(percentage);
             std::stringstream data_ss;
-            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << decimal_value;
-            percentage_grouped = data_ss.str();
-            updated_values[0x01C0] = percentage_grouped;
+            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << percentage_value;
+            std::string percentage_str = data_ss.str();
+            updated_values[0x01C0] = percentage_str;
         }
         else if (line.find("state:") != std::string::npos)
         {

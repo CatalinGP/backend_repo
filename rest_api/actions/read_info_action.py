@@ -68,6 +68,56 @@ class ReadInfo(Action):
 
         return modes
 
+    def read_from_mcu(self, item=None):
+        """
+        Method to read information from the mcu module.
+
+        Args:
+        - item: Optional identifier for a specific data item to read.
+
+        Returns:
+        - JSON response.
+
+        Endpoint test (external flow):
+
+        curl -X GET "http://127.0.0.1:5000/api/read_info_mcu?is_manual_flow=false" -H "Content-Type: application/json"
+
+        """
+        try:
+            log_info_message(logger, "Reading data from mcu")
+            id = self.my_id * 0x100 + self.id_ecu[MCU]
+
+            identifiers = data_identifiers["MCU_Identifiers"]
+            results = {}
+            for key, identifier in identifiers.items():
+                result_value = self._read_by_identifier(id, int(identifier, 16))
+                results[key] = result_value if result_value else "No data"
+
+            response_json = {
+                "software_version": results.get("software_version"),
+                "vin": results.get("vin"),
+                "ecu_serial_number": results.get("ecu_serial_number"),
+                "ecu_hardware_number": results.get("ecu_hardware_number"),
+                "ecu_software_number": results.get("ecu_software_number"),
+                "engine_type": results.get("engine_type"),
+                "ecu_software_version_number": results.get("ecu_software_version_number"),
+                "ecu_hardware_version_number": results.get("ecu_hardware_version_number"),
+                "ecu_manufacturing_date": results.get("ecu_manufacturing_date"),
+                "ecu_part_number": results.get("ecu_part_number"),
+            }
+
+            log_info_message(logger, "Sending JSON response")
+            return response_json
+
+        except CustomError:
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            negative_response = self.handle_negative_response(nrc_msg, sid_msg)
+            return {
+                "message": "Issue encountered during Read by ID",
+                "negative_response": negative_response
+            }
+
     def read_from_battery(self, item=None):
         """
         Method to read information from the battery module.
@@ -101,13 +151,13 @@ class ReadInfo(Action):
                     results[item] = result_value if result_value else "No data"
 
                     response_json = {
-                            item: self.hex_to_dec(result_value) if result_value else "No data",
-                            "time_stamp": datetime.datetime.now().isoformat()
-                        }
+                        item: self.hex_to_dec(result_value) if result_value else "No data",
+                        "time_stamp": datetime.datetime.now().isoformat()}
                     return response_json
 
                 else:
-                    return {"error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
+                    return {
+                        "error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
             else:
                 for key, identifier in identifiers.items():
                     result_value = self._read_by_identifier(id, int(identifier, 16))
@@ -135,11 +185,13 @@ class ReadInfo(Action):
             return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
-                "message": "ssue encountered during Read by ID",
+                "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
 
@@ -181,7 +233,8 @@ class ReadInfo(Action):
                     result_value = self._read_by_identifier(id, int(identifier, 16))
                     context = get_context(item)
 
-                    results[item] = self._interpret_status(result_value, context) if result_value else "No data"
+                    results[item] = self._interpret_status(
+                        result_value, context) if result_value else "No data"
 
                     response_json = {
                         item: self.hex_to_dec(results.get(item, "No data")),
@@ -189,14 +242,16 @@ class ReadInfo(Action):
                     }
                     return response_json
                 else:
-                    return {"error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
+                    return {
+                        "error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
 
             else:
                 for key, identifier in identifiers.items():
                     result_value = self._read_by_identifier(id, int(identifier, 16))
                     context = get_context(key)
 
-                    results[key] = self._interpret_status(result_value, context) if result_value else "No data"
+                    results[key] = self._interpret_status(
+                        result_value, context) if result_value else "No data"
 
                 response_json = {
                     "door": self.hex_to_dec(results.get("door", "No data")),
@@ -210,11 +265,13 @@ class ReadInfo(Action):
                 return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
-                "message": "ssue encountered during Read by ID",
+                "message": "Issue encountered during Read by ID",
                 "negative_response": negative_response
             }
         except Exception as e:
@@ -247,7 +304,8 @@ class ReadInfo(Action):
                 if item in identifiers:
                     identifier = identifiers[item]
                     result_value = self._read_by_identifier(id, int(identifier, 16))
-                    interpreted_value = self.hex_to_dec(result_value) if result_value else "No data"
+                    interpreted_value = self.hex_to_dec(
+                        result_value) if result_value else "No data"
 
                     response_json = {
                         item: interpreted_value,
@@ -257,11 +315,13 @@ class ReadInfo(Action):
                     log_info_message(logger, "Sending JSON response")
                     return response_json
                 else:
-                    return {"error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
+                    return {
+                        "error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
             else:
                 for key, identifier in identifiers.items():
                     result_value = self._read_by_identifier(id, int(identifier, 16))
-                    results[key] = self.hex_to_dec(result_value) if result_value else "No data"
+                    results[key] = self.hex_to_dec(
+                        result_value) if result_value else "No data"
 
                 response_json = {
                     **results,
@@ -272,8 +332,10 @@ class ReadInfo(Action):
                 return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Read by ID",
@@ -306,9 +368,11 @@ class ReadInfo(Action):
                     result_value = self._read_by_identifier(id, int(identifier, 16))
 
                     if item == "hvac_modes":
-                        interpreted_value = self._interpret_hvac_modes(self.hex_to_dec(result_value)) if result_value else "No data"
+                        interpreted_value = self._interpret_hvac_modes(
+                            self.hex_to_dec(result_value)) if result_value else "No data"
                     else:
-                        interpreted_value = self.hex_to_dec(result_value) if result_value else "No data"
+                        interpreted_value = self.hex_to_dec(
+                            result_value) if result_value else "No data"
 
                     response_json = {
                         item: interpreted_value,
@@ -317,26 +381,31 @@ class ReadInfo(Action):
                     log_info_message(logger, "Sending JSON response")
                     return response_json
                 else:
-                    return {"error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
+                    return {
+                        "error": f"Invalid parameter '{item}'. Use /get_identifiers to see valid parameters."}
             else:
                 for key, identifier in identifiers.items():
                     result_value = self._read_by_identifier(id, int(identifier, 16))
 
                     if key == "hvac_modes":
-                        results[key] = self._interpret_hvac_modes(self.hex_to_dec(result_value)) if result_value else "No data"
+                        results[key] = self._interpret_hvac_modes(
+                            self.hex_to_dec(result_value)) if result_value else "No data"
                     else:
-                        results[key] = self.hex_to_dec(result_value) if result_value else "No data"
+                        results[key] = self.hex_to_dec(
+                            result_value) if result_value else "No data"
 
                 response_json = {
                     **results,
                     "time_stamp": datetime.datetime.now().isoformat()
-                    }
+                }
                 log_info_message(logger, "Sending JSON response")
                 return response_json
 
         except CustomError:
-            nrc_msg = self.last_msg.data[3] if self.last_msg and len(self.last_msg.data) > 3 else 0x00
-            sid_msg = self.last_msg.data[2] if self.last_msg and len(self.last_msg.data) > 2 else 0x00
+            nrc_msg = self.last_msg.data[3] if self.last_msg and len(
+                self.last_msg.data) > 3 else 0x00
+            sid_msg = self.last_msg.data[2] if self.last_msg and len(
+                self.last_msg.data) > 2 else 0x00
             negative_response = self.handle_negative_response(nrc_msg, sid_msg)
             return {
                 "message": "Issue encountered during Read by ID",
@@ -347,10 +416,10 @@ class ReadInfo(Action):
         log_info_message(logger, "Read info function called.")
 
         if ecu_id == 17:
-                return self.read_from_battery(item)
+            return self.read_from_battery(item)
         elif ecu_id == 18:
-                return self.read_from_engine(item)
+            return self.read_from_engine(item)
         elif ecu_id == 19:
-                return self.read_from_doors(item)
+            return self.read_from_doors(item)
         elif ecu_id == 20:
-                return self.read_from_hvac(item)
+            return self.read_from_hvac(item)

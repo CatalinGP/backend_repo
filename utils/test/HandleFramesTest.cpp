@@ -1,8 +1,11 @@
 #include "gtest/gtest.h"
 #include "../include/HandleFrames.h"
+#include "../include/GenerateFrames.h"
+#include "../include/TestUtils.h"
 #include "../../uds/diagnostic_session_control/include/DiagnosticSessionControl.h"
 #include <linux/can.h>
 #include "../include/MCULogger.h"
+#include "../../uds/tester_present/include/TesterPresent.h"
 
 Logger logger;
 int skt = 1;
@@ -19,22 +22,11 @@ class HandleFramesTest : public ::testing::Test{
     DiagnosticSessionControl dsc;
 };
 
-struct can_frame createFrame(std::vector<uint8_t> test_data)
-{
-    struct can_frame result_frame;
-    result_frame.can_id = (FRAME_ID & CAN_EFF_MASK) | CAN_EFF_FLAG;
-    int i=0;
-    for (auto d : test_data)
-        result_frame.data[i++] = d;
-    result_frame.can_dlc = test_data.size();
-    return result_frame;
-}
-
 /* Test for HandleFrameNegativeResponse */
 TEST_F(HandleFramesTest, HandleFrameNegativeResponse)
 {
     dsc.sessionControl(0xFA10, 0x02, true);
-    struct can_frame testFrame = createFrame({0x03,0x7F,0x10, 0x12});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x03,0x7F,0x10, 0x12});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -57,7 +49,7 @@ TEST_F(HandleFramesTest, HandleFrameSessionChangeByTP)
 /* Test for HandleFrameNegativeResponse */
 TEST_F(HandleFramesTest, HandleFrameDiagnosticSession)
 {
-    struct can_frame testFrame = createFrame({0x02,0x10, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x10, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -68,7 +60,7 @@ TEST_F(HandleFramesTest, HandleFrameDiagnosticSession)
 /* Test for HandleFrameEcuReset */
 TEST_F(HandleFramesTest, HandleFrameEcuReset)
 {
-    struct can_frame testFrame = createFrame({0x02,0x11, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x11, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -81,7 +73,7 @@ TEST_F(HandleFramesTest, HandleFrameEcuReset)
 /* Test for InvalidFrameType */
 TEST_F(HandleFramesTest, InvalidFrameType)
 {
-    struct can_frame testFrame = createFrame({0x31,0x11, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x31,0x11, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -94,7 +86,7 @@ TEST_F(HandleFramesTest, InvalidFrameType)
 TEST_F(HandleFramesTest, WrongSessionSecurity)
 {
     dsc.sessionControl(0xFA10, 0x01, true);
-    struct can_frame testFrame = createFrame({0x02,0x27, 0x01});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x27, 0x01});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -106,7 +98,7 @@ TEST_F(HandleFramesTest, WrongSessionSecurity)
 /* Test for SecurityTest */
 TEST_F(HandleFramesTest, SecurityTest)
 {
-    struct can_frame testFrame = createFrame({0x02,0x27, 0x01});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x27, 0x01});
     dsc.sessionControl(0xFA10, 0x02, true);
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
@@ -119,7 +111,7 @@ TEST_F(HandleFramesTest, SecurityTest)
 /* Test for TesterPresent */
 TEST_F(HandleFramesTest, TesterPresent)
 {
-    struct can_frame testFrame = createFrame({0x01,0x3E});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01,0x3E});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -131,7 +123,7 @@ TEST_F(HandleFramesTest, TesterPresent)
 /* Test for AccessTimingParameter */
 TEST_F(HandleFramesTest, AccessTimingParameter)
 {
-    struct can_frame testFrame = createFrame({0x02,0x83, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x83, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -143,7 +135,7 @@ TEST_F(HandleFramesTest, AccessTimingParameter)
 /* Test for AccessTimingParameter2 */
 TEST_F(HandleFramesTest, AccessTimingParameter2)
 {
-    struct can_frame testFrame = createFrame({0x06,0x83, 0x03, 0x00, 0x090, 0x01, 0x50});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x06,0x83, 0x03, 0x00, 0x090, 0x01, 0x50});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -155,7 +147,7 @@ TEST_F(HandleFramesTest, AccessTimingParameter2)
 /* Test for ReadDataByIdentifier */
 TEST_F(HandleFramesTest, ReadDataByIdentifier)
 {
-    struct can_frame testFrame = createFrame({0x03,0x22, 0x01, 0xa0});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x03,0x22, 0x01, 0xa0});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -177,7 +169,7 @@ TEST_F(HandleFramesTest, ReadMemoryByAdressNRC)
 /* Test for ReadMemoryByAdress */
 TEST_F(HandleFramesTest, ReadMemoryByAdress)
 {
-    struct can_frame testFrame = createFrame({0x03,0x23, 0x01, 0xaa});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x03,0x23, 0x01, 0xaa});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -187,7 +179,7 @@ TEST_F(HandleFramesTest, ReadMemoryByAdress)
 /* Test for WriteDataByIdentifier */
 TEST_F(HandleFramesTest, WriteDataByIdentifier)
 {
-    struct can_frame testFrame = createFrame({0x04,0x2e, 0x01, 0xa0, 0x11});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x04,0x2e, 0x01, 0xa0, 0x11});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -198,7 +190,7 @@ TEST_F(HandleFramesTest, WriteDataByIdentifier)
 /* Test for ClearDiagnosticInformation */
 TEST_F(HandleFramesTest, ClearDiagnosticInformation)
 {
-    struct can_frame testFrame = createFrame({0x02,0x14, 0xff});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x14, 0xff});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -209,7 +201,7 @@ TEST_F(HandleFramesTest, ClearDiagnosticInformation)
 /* Test for ReadDtcInformation */
 TEST_F(HandleFramesTest, ReadDtcInformation)
 {
-    struct can_frame testFrame = createFrame({0x02,0x19, 0x02, 0xff});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x19, 0x02, 0xff});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -220,7 +212,7 @@ TEST_F(HandleFramesTest, ReadDtcInformation)
 /* Test for RoutineControl */
 TEST_F(HandleFramesTest, RoutineControl)
 {
-    struct can_frame testFrame = createFrame({0x02,0x31, 0x02,0x01, 0x01});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x31, 0x02,0x01, 0x01});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -230,7 +222,7 @@ TEST_F(HandleFramesTest, RoutineControl)
 /* Test for DiagnosticSessionResponse */
 TEST_F(HandleFramesTest, DiagnosticSessionControlResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x50});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x50});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -240,7 +232,7 @@ TEST_F(HandleFramesTest, DiagnosticSessionControlResponse)
 /* Test for ECUResetResponse */
 TEST_F(HandleFramesTest, ECUResetResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x51});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x51});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -250,7 +242,7 @@ TEST_F(HandleFramesTest, ECUResetResponse)
 /* Test for SecurityAccessResponse */
 TEST_F(HandleFramesTest, SecurityAccessResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x67});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x67});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -260,7 +252,7 @@ TEST_F(HandleFramesTest, SecurityAccessResponse)
 /* Test for AuthenticationResponse */
 TEST_F(HandleFramesTest, AuthenticationResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x69});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x69});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -270,7 +262,7 @@ TEST_F(HandleFramesTest, AuthenticationResponse)
 /* Test for TesterPresentResponse */
 TEST_F(HandleFramesTest, TesterPresentResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x7E});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x7E});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -280,7 +272,7 @@ TEST_F(HandleFramesTest, TesterPresentResponse)
 /* Test for AccessTimingParametersResponse */
 TEST_F(HandleFramesTest, AccessTimingParametersResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0xC3});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0xC3});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -290,7 +282,7 @@ TEST_F(HandleFramesTest, AccessTimingParametersResponse)
 /* Test for ReadDataByIdentifierResponse */
 TEST_F(HandleFramesTest, ReadDataByIdentifierResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x62});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x62});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -311,7 +303,7 @@ TEST_F(HandleFramesTest, ReadDataByIdentifierLongResponse)
 /* Test for ReadMemoryByAdressResponse */
 TEST_F(HandleFramesTest, ReadMemoryByAdressResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x63});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x63});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -332,7 +324,7 @@ TEST_F(HandleFramesTest, ReadMemoryByAdressLongResponse)
 /* Test for WriteDataByIdentifierResponse */
 TEST_F(HandleFramesTest, WriteDataByIdentifierResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x6E});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x6E});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -342,7 +334,7 @@ TEST_F(HandleFramesTest, WriteDataByIdentifierResponse)
 /* Test for ClearDiagnosticInformationResponse */
 TEST_F(HandleFramesTest, ClearDiagnosticInformationResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x54});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x54});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -352,7 +344,7 @@ TEST_F(HandleFramesTest, ClearDiagnosticInformationResponse)
 /* Test for ReadDtcInformationResponse */
 TEST_F(HandleFramesTest, ReadDtcInformationResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x59});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x59});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -362,7 +354,7 @@ TEST_F(HandleFramesTest, ReadDtcInformationResponse)
 /* Test for RoutineControlResponse */
 TEST_F(HandleFramesTest, RoutineControlResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x71});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x71});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -372,7 +364,7 @@ TEST_F(HandleFramesTest, RoutineControlResponse)
 /* Test for RequestDownload */
 TEST_F(HandleFramesTest, RequestDownload)
 {
-    struct can_frame testFrame = createFrame({0x02,0x34, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x34, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -384,7 +376,7 @@ TEST_F(HandleFramesTest, RequestDownload)
 TEST_F(HandleFramesTest, WrongSessionRequestDownload)
 {
     dsc.sessionControl(0xFA10, 0x01, true);
-    struct can_frame testFrame = createFrame({0x02,0x34, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x34, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -395,7 +387,7 @@ TEST_F(HandleFramesTest, WrongSessionRequestDownload)
 TEST_F(HandleFramesTest, WrongSessionTransferData)
 {
     dsc.sessionControl(0xFA10, 0x01, true);
-    struct can_frame testFrame = createFrame({0x02,0x36, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x36, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -407,7 +399,7 @@ TEST_F(HandleFramesTest, WrongSessionTransferData)
 TEST_F(HandleFramesTest, TransferData)
 {   
     dsc.sessionControl(0xFA10, 0x02, true);
-    struct can_frame testFrame = createFrame({0x02,0x36, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x36, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -420,7 +412,7 @@ TEST_F(HandleFramesTest, TransferData)
 TEST_F(HandleFramesTest, WrongSessionRequestTransferExit)
 {
     dsc.sessionControl(0xFA10, 0x01, true);
-    struct can_frame testFrame = createFrame({0x02,0x37, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x37, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -432,7 +424,7 @@ TEST_F(HandleFramesTest, WrongSessionRequestTransferExit)
 TEST_F(HandleFramesTest, RequestTransferExit)
 {
     dsc.sessionControl(0xFA10, 0x02, true);
-    struct can_frame testFrame = createFrame({0x02,0x37, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x37, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -453,7 +445,7 @@ TEST_F(HandleFramesTest, TransferDataMultipleFrame)
 /* Test for RequestUpdateStatus */
 TEST_F(HandleFramesTest, RequestUpdateStatus)
 {
-    struct can_frame testFrame = createFrame({0x02,0x32, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x32, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -465,7 +457,7 @@ TEST_F(HandleFramesTest, RequestUpdateStatus)
 TEST_F(HandleFramesTest, WrongSessionRequestUpdateStatus)
 {
     dsc.sessionControl(0xFA10, 0x01, true);
-    struct can_frame testFrame = createFrame({0x02,0x32, 0x02});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x02,0x32, 0x02});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -475,7 +467,7 @@ TEST_F(HandleFramesTest, WrongSessionRequestUpdateStatus)
 
 TEST_F(HandleFramesTest, RequestDownloadResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x74});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x74});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -484,7 +476,7 @@ TEST_F(HandleFramesTest, RequestDownloadResponse)
 
 TEST_F(HandleFramesTest, TransferDataResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x76});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x76});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -493,7 +485,7 @@ TEST_F(HandleFramesTest, TransferDataResponse)
 
 TEST_F(HandleFramesTest, RequestTransferExitResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x77});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x77});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -502,7 +494,7 @@ TEST_F(HandleFramesTest, RequestTransferExitResponse)
 
 TEST_F(HandleFramesTest, RequestUpdateStatusResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0x72});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0x72});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -511,7 +503,7 @@ TEST_F(HandleFramesTest, RequestUpdateStatusResponse)
 
 TEST_F(HandleFramesTest, UnknownResponse)
 {
-    struct can_frame testFrame = createFrame({0x01, 0xFF});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x01, 0xFF});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -520,13 +512,13 @@ TEST_F(HandleFramesTest, UnknownResponse)
 
 TEST_F(HandleFramesTest, IgnoreConsecutiveFrames)
 {
-    struct can_frame testFrame = createFrame({0x22, 0x0F,0x05});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x22, 0x0F,0x05});
     handler.handleFrame(skt, testFrame);
 }
 
 TEST_F(HandleFramesTest, FirstFrame)
 {
-    struct can_frame testFrame = createFrame({0x10, 0x08,0x05});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x10, 0x08,0x05});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -536,7 +528,7 @@ TEST_F(HandleFramesTest, FirstFrame)
 
 TEST_F(HandleFramesTest, WrongConsecutiveFrames)
 {
-    struct can_frame testFrame = createFrame({0x22, 0x0F,0x05});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x22, 0x0F,0x05});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
@@ -546,7 +538,7 @@ TEST_F(HandleFramesTest, WrongConsecutiveFrames)
 
 TEST_F(HandleFramesTest, ConsecutiveFrames)
 {
-    struct can_frame testFrame = createFrame({0x21, 0x08,0x05,0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x10,0x11});
+    struct can_frame testFrame = createFrame(FRAME_ID, {0x21, 0x08,0x05,0x11,0x11,0x11});
     testing::internal::CaptureStdout();
     handler.handleFrame(skt, testFrame);
     std::string output = testing::internal::GetCapturedStdout();
