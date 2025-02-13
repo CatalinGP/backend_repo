@@ -1,3 +1,4 @@
+from utils.frontendLogs import uploadFrontendLogs
 import sys
 from configs.data_identifiers import data_identifiers
 import os
