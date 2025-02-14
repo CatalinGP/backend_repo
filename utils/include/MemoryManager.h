@@ -63,7 +63,7 @@
         install2->writeToAddress(data);
 
         // line called to move from adress to the executable(Can be implemented in a routine) 
-        std::vector<uint8_t> data2 = MemoryManager::readFromAddress("/dev/loop21", install2->getAddress(), data.size()); //Read from the address
+        std::vector<uint8_t> data2 = install->readFromAddress("/dev/loop21", install2->getAddress(), data.size()); //Read from the address
         MemoryManager::writeToFile(data2, "/mnt/sdcard/test"); //Write in bin the data
     }
     */
@@ -74,6 +74,7 @@
 #include <cstring>
 #include <vector>
 
+#include "IMemoryManager.h"
 #include "Logger.h"
 
 #define DEV_LOOP "/dev/loop0"
@@ -89,7 +90,7 @@
 #define DEV_LOOP_PARTITION_2_ADDRESS_END 614399
 #define DEV_LOOP_PARTITION_2_SECTORS ((DEV_LOOP_PARTITION_2_ADDRESS_END - DEV_LOOP_PARTITION_2_ADDRESS_START) + 1)
 #define DEV_LOOP_PARTITION_2_SIZE (DEV_LOOP_PARTITION_2_SECTORS * SECTOR_SIZE)
-class MemoryManager
+class MemoryManager : public IMemoryManager
 {
     private:
         std::string path;
@@ -117,7 +118,12 @@ class MemoryManager
          * @param logger 
          */
         MemoryManager(off_t address, std::string path, Logger& logger);
-        
+
+        /**
+         * @brief Default destructor
+         */
+        ~MemoryManager() override = default;
+
         /**
          * @brief Get the Instance object
          * 
@@ -169,7 +175,7 @@ class MemoryManager
          * 
          * @return std::string 
          */
-        std::string getPath();
+        std::string getPath() override;
 
         /**
          * @brief Method to read a binary file. This is a static method.
@@ -186,7 +192,7 @@ class MemoryManager
          * @param address 
          * @return true or false
          */
-        bool availableAddress(off_t address);
+        bool availableAddress(off_t address) override;
 
         /**
          * @brief Method to check if the amount of memory is available
@@ -194,10 +200,10 @@ class MemoryManager
          * @param size_of_data 
          * @return true or false
          */
-        bool availableMemory(off_t size_of_data);
+        bool availableMemory(off_t size_of_data) override;
         
         /**
-         * @brief Method to read from an address. This is a static method.
+         * @brief Method to read from an address.
          * 
          * @param path Path to a sd, usb, etc
          * @param address_start Start address
@@ -205,7 +211,7 @@ class MemoryManager
          * @param logger
          * @return std::vector<uint8_t> 
          */
-        static std::vector<uint8_t> readFromAddress(std::string path, off_t address_start, off_t size, Logger& logger);
+        std::vector<uint8_t> readFromAddress(std::string path, off_t address_start, off_t size, Logger& logger) override;
 
         /**
          * @brief Method to write data in a specific address. This method uses the address specified in the constructor.

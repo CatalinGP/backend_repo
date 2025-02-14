@@ -77,7 +77,7 @@ void ECU::checkSwVersion()
     uint8_t previous_sw_version = 0;
     try
     {
-        previous_sw_version = MemoryManager::readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (_module_id % 0x10) - 1, 1, _logger)[0];
+        previous_sw_version = memory_manager_instance->readFromAddress(DEV_LOOP, DEV_LOOP_PARTITION_2_ADDRESS_END - (_module_id % 0x10) - 1, 1, _logger)[0];
     }
     catch(const std::runtime_error& e)
     {

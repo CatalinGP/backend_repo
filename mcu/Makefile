@@ -45,7 +45,7 @@ LDFLAGS = -lspdlog -lfmt -lzip ${PYTHON_LDFLAGS}
 
 # Test flags
 CFLAGSTST = -std=c++17 -I/include -I/usr/include/python3.8 -fprofile-arcs -ftest-coverage
-CFLAGSTST2 = -lgtest -lgtest_main -lpthread
+CFLAGSTST2 = -lgmock -lgtest -lgtest_main -lpthread
 CFLAGSTST += -DUNIT_TESTING_MODE
 
 # Directories
@@ -477,7 +477,7 @@ $(OBJ_DIR)/NegativeResponse_test.o: $(UTILS_DIR)/NegativeResponse.cpp
 	
 # Compile all unit tests
 
-allTests: mcuModuleTest batteryModuleTest engineModuleTest doorsModuleTest hvacModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest
+allTests: mcuModuleTest batteryModuleTest engineModuleTest doorsModuleTest hvacModuleTest handleFramesTest receiveFramesTest generateFramesTest loggerTest memoryManagerTest createInterfaceTest diagnosticSessionControlTest writeDataByIdentifierTest readDataByIdentifierTest requestTransferExitTest readDtcTest clearDtcTest requestUpdateStatusTest securityAccessTest testerPresentTest routineControlTest transferDataTest requestDownloadTest ecuResetTest negativeResponseTest accessTimingParameterTest receiveFramesTestUtils ecuTest readMemoryByAddressTest
 
 
 # HandleFrames Unit tests
@@ -590,6 +590,17 @@ $(UDS_DIR)/diagnostic_session_control/utest/diagnosticSessionControlTest.out: $(
 
 $(UDS_DIR)/diagnostic_session_control/utest/DiagnosticSessionControl_test.o: $(UDS_DIR)/diagnostic_session_control/utest/DiagnosticSessionControlTest.cpp
 	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UDS_DIR)/diagnostic_session_control/utest/DiagnosticSessionControlTest.cpp -o $(UDS_DIR)/diagnostic_session_control/utest/DiagnosticSessionControl_test.o $(CFLAGSTST2) $(LDFLAGS)
+
+
+
+# ReadMemoryByAddress Unit tests
+readMemoryByAddressTest: $(OBJ_DIR) $(UDS_DIR)/read_memory_by_address/utest/readMemoryByAddressTest.out
+
+$(UDS_DIR)/read_memory_by_address/utest/readMemoryByAddressTest.out: $(OBJ_DIR) $(OBJS_TEST) $(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddress_test.o
+	$(CXX) $(CFLAGSTST) -o $(UDS_DIR)/read_memory_by_address/utest/readMemoryByAddressTest.out $(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddress_test.o $(OBJS_TEST) $(CFLAGSTST2) $(LDFLAGS)
+
+$(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddress_test.o: $(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddressTest.cpp
+	$(CXX) $(CFLAGS) $(CFLAGSTST) -c $(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddressTest.cpp -o $(UDS_DIR)/read_memory_by_address/utest/ReadMemoryByAddress_test.o $(CFLAGSTST2) $(LDFLAGS)
 
 
 
@@ -954,6 +965,21 @@ diagnosticSessionControl_coverage: diagnosticSessionControlTest
 
 
 
+# ReadMemoryByAddress Coverage - solo job
+readMemoryByAddressCoverage: readMemoryByAddress_coverage
+	lcov --capture --directory . --output-file coverage.info
+	lcov --remove coverage.info '/usr/' --output-file coverage_filtered.info
+	lcov --remove coverage.info '/test/' --output-file coverage.info
+	genhtml coverage_filtered.info --output-directory coverage/out_ReadMemoryByAddressTest
+	xdg-open coverage/out_ReadMemoryByAddressTest/index.html
+# This job runs for allCoverage
+readMemoryByAddress_coverage: readMemoryByAddressTest
+	./$(UDS_DIR)/read_memory_by_address/utest/readMemoryByAddressTest.out
+	mkdir -p coverage/out_ReadMemoryByAddress
+	gcov -o obj/ReadMemoryByAddress_test.gcno obj/ReadMemoryByAddress_test.gcda $(UDS_DIR)/read_memory_by_address/src/ReadMemoryByAddress.cpp
+	mv ReadMemoryByAddress.cpp.gcov coverage/out_ReadMemoryByAddress
+
+
 # CreateInterface Coverage - solo job
 createInterfaceCoverage: createInterface_coverage
 	lcov --capture --directory . --output-file coverage.info
@@ -1250,7 +1276,7 @@ batteryModule_coverage: batteryModuleTest
 
 
 
-allCoverage: securityAccess_coverage routineControl_coverage transferData_coverage requestDownload_coverage ecuReset_coverage memoryManager_coverage logger_coverage generateFrames_coverage mcuModule_coverage receiveFrames_coverage handleFrames_coverage createInterface_coverage diagnosticSessionControl_coverage writeDataByIdentifier_coverage readDataByIdentifier_coverage testerPresent_coverage requestTransferExit_coverage clearDtc_coverage readDtc_coverage requestUpdateStatus_coverage negativeResponse_coverage accessTimingParameter_coverage receiveFrames_coverage_utils ecu_coverage
+allCoverage: securityAccess_coverage routineControl_coverage transferData_coverage requestDownload_coverage ecuReset_coverage memoryManager_coverage logger_coverage generateFrames_coverage mcuModule_coverage receiveFrames_coverage handleFrames_coverage createInterface_coverage diagnosticSessionControl_coverage writeDataByIdentifier_coverage readDataByIdentifier_coverage testerPresent_coverage requestTransferExit_coverage clearDtc_coverage readDtc_coverage requestUpdateStatus_coverage negativeResponse_coverage accessTimingParameter_coverage receiveFrames_coverage_utils ecu_coverage readMemoryByAddress_coverage
 
 
 allCoveragePostProcess:

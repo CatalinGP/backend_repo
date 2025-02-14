@@ -1,6 +1,6 @@
 #include <cstdint>
+#include <cstring>
 #include <fcntl.h>
-#include <iostream>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -11,6 +11,7 @@
 
 #include "../include/CaptureFrame.h"
 #include "../include/Globals.h"
+#include "../../uds/authentication/include/SecurityAccess.h"
 
 bool containsLine(const std::string& output, const std::string& line){
     return output.find(line) != std::string::npos;
@@ -77,7 +78,7 @@ int createSocket(uint8_t interface_number) {
     s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (s < 0)
     {
-        std::cout<<"Error trying to create the socket\n";
+        perror("Error trying to create the socket");
         return 1;
     }
     /* Giving name and index to the interface created */
@@ -90,7 +91,7 @@ int createSocket(uint8_t interface_number) {
     int b = bind(s, (struct sockaddr*)&addr, sizeof(addr));
     if( b < 0 )
     {
-        std::cout<<"Error binding\n";
+        perror("Error binding");
         return 1;
     }
     int flags = fcntl(s, F_GETFL, 0);
@@ -105,4 +106,27 @@ int createSocket(uint8_t interface_number) {
         return -1;
     }
     return s;
+}
+
+void v_requestSecurityAccess(std::shared_ptr<SecurityAccess> spSecurityAccess, std::shared_ptr<CaptureFrame> spCapturedFrame, uint8_t sid){
+    std::vector<uint8_t> vecU8_seed {};
+    /* Check the security */
+    /* Request seed */
+    spSecurityAccess->securityAccess(0xFA10, {0x02, sid, 0x01});
+
+    spCapturedFrame->capture();
+
+    /* from 3 to pci_length we have the seed generated in response */
+    for (int i = 3; i <= spCapturedFrame->frame.data[0]; i++)
+    {
+        vecU8_seed.push_back(spCapturedFrame->frame.data[i]);
+    }
+    /* Compute key from seed */
+    for (auto &elem : vecU8_seed)
+    {
+        elem = computeKey(elem);
+    }
+    std::vector<uint8_t> vecU8_securityAccessData = {static_cast<uint8_t>(vecU8_seed.size() + 2), sid, 0x02};
+    vecU8_securityAccessData.insert(vecU8_securityAccessData.end(), vecU8_seed.begin(), vecU8_seed.end());
+    spSecurityAccess->securityAccess(0xFA10, vecU8_securityAccessData);
 }
