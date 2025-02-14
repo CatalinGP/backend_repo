@@ -7,7 +7,7 @@
 
 int main()
 {
-    loadProjectPathForECU();
+    v_loadProjectPath();
     hvacModuleLogger = new Logger("hvacModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/HVACModule/logs/hvacModuleLogger.log");
 
     hvac = new HVACModule();

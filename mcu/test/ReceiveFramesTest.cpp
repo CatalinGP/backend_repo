@@ -59,7 +59,7 @@ protected:
     /* Setup method to initialize test environment */
     virtual void SetUp()
     {
-        loadProjectPathForMCU();
+        v_loadProjectPath();
         /* Create mock socket pairs for testing */
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_canbus);
         socketpair(AF_UNIX, SOCK_STREAM, 0, mock_socket_pair_api);

@@ -6,7 +6,7 @@
 #include "Globals.h"
 
 int main() {
-    loadProjectPathForECU();
+    v_loadProjectPath();
     batteryModuleLogger = new Logger("batteryModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/BatteryModule/logs/batteryModuleLogger.log");
     battery = new BatteryModule();
     stopProcess("main_battery");

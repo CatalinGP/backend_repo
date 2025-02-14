@@ -6,7 +6,7 @@
 #include "Globals.h"
 
 int main() {
-    loadProjectPathForECU();
+    v_loadProjectPath();
     doorsModuleLogger = new Logger("doorsModuleLogger", std::string(PROJECT_PATH) + "/backend/ecu_simulation/DoorsModule/logs/doorsModuleLogger.log");
     doors = new DoorsModule();
     stopProcess("main_doors");
