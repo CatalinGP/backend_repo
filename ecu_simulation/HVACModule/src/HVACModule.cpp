@@ -16,6 +16,7 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> HVACModule::default_DID_hvac 
         {HVAC_SET_TEMPERATURE_DID, {DEFAULT_DID_VALUE}}, /* HVAC set temperature */
         {FAN_SPEED_DID, {DEFAULT_DID_VALUE}}, /* Fan speed (Duty cycle) */
         {HVAC_MODES_DID, {DEFAULT_DID_VALUE}},  /* HVAC modes */
+        {ROLLBACK_AVAILABLE_DID, {0}}, /* Flag indicating if rollback is available */
         {OTA_UPDATE_STATUS_DID, {0}}, /* OTA Status */
 #ifdef SOFTWARE_VERSION
         {SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID, {static_cast<uint8_t>(SOFTWARE_VERSION)}}
@@ -31,6 +32,7 @@ const std::vector<uint16_t> HVACModule::writable_HVAC_DID =
      0x04C0,
     /* represents HVAC operating modes */
      0x04D0,
+    ROLLBACK_AVAILABLE_DID,
     OTA_UPDATE_STATUS_DID,
     SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
@@ -47,12 +49,35 @@ void HVACModule::initHVAC()
     writeDataToFile();
 }
 
+std::unordered_map<uint16_t, std::string> HVACModule::getExistingDIDValues(const std::string& file_path) {
+    std::unordered_map<uint16_t, std::string> existing_values;
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        uint16_t did;
+        std::string data;
+
+        if (iss >> std::hex >> did) {
+            std::getline(iss >> std::ws, data);
+            existing_values[did] = data;
+        }
+    }
+    infile.close();
+
+    return existing_values;
+}
+
 void HVACModule::fetchHvacData()
 {
     generateData();
 
-    /* Path to engine data file */
+    /* Path to HVAC data file */
     std::string file_path = "hvac_data.txt";
+
+    /* Retrieve existing values from the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
 
     /* Read the current file contents into memory */
     std::ifstream infile(file_path);
@@ -73,17 +98,23 @@ void HVACModule::fetchHvacData()
             std::stringstream did_ss;
             did_ss << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << pair.first;
             if (to_lowercase(file_line).find(to_lowercase(did_ss.str())) != std::string::npos)
+            {
+                /* Convert the vector<uint8_t> to a string */
+                std::stringstream value_ss;
+                if (pair.first == ROLLBACK_AVAILABLE_DID && existing_values.find(pair.first) != existing_values.end())
                 {
-                    /* Convert the vector<uint8_t> to a string */
-                    std::stringstream value_ss;
+                    value_ss << existing_values[pair.first];
+                }
+                else
+                {
                     for (const auto& byte : pair.second)
                     {
                         value_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte);
                     }
-
-                    updated_file_contents += did_ss.str() + " " + value_ss.str() + "\n";
-                    break;
                 }
+                updated_file_contents += did_ss.str() + " " + value_ss.str() + "\n";
+                break;
+            }
         }
     }
 
@@ -114,8 +145,13 @@ void HVACModule::generateData()
 
 void HVACModule::writeDataToFile()
 {
+    std::string file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/HVACModule/hvac_data.txt";
+
+    /* Retrieve existing values before overwriting the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
     /* Insert the default DID values in the file */
-    std::ofstream hvac_data_file("hvac_data.txt");
+    std::ofstream hvac_data_file(file_path);
     if (!hvac_data_file.is_open())
     {
         throw std::runtime_error("Failed to open file: hvac_data.txt");
@@ -136,27 +172,35 @@ void HVACModule::writeDataToFile()
         /* Store the original content */
         std::string original_file_contents = buffer.str();
 
-        /* Write the content of old_mcu_data.txt into mcu_data.txt */
+        /* Write the content of old_hvac_data.txt into hvac_data.txt */
         hvac_data_file << original_file_contents;
 
         /* Delete the old file after reading its contents */
         std::remove(old_file_path.c_str());
-        hvac_data_file.close();
     }
     else
     {
+        /* Write default DID values to hvac_data.txt, keeping ROLLBACK_AVAILABLE_DID */
         for (const auto& [data_identifier, data] : default_DID_hvac)
         {
             hvac_data_file << std::hex << std::setw(4) << std::setfill('0') << data_identifier << " ";
-            for (uint8_t byte : data) 
+
+            if (data_identifier == ROLLBACK_AVAILABLE_DID && existing_values.find(data_identifier) != existing_values.end())
             {
-                hvac_data_file << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                hvac_data_file << existing_values[data_identifier] << "\n";
             }
-            hvac_data_file << "\n";
+            else
+            {
+                for (uint8_t byte : data) 
+                {
+                    hvac_data_file << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                }
+                hvac_data_file << "\n";
+            }
         }
-        hvac_data_file.close();
-        fetchHvacData();
     }
+    hvac_data_file.close();
+    fetchHvacData();
 }
 
 void HVACModule::printHvacInfo()

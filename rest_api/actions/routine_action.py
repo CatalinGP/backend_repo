@@ -1,5 +1,6 @@
 from actions.base_actions import *
 from configs.data_identifiers import *
+from actions.read_info_action import *
 
 
 class Routine(Action):
@@ -131,6 +132,13 @@ class Routine(Action):
         - ecu_id: ID of the ECU in hexadecimal (e.g., "0x10").
         """
         try:
+            rollback_flag = self._read_by_identifier(0xFA * 0x100 + int(ecu_id, 16), 0xEEEE)
+            if int(rollback_flag, 16) == 0:
+                return {
+                    "status": "success",
+                    "message": f"Rollback not available for ECU ID: {ecu_id}"
+                }
+
             # Compute CAN ID from ECU ID
             ecu_numeric_id = int(ecu_id, 16)  # Convert hex string to integer
             can_id = 0xFA00 + ecu_numeric_id  # Compute CAN ID (e.g., FA10 for 0x10)
@@ -139,6 +147,9 @@ class Routine(Action):
             frame_data = [0x05, 0x31, 0x01, 0x05, 0x01, 0x00]
             log_info_message(
                 logger, f"Sending rollback CAN frame with ID: {hex(can_id)} and data: {frame_data}")
+            self.write_data_by_identifier(0xFA * 0x100 + int(ecu_id, 16), 0xEEEE, [0])
+            self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {0xEEEE}")
             self.send_frame(can_id, frame_data)
 
             # Wait for response and handle it

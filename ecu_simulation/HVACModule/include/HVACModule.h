@@ -57,6 +57,12 @@ public:
     void initHVAC();
 
     /**
+     * @brief Retrieves existing DID values from the data file.
+     * 
+     */
+    std::unordered_map<uint16_t, std::string> getExistingDIDValues(const std::string& file_path);
+
+    /**
      * @brief Method that generates random data and outputs it to file
      * 
      */

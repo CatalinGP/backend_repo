@@ -45,7 +45,13 @@ public:
      * @brief Destructor Doors Module object.
      */
     virtual ~DoorsModule();
-       
+
+     /**
+     * @brief Retrieves existing DID values from the data file.
+     * 
+     */
+    std::unordered_map<uint16_t, std::string> getExistingDIDValues(const std::string& file_path);
+
     /**
      * @brief Function to fetch data from system about doors.
      */

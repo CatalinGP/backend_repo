@@ -117,6 +117,9 @@ class Updates(Action):
                 return response_json
 
             # Check if another OTA update is in progress ( OTA_STATE is not IDLE)
+            self.write_data_by_identifier(0xFA * 0x100 + int(id, 16), 0xEEEE, [1])
+            self._passive_response(
+                        WRITE_BY_IDENTIFIER, f"Error writing {0xEEEE}")
 
             log_info_message(logger, "Downloading... Please wait")
             self._download_data(type, version, id, address)
@@ -139,7 +142,6 @@ class Updates(Action):
 
             # Generate a JSON response indicating the success of the update
             response_json = ToJSON()._to_json("downloaded", no_errors)
-
             log_info_message(logger, "Sending JSON")
             return response_json
 

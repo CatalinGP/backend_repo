@@ -32,6 +32,8 @@ std::unordered_map<uint16_t, std::vector<uint8_t>> EngineModule::default_DID_eng
         {0x0130, {0}},
         /* Mass air flow sensor */
         {0x0134, {0}},
+        /* Flag indicating if rollback is available */
+        {ROLLBACK_AVAILABLE_DID, {0}}, 
         /* OTA Status */
         {OTA_UPDATE_STATUS_DID, {0}},
 #ifdef SOFTWARE_VERSION
@@ -44,6 +46,7 @@ const std::vector<uint16_t> EngineModule::writable_Engine_DID =
 {
     /* Throttle Position */
      0x0110,
+    ROLLBACK_AVAILABLE_DID,
     OTA_UPDATE_STATUS_DID,
     SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID
 };
@@ -65,6 +68,26 @@ EngineModule::~EngineModule()
     LOG_INFO(engineModuleLogger->GET_LOGGER(), "Engine object out of scope");
 }
 
+std::unordered_map<uint16_t, std::string> EngineModule::getExistingDIDValues(const std::string& file_path) {
+    std::unordered_map<uint16_t, std::string> existing_values;
+    std::ifstream infile(file_path);
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        uint16_t did;
+        std::string data;
+
+        if (iss >> std::hex >> did) {
+            std::getline(iss >> std::ws, data);
+            existing_values[did] = data;
+        }
+    }
+    infile.close();
+
+    return existing_values;
+}
+
 void EngineModule::fetchEngineData()
 {
     /* Path to engine data file */
@@ -76,19 +99,29 @@ void EngineModule::fetchEngineData()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, 255);
 
+    /* Retrieve existing values from the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
     for (auto& [did, data] : default_DID_engine)
     {
-        std::stringstream data_ss;
-        for (auto& byte : data)
+        if (existing_values.find(did) != existing_values.end() && did == ROLLBACK_AVAILABLE_DID) 
         {
-            if(did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
-            {
-                byte = dist(gen);  
-            }
-            /* Generate a random value between 0 and 255 */
-            data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            updated_values[did] = existing_values[did];
         }
-        updated_values[did] = data_ss.str();
+        else 
+        {
+            std::stringstream data_ss;
+            for (auto& byte : data)
+            {
+                if (did != SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER_DID && did != OTA_UPDATE_STATUS_DID)
+                {
+                    byte = dist(gen);
+                }
+                /* Generate a random value between 0 and 255 */
+                data_ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << static_cast<int>(byte) << " ";
+            }
+            updated_values[did] = data_ss.str();
+        }
     }
 
     /* Read the current file contents into memory */
@@ -132,8 +165,13 @@ int EngineModule::getEngineSocket() const
 
 void EngineModule::writeDataToFile()
 {
+    std::string file_path = std::string(PROJECT_PATH) + "/backend/ecu_simulation/EngineModule/engine_data.txt";
+
+    /* Retrieve existing values before overwriting the file */
+    std::unordered_map<uint16_t, std::string> existing_values = getExistingDIDValues(file_path);
+
     /* Insert the default DID values in the file */
-    std::ofstream outfile("engine_data.txt");
+    std::ofstream outfile(file_path);
     if (!outfile.is_open())
     {
         throw std::runtime_error("Failed to open file: engine_data.txt");
@@ -154,27 +192,35 @@ void EngineModule::writeDataToFile()
         /* Store the original content */
         std::string original_file_contents = buffer.str();
 
-        /* Write the content of old_mcu_data.txt into mcu_data.txt */
+        /* Write the content of old_engine_data.txt into engine_data.txt */
         outfile << original_file_contents;
 
         /* Delete the old file after reading its contents */
         std::remove(old_file_path.c_str());
-        outfile.close();
     }
     else
     {
+        /* Write default DID values to engine_data.txt, keeping ROLLBACK_AVAILABLE_DID */
         for (const auto& [data_identifier, data] : default_DID_engine)
         {
             outfile << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << data_identifier << " ";
-            for (uint8_t byte : data)
+
+            if (data_identifier == ROLLBACK_AVAILABLE_DID && existing_values.find(data_identifier) != existing_values.end())
             {
-                outfile << std::hex << std::setw(1) << std::setfill('0') << static_cast<int>(byte) << " ";
+                outfile << existing_values[data_identifier] << "\n";
             }
-            outfile << "\n";
+            else
+            {
+                for (uint8_t byte : data)
+                {
+                    outfile << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+                }
+                outfile << "\n";
+            }
         }
-        outfile.close();
-        fetchEngineData();
     }
+    outfile.close();
+    fetchEngineData();
 }
 
 void EngineModule::checkDTC()
