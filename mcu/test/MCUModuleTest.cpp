@@ -47,7 +47,7 @@ protected:
     MCUModuleTest()
     {
         mockLogger = new Logger;
-        loadProjectPathForMCU();
+        v_loadProjectPath();
     }
     ~MCUModuleTest()
     {

@@ -7,7 +7,7 @@
 
 int main() {
 
-    loadProjectPathForMCU();
+    v_loadProjectPath();
     MCULogger = new Logger("MCULogger", std::string(PROJECT_PATH) + "/backend/mcu/logs/MCULogs.log");
     MCU::mcu = new MCU::MCUModule(0x01);
     stopProcess("main_mcu");

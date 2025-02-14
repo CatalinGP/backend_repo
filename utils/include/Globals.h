@@ -6,8 +6,10 @@
 
 extern std::string PROJECT_PATH;
 
-void loadProjectPathForMCU();
-void loadProjectPathForECU();
+/**
+ * @brief find the config.ini file and load project path from it
+ */
+void v_loadProjectPath();
 
 /**
  * @brief Convert all the letters to lowercase

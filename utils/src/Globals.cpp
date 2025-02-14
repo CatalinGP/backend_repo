@@ -3,27 +3,13 @@
 #include <stdexcept>
 #include <algorithm>
 
+#define __DIR__ (std::string(__FILE__).substr(0, std::string(__FILE__).find_last_of("/")))
+
 std::string PROJECT_PATH;
 
-void loadProjectPathForMCU() {
-    std::ifstream file("../config/config.ini");
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open config.ini");
-    }
-
-    std::string line, key = "PROJECT_PATH=";
-    while (std::getline(file, line)) {
-        if (line.rfind(key, 0) == 0) {
-            PROJECT_PATH = line.substr(key.size());
-            return;
-        }
-    }
-
-    throw std::runtime_error("PROJECT_PATH not found in config.ini");
-}
-
-void loadProjectPathForECU() {
-    std::ifstream file("../../config/config.ini");
+void v_loadProjectPath() {
+    std::string configIniFilePath = __DIR__ + std::string("/../../config/config.ini");
+    std::ifstream file(configIniFilePath);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open config.ini");
     }
